@@ -1,16 +1,16 @@
 import { HttpStatus } from '@nestjs/common';
 import { BaseError, BaseErrorExtra } from './errors.model';
 
-export type ResultCommonSuccess = {
+export type IResultCommonSuccess = {
     success: true;
 };
 
-export type ResultSuccess<T> = {
+export type IResultSuccess<T> = {
     success: true;
     data: T;
 };
 
-export type ResultFail<E extends BaseError> = {
+export type IResultFail<E extends BaseError> = {
     success: false;
     error: E;
     makeResponse: () => {
@@ -21,7 +21,12 @@ export type ResultFail<E extends BaseError> = {
     };
 };
 
-export const resultFail = <E extends BaseError>(error: E): ResultFail<E> => ({
+export type IResult<T, E extends BaseError> =
+    | IResultCommonSuccess
+    | IResultSuccess<T>
+    | IResultFail<E>;
+
+export const resultFail = <E extends BaseError>(error: E): IResultFail<E> => ({
     success: false,
     error,
     makeResponse: () => ({
@@ -34,8 +39,8 @@ export const resultFail = <E extends BaseError>(error: E): ResultFail<E> => ({
     }),
 });
 
-export function resultSuccess(): ResultCommonSuccess;
-export function resultSuccess<T>(data: T): ResultSuccess<T>;
+export function resultSuccess(): IResultCommonSuccess;
+export function resultSuccess<T>(data: T): IResultSuccess<T>;
 export function resultSuccess(data?: unknown) {
     if (data) {
         return {

@@ -1,10 +1,10 @@
 import { HttpStatus } from '@nestjs/common';
 import { BaseError } from '../../model/errors.model';
 
-export interface IUserPayload {
-    readonly email: string;
-    readonly password: string;
-}
+export type UserPayload = {
+    email: string;
+    password: string;
+};
 
 export class UserAlreadyExist extends BaseError {
     constructor() {

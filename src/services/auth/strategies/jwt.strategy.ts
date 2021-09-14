@@ -8,8 +8,8 @@ import { UsersRepositoryProvider } from '../../../repositories/users/users.repos
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-user') {
     constructor(
-        private readonly usersRepository: UsersRepositoryProvider,
-        private readonly configService: ConfigServiceProvider,
+        private usersRepository: UsersRepositoryProvider,
+        private configService: ConfigServiceProvider,
     ) {
         super({
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -20,7 +20,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-user') {
     async validate({ email }: TokenPayload) {
         const user = await this.usersRepository.findOne({ email });
 
-        if (!user || user.isBanned) {
+        if (!user.success || user.data.isBanned) {
             return undefined;
         }
 

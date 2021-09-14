@@ -1,17 +1,17 @@
-export interface IDatabaseConfig {
-    readonly DB_ADDRESS: string;
-    readonly DB_USER: string;
-    readonly DB_PASSWORD: string;
-    readonly DB_NAME: string;
-    readonly DB_PORT: number;
-}
+export type DatabaseConfig = {
+    DB_ADDRESS: string;
+    DB_USER: string;
+    DB_PASSWORD: string;
+    DB_NAME: string;
+    DB_PORT: number;
+};
 
-export interface IConfig {
+export type Config = {
     IS_DEV: boolean;
     IS_TEST: boolean;
-}
+};
 
-export interface IJwtConfig {
+export type JwtConfig = {
     JWT_SECRET: string;
     JWT_EXPIRES_IN: string;
-}
+};

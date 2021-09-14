@@ -4,7 +4,7 @@ import { resultFail, resultSuccess } from './result.model';
 
 export class BaseEntity {
     @PrimaryGeneratedColumn()
-    readonly id: number;
+    id: number;
 }
 
 export class BaseRepository<

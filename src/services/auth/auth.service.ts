@@ -13,7 +13,7 @@ import {
     ConfirmationNotFound,
     EmailAlreadyConfirmed,
     EmailNotConfirmed,
-    IUnknownUserPayload,
+    UnknownUserPayload,
 } from './auth.model';
 import { JwtStrategy } from './strategies/jwt.strategy';
 
@@ -25,7 +25,7 @@ export class AuthServiceProvider {
         private jwtService: JwtService,
     ) {}
 
-    signUp = async (payload: IUnknownUserPayload) => {
+    signUp = async (payload: UnknownUserPayload) => {
         const user = await this.userService.createUser(payload);
         if (user.success) {
             await this.sendConfirmEmail({ id: user.data.id });
@@ -33,7 +33,7 @@ export class AuthServiceProvider {
         return user;
     };
 
-    logIn = async (payload: IUnknownUserPayload) => {
+    logIn = async (payload: UnknownUserPayload) => {
         const user = await this.userService.findVerifiedUser(payload);
         if (!user.success) {
             return user;

@@ -10,7 +10,7 @@ import { sha256 } from '../../utils/crypt.utils';
 import {
     CannotCreateUser,
     EmailOrPasswordIncorrect,
-    IUserPayload,
+    UserPayload,
     UserAlreadyExist,
 } from './user.model';
 
@@ -18,7 +18,7 @@ import {
 export class UserServiceProvider {
     constructor(private usersRepository: UsersRepositoryProvider) {}
 
-    createUser = async ({ email, password }: IUserPayload) => {
+    createUser = async ({ email, password }: UserPayload) => {
         if ((await this.usersRepository.findOne({ email })) !== null) {
             return resultFail(new UserAlreadyExist());
         }
@@ -36,12 +36,12 @@ export class UserServiceProvider {
         return resultSuccess(user);
     };
 
-    findVerifiedUser = async ({ email, password }: IUserPayload) => {
+    findVerifiedUser = async ({ email, password }: UserPayload) => {
         const user = await this.usersRepository.findOne({ email });
         if (!user.success || user.data.hash !== sha256(password)) {
             return resultFail(new EmailOrPasswordIncorrect());
         }
-        return resultSuccess(user);
+        return user;
     };
 
     confirmEmail = async (filter: Partial<UserEntity>) => {

@@ -4,8 +4,8 @@ import { BaseEntity } from '../../model/repository.model';
 @Entity()
 export class EmailConfirmEntity extends BaseEntity {
     @Column()
-    readonly userId: number;
+    userId: number;
 
     @Column()
-    readonly confirmId: string;
+    confirmId: string;
 }

@@ -4,17 +4,17 @@ import { BaseEntity } from '../../model/repository.model';
 @Entity()
 export class UserEntity extends BaseEntity {
     @Column()
-    readonly email: string;
+    email: string;
 
     @Column()
-    readonly hash: string;
+    hash: string;
 
     @Column()
-    readonly emailConfirmed: boolean;
+    emailConfirmed: boolean;
 
     @Column()
-    readonly created: Date;
+    created: Date;
 
     @Column()
-    readonly isBanned: boolean;
+    isBanned: boolean;
 }

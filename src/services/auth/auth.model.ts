@@ -1,14 +1,14 @@
 import { HttpStatus } from '@nestjs/common';
 import { BaseError } from '../../model/errors.model';
 
-export interface TokenPayload {
-    readonly email: string;
-}
+export type TokenPayload = {
+    email: string;
+};
 
-export interface IUnknownUserPayload {
-    readonly email: string;
-    readonly password: string;
-}
+export type UnknownUserPayload = {
+    email: string;
+    password: string;
+};
 
 export class EmailNotConfirmed extends BaseError {
     constructor() {

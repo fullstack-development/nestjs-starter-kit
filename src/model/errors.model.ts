@@ -16,10 +16,10 @@ export class ValidationError {
     }
 }
 
-export interface BaseErrorExtra {
+export type BaseErrorExtra = {
     message?: string;
     payload?: unknown;
-}
+};
 
 export class BaseError {
     stackTrace?: string;

@@ -1,7 +1,7 @@
 import { IsString, IsBoolean, IsInt } from 'class-validator';
-import { IConfig, IDatabaseConfig, IJwtConfig } from './config.model';
+import { Config, DatabaseConfig, JwtConfig } from './config.model';
 
-export class ConfigDto implements IDatabaseConfig, IConfig, IJwtConfig {
+export class ConfigDto implements DatabaseConfig, Config, JwtConfig {
     @IsBoolean()
     IS_TEST: boolean;
 

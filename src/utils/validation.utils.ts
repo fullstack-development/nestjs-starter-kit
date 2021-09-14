@@ -5,20 +5,20 @@ import {
     ValidationError,
 } from 'class-validator';
 
-interface IValidationSuccess<T> {
+type ValidationSuccess<T> = {
     status: 'success';
     value: T;
-}
+};
 
-interface IValidationFail {
+type ValidationFail = {
     errors: Array<ValidationError>;
     status: 'fail';
-}
+};
 
 export const validate = <C>(
     SchemeClass: new () => C,
     data: unknown,
-): Promise<IValidationSuccess<C> | IValidationFail> => {
+): Promise<ValidationSuccess<C> | ValidationFail> => {
     const value = plainToClass(SchemeClass, data);
     return classValidate(value).then((errors) =>
         errors.length > 0 ? { errors, status: 'fail' } : { value, status: 'success' },
@@ -28,7 +28,7 @@ export const validate = <C>(
 export const validateSync = <C>(
     SchemeClass: new () => C,
     data: unknown,
-): IValidationSuccess<C> | IValidationFail => {
+): ValidationSuccess<C> | ValidationFail => {
     const value = plainToClass(SchemeClass, data);
     const errors = classValidateSync(value);
     return errors.length > 0 ? { errors, status: 'fail' } : { value, status: 'success' };
