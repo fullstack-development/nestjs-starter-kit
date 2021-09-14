@@ -11,11 +11,12 @@ import { ConfigService, ConfigServiceProvider } from '../config/config.service';
 import { MailService, MailServiceProvider } from '../mail/mail.service';
 import { UserService, UserServiceProvider } from '../user/user.service';
 import {
-    CannotCreateEmailConfirmation,
-    ConfirmationNotFound,
-    EmailAlreadyConfirmed,
-    EmailNotConfirmed,
-    UnknownUserPayload,
+    cannotCreateEmailConfirmation,
+    cannotSendEmailConfirmation,
+    confirmationNotFound,
+    emailNotConfirmed,
+    emailAlreadyConfirmed,
+    UserPayload,
 } from './auth.model';
 import { JwtStrategy } from './strategies/jwt.strategy';
 
@@ -29,16 +30,22 @@ export class AuthServiceProvider {
         private mailService: MailServiceProvider,
     ) {}
 
-    async signUp(payload: UnknownUserPayload) {
+    async signUp(payload: UserPayload) {
         const userResult = await this.userService.createUser(payload);
         if (!userResult.success) {
             return userResult;
         }
         const user = userResult.data;
-        await this.sendConfirmEmail({ id: user.id });
+
+        const sendEmailResult = await this.sendConfirmEmail({ id: user.id });
+        if (!sendEmailResult.success) {
+            return resultFail(cannotSendEmailConfirmation({ sourceError: sendEmailResult.error }));
+        }
+
+        return resultSuccess();
     }
 
-    async logIn(payload: UnknownUserPayload) {
+    async signIn(payload: UserPayload) {
         const userResult = await this.userService.findVerifiedUser(payload);
         if (!userResult.success) {
             return userResult;
@@ -46,7 +53,7 @@ export class AuthServiceProvider {
         const user = userResult.data;
 
         if (!user.emailConfirmed) {
-            return resultFail(new EmailNotConfirmed());
+            return resultFail(emailNotConfirmed());
         }
 
         return resultSuccess({ token: this.jwtService.sign({ email: payload.email }) });
@@ -55,7 +62,7 @@ export class AuthServiceProvider {
     async confirmEmail(confirmId: string) {
         const confirmEntityResult = await this.emailConfirmsRepository.findOne({ confirmId });
         if (!confirmEntityResult.success) {
-            return resultFail(new ConfirmationNotFound());
+            return resultFail(confirmationNotFound());
         }
         const confirmEntity = confirmEntityResult.data;
 
@@ -66,7 +73,7 @@ export class AuthServiceProvider {
         const user = userResult.data;
 
         if (user.emailConfirmed) {
-            return resultFail(new EmailAlreadyConfirmed());
+            return resultFail(emailAlreadyConfirmed());
         }
 
         const confirmedResult = await this.userService.confirmEmail({ id: user.id });
@@ -87,7 +94,7 @@ export class AuthServiceProvider {
         const user = userResult.data;
 
         if (user.emailConfirmed) {
-            return resultFail(new EmailAlreadyConfirmed());
+            return resultFail(emailAlreadyConfirmed());
         }
 
         const confirmEntityId = await this.emailConfirmsRepository.create({
@@ -99,7 +106,7 @@ export class AuthServiceProvider {
         });
         if (!confirmEntityResult.success) {
             return resultFail(
-                new CannotCreateEmailConfirmation({
+                cannotCreateEmailConfirmation({
                     id: filter.id,
                     createdConfirmId: confirmEntityId,
                 }),

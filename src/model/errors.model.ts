@@ -21,16 +21,21 @@ export type BaseErrorExtra = {
     payload?: unknown;
 };
 
-export class BaseError {
+export type BaseError = {
+    error: string;
+    status: HttpStatus.OK | HttpStatus.INTERNAL_SERVER_ERROR | HttpStatus.BAD_REQUEST;
+    extra?: BaseErrorExtra;
     stackTrace?: string;
+};
 
-    constructor(
-        public error: string,
-        public status: HttpStatus.OK | HttpStatus.INTERNAL_SERVER_ERROR | HttpStatus.BAD_REQUEST,
-        public extra?: BaseErrorExtra,
-    ) {
-        if (status === HttpStatus.INTERNAL_SERVER_ERROR) {
-            this.stackTrace = new Error().stack;
-        }
-    }
-}
+export const makeError = <E extends BaseError>(
+    error: E['error'],
+    status: E['status'],
+    extra?: E['extra'],
+) =>
+    ({
+        error,
+        status,
+        extra,
+        stackTrace: status === HttpStatus.INTERNAL_SERVER_ERROR ? new Error().stack : undefined,
+    } as E);

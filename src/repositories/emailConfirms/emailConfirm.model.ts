@@ -1,20 +1,26 @@
 import { HttpStatus } from '@nestjs/common';
-import { BaseError } from '../../model/errors.model';
+import { BaseError, makeError } from '../../model/errors.model';
 
-export class CannotFindEmailConfirm extends BaseError {
-    constructor() {
-        super('cannotFindEmailConfirm', HttpStatus.OK);
-    }
-}
+export type CannotFindEmailConfirm = BaseError & {
+    error: 'cannotFindEmailConfirm';
+};
+export const cannotFindEmailConfirm = () =>
+    makeError<CannotFindEmailConfirm>('cannotFindEmailConfirm', HttpStatus.OK);
 
-export class CannotUpdateEmailConfirm extends BaseError {
-    constructor() {
-        super('cannotUpdateEmailConfirm', HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-}
+export type CannotUpdateEmailConfirm = BaseError & {
+    error: 'cannotUpdateEmailConfirm';
+};
+export const cannotUpdateEmailConfirm = () =>
+    makeError<CannotUpdateEmailConfirm>(
+        'cannotUpdateEmailConfirm',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+    );
 
-export class CannotRemoveEmailConfirm extends BaseError {
-    constructor() {
-        super('cannotRemoveEmailConfirm', HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-}
+export type CannotRemoveEmailConfirm = BaseError & {
+    error: 'cannotRemoveEmailConfirm';
+};
+export const cannotRemoveEmailConfirm = () =>
+    makeError<CannotRemoveEmailConfirm>(
+        'cannotRemoveEmailConfirm',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+    );

@@ -9,13 +9,13 @@ import {
 } from '../../repositories/errors/errors.repository';
 import { UserEntity } from '../../repositories/users/user.entity';
 import { uuid } from '../../utils';
-import { CannotFindErrorByUuid } from './errors.model';
+import { cannotFindErrorByUuid } from './errors.model';
 
 @Injectable()
 export class ErrorsServiceProvider {
     constructor(private errorsRepository: ErrorsRepositoryProvider) {}
 
-    async handleError<E extends BaseError>(fail: ResultFail<E>, userId: UserEntity['id']) {
+    async handleError(fail: ResultFail<BaseError>, userId?: UserEntity['id']) {
         const errorId = await this.errorsRepository.create({
             uuid: uuid(),
             userId,
@@ -37,7 +37,7 @@ export class ErrorsServiceProvider {
     async getErrorByUuid(filter: Pick<ErrorEntity, 'uuid'>) {
         const errorResult = await this.errorsRepository.findOne(filter);
         if (!errorResult.success) {
-            return resultFail(new CannotFindErrorByUuid(filter));
+            return resultFail(cannotFindErrorByUuid(filter));
         }
 
         return resultSuccess(errorResult.data);

@@ -3,7 +3,14 @@ import { InjectRepository, TypeOrmModule } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BaseRepository } from '../../model/repository.model';
 import { UserEntity } from './user.entity';
-import { CannotFindUser, CannotRemoveUser, CannotUpdateUser } from './user.model';
+import {
+    CannotFindUser,
+    CannotRemoveUser,
+    CannotUpdateUser,
+    cannotFindUser,
+    cannotRemoveUser,
+    cannotUpdateUser,
+} from './user.model';
 
 @Injectable()
 export class UsersRepositoryProvider extends BaseRepository<
@@ -17,9 +24,9 @@ export class UsersRepositoryProvider extends BaseRepository<
         private usersRepository: Repository<UserEntity>,
     ) {
         super(usersRepository, {
-            findError: CannotFindUser,
-            updateError: CannotUpdateUser,
-            removeError: CannotRemoveUser,
+            findError: cannotFindUser,
+            updateError: cannotUpdateUser,
+            removeError: cannotRemoveUser,
         });
     }
 }

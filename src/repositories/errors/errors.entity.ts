@@ -6,8 +6,8 @@ export class ErrorEntity extends BaseEntity {
     @Column()
     uuid: string;
 
-    @Column()
-    userId: number;
+    @Column({ nullable: true })
+    userId?: number;
 
     @Column()
     error: string;

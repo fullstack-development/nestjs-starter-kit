@@ -3,7 +3,14 @@ import { InjectRepository, TypeOrmModule } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BaseRepository } from '../../model/repository.model';
 import { ErrorEntity } from './errors.entity';
-import { CannotFindError, CannotRemoveError, CannotUpdateError } from './errors.model';
+import {
+    CannotFindError,
+    CannotRemoveError,
+    CannotUpdateError,
+    cannotFindError,
+    cannotRemoveError,
+    cannotUpdateError,
+} from './errors.model';
 
 @Injectable()
 export class ErrorsRepositoryProvider extends BaseRepository<
@@ -17,9 +24,9 @@ export class ErrorsRepositoryProvider extends BaseRepository<
         private errorsRepository: Repository<ErrorEntity>,
     ) {
         super(errorsRepository, {
-            findError: CannotFindError,
-            updateError: CannotUpdateError,
-            removeError: CannotRemoveError,
+            findError: cannotFindError,
+            updateError: cannotUpdateError,
+            removeError: cannotRemoveError,
         });
     }
 }

@@ -7,6 +7,9 @@ import {
     CannotFindEmailConfirm,
     CannotRemoveEmailConfirm,
     CannotUpdateEmailConfirm,
+    cannotFindEmailConfirm,
+    cannotRemoveEmailConfirm,
+    cannotUpdateEmailConfirm,
 } from './emailConfirm.model';
 
 @Injectable()
@@ -21,9 +24,9 @@ export class EmailConfirmsRepositoryProvider extends BaseRepository<
         private emailConfirmsRepository: Repository<EmailConfirmEntity>,
     ) {
         super(emailConfirmsRepository, {
-            findError: CannotFindEmailConfirm,
-            updateError: CannotUpdateEmailConfirm,
-            removeError: CannotRemoveEmailConfirm,
+            findError: cannotFindEmailConfirm,
+            updateError: cannotUpdateEmailConfirm,
+            removeError: cannotRemoveEmailConfirm,
         });
     }
 }

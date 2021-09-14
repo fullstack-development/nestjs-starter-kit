@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthController } from '../controllers/auth/auth.controller';
 import { UserController } from '../controllers/user/user.controller';
 import { ConfigService, ConfigServiceProvider } from '../services/config/config.service';
 
@@ -26,6 +27,7 @@ import { ConfigService, ConfigServiceProvider } from '../services/config/config.
                 synchronize: true,
             }),
         }),
+        AuthController,
         UserController,
     ],
 })

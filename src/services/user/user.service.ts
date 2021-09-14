@@ -8,10 +8,10 @@ import {
 import { date } from '../../utils';
 import { sha256 } from '../../utils/crypt.utils';
 import {
-    CannotCreateUser,
-    EmailOrPasswordIncorrect,
+    cannotCreateUser,
+    emailOrPasswordIncorrect,
     UserPayload,
-    UserAlreadyExist,
+    userAlreadyExist,
 } from './user.model';
 
 @Injectable()
@@ -20,7 +20,7 @@ export class UserServiceProvider {
 
     createUser = async ({ email, password }: UserPayload) => {
         if ((await this.usersRepository.findOne({ email })) !== null) {
-            return resultFail(new UserAlreadyExist());
+            return resultFail(userAlreadyExist());
         }
         const id = await this.usersRepository.create({
             email,
@@ -31,7 +31,7 @@ export class UserServiceProvider {
         });
         const userResult = await this.usersRepository.findOne({ id });
         if (!userResult.success) {
-            return resultFail(new CannotCreateUser(email));
+            return resultFail(cannotCreateUser(email));
         }
         return userResult;
     };
@@ -39,7 +39,7 @@ export class UserServiceProvider {
     findVerifiedUser = async ({ email, password }: UserPayload) => {
         const userResult = await this.usersRepository.findOne({ email });
         if (!userResult.success || userResult.data.hash !== sha256(password)) {
-            return resultFail(new EmailOrPasswordIncorrect());
+            return resultFail(emailOrPasswordIncorrect());
         }
         return userResult;
     };

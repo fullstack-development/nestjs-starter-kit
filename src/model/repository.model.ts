@@ -8,9 +8,9 @@ export class BaseEntity {
 }
 
 interface ErrorsConstructors<FE extends BaseError, UE extends BaseError, RE extends BaseError> {
-    findError: new () => FE;
-    updateError: new () => UE;
-    removeError: new () => RE;
+    findError: () => FE;
+    updateError: () => UE;
+    removeError: () => RE;
 }
 
 export class BaseRepository<
@@ -36,7 +36,7 @@ export class BaseRepository<
     findOne = async (filter: Partial<T>) => {
         const entity = await this.repository.findOne(filter);
         if (!entity) {
-            return resultFail(new this.errors.findError());
+            return resultFail(this.errors.findError());
         }
         return resultSuccess(entity);
     };
@@ -50,7 +50,7 @@ export class BaseRepository<
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const updated = await this.repository.update(filter, update as any);
         if (!Boolean(updated.affected)) {
-            const error = new this.errors.updateError();
+            const error = this.errors.updateError();
             error.extra = { ...(error.extra ?? {}), payload: { filter } };
             return resultFail(error);
         }
@@ -60,7 +60,7 @@ export class BaseRepository<
     removeOne = async (filter: Partial<T>) => {
         const removed = await this.repository.delete(filter);
         if (!Boolean(removed.affected)) {
-            const error = new this.errors.removeError();
+            const error = this.errors.removeError();
             error.extra = { ...(error.extra ?? {}), payload: { filter } };
             return resultFail(error);
         }

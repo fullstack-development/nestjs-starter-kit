@@ -1,3 +1,4 @@
+import { UsePipes, ValidationPipe } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
 import {
     validate as classValidate,
@@ -33,3 +34,17 @@ export const validateSync = <C>(
     const errors = classValidateSync(value);
     return errors.length > 0 ? { errors, status: 'fail' } : { value, status: 'success' };
 };
+
+class CustomValidationPipe extends ValidationPipe {
+    constructor() {
+        super({
+            whitelist: true,
+            forbidNonWhitelisted: true,
+            forbidUnknownValues: true,
+        });
+    }
+}
+
+export function UseValidationPipe() {
+    return UsePipes(new CustomValidationPipe());
+}
