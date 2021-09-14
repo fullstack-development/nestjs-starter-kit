@@ -3,18 +3,18 @@ import { BaseError } from '../../model/errors.model';
 
 export class CannotFindEmailConfirm extends BaseError {
     constructor() {
-        super('cannotFindEmailConfrim', HttpStatus.OK);
+        super('cannotFindEmailConfirm', HttpStatus.OK);
     }
 }
 
 export class CannotUpdateEmailConfirm extends BaseError {
     constructor() {
-        super('cannotUpdateEmailConfrim', HttpStatus.INTERNAL_SERVER_ERROR);
+        super('cannotUpdateEmailConfirm', HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
 
 export class CannotRemoveEmailConfirm extends BaseError {
     constructor() {
-        super('cannotRemoveEmailConfrim', HttpStatus.INTERNAL_SERVER_ERROR);
+        super('cannotRemoveEmailConfirm', HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

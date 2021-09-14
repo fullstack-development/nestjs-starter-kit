@@ -7,6 +7,12 @@ export class BaseEntity {
     id: number;
 }
 
+interface ErrorsConstructors<FE extends BaseError, UE extends BaseError, RE extends BaseError> {
+    findError: new () => FE;
+    updateError: new () => UE;
+    removeError: new () => RE;
+}
+
 export class BaseRepository<
     T extends BaseEntity,
     FE extends BaseError = BaseError,
@@ -15,11 +21,7 @@ export class BaseRepository<
 > {
     constructor(
         private repository: Repository<T>,
-        private errors: {
-            findError: new () => FE;
-            updateError: new () => UE;
-            removeError: new () => RE;
-        },
+        private errors: ErrorsConstructors<FE, UE, RE>,
     ) {}
 
     create = async (entity: Omit<T, 'id'>): Promise<number> => {

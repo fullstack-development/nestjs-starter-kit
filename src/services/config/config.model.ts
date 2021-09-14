@@ -9,6 +9,8 @@ export type DatabaseConfig = {
 export type Config = {
     IS_DEV: boolean;
     IS_TEST: boolean;
+    DOMAIN: string;
+    PORT_API: number;
 };
 
 export type JwtConfig = {

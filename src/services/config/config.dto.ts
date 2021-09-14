@@ -1,7 +1,8 @@
+import { Type } from 'class-transformer';
 import { IsString, IsBoolean, IsInt } from 'class-validator';
 import { Config, DatabaseConfig, JwtConfig } from './config.model';
 
-export class ConfigDto implements DatabaseConfig, Config, JwtConfig {
+export class ConfigDto implements DatabaseConfig, Omit<Config, 'DOMAIN'>, JwtConfig {
     @IsBoolean()
     IS_TEST: boolean;
 
@@ -20,6 +21,7 @@ export class ConfigDto implements DatabaseConfig, Config, JwtConfig {
     @IsString()
     DB_NAME: string;
 
+    @Type(() => Number)
     @IsInt()
     DB_PORT: number;
 
@@ -28,4 +30,8 @@ export class ConfigDto implements DatabaseConfig, Config, JwtConfig {
 
     @IsString()
     JWT_EXPIRES_IN: string;
+
+    @Type(() => Number)
+    @IsInt()
+    PORT_API: number;
 }

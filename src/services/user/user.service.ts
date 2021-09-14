@@ -29,31 +29,35 @@ export class UserServiceProvider {
             isBanned: false,
             emailConfirmed: false,
         });
-        const user = await this.usersRepository.findOne({ id });
-        if (user === null) {
+        const userResult = await this.usersRepository.findOne({ id });
+        if (!userResult.success) {
             return resultFail(new CannotCreateUser(email));
         }
-        return resultSuccess(user);
+        return userResult;
     };
 
     findVerifiedUser = async ({ email, password }: UserPayload) => {
-        const user = await this.usersRepository.findOne({ email });
-        if (!user.success || user.data.hash !== sha256(password)) {
+        const userResult = await this.usersRepository.findOne({ email });
+        if (!userResult.success || userResult.data.hash !== sha256(password)) {
             return resultFail(new EmailOrPasswordIncorrect());
         }
-        return user;
+        return userResult;
     };
 
     confirmEmail = async (filter: Partial<UserEntity>) => {
-        const user = await this.usersRepository.findOne(filter);
-        if (!user.success) {
-            return user;
+        const userResult = await this.usersRepository.findOne(filter);
+        if (!userResult.success) {
+            return userResult;
         }
         const updated = await this.usersRepository.updateOne(filter, { emailConfirmed: true });
         if (!updated.success) {
             return updated;
         }
         return resultSuccess();
+    };
+
+    findUser = async (filter: Pick<UserEntity, 'id'>) => {
+        return await this.usersRepository.findOne(filter);
     };
 }
 

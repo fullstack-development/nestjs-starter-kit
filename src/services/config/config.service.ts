@@ -9,15 +9,17 @@ import { ValidationError } from '../../model/errors.model';
 
 @Injectable()
 export class ConfigServiceProvider implements DatabaseConfig, Config, JwtConfig {
-    IS_TEST: boolean;
-    IS_DEV: boolean;
-    DB_ADDRESS: string;
-    DB_USER: string;
-    DB_PASSWORD: string;
-    DB_NAME: string;
-    DB_PORT: number;
-    JWT_SECRET: string;
-    JWT_EXPIRES_IN: string;
+    readonly IS_TEST: boolean;
+    readonly IS_DEV: boolean;
+    readonly DB_ADDRESS: string;
+    readonly DB_USER: string;
+    readonly DB_PASSWORD: string;
+    readonly DB_NAME: string;
+    readonly DB_PORT: number;
+    readonly JWT_SECRET: string;
+    readonly JWT_EXPIRES_IN: string;
+    readonly DOMAIN: string;
+    readonly PORT_API: number;
 
     constructor() {
         const isDev = process.env.NODE_ENV === 'development';
@@ -44,6 +46,8 @@ export class ConfigServiceProvider implements DatabaseConfig, Config, JwtConfig 
         this.DB_PORT = envValidation.value.DB_PORT;
         this.JWT_SECRET = envValidation.value.JWT_SECRET;
         this.JWT_EXPIRES_IN = envValidation.value.JWT_EXPIRES_IN;
+        this.PORT_API = envValidation.value.PORT_API;
+        this.DOMAIN = isDev ? `http://localhost:${this.PORT_API}` : 'https://staging.teraswap.ru';
     }
 }
 
