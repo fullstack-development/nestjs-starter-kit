@@ -18,6 +18,6 @@ export class ErrorEntity extends BaseEntity {
     @Column({ type: 'text', nullable: true })
     message?: string;
 
-    @Column({ type: 'binary', nullable: true })
+    @Column({ type: 'bytea', nullable: true })
     payload?: Buffer;
 }

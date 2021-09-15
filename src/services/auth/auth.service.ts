@@ -6,6 +6,7 @@ import {
     EmailConfirmsRepositoryProvider,
 } from '../../repositories/emailConfirms/emailConfirms.repository';
 import { UserEntity } from '../../repositories/users/user.entity';
+import { UsersRepository } from '../../repositories/users/users.repository';
 import { uuid } from '../../utils';
 import { ConfigService, ConfigServiceProvider } from '../config/config.service';
 import { MailService, MailServiceProvider } from '../mail/mail.service';
@@ -126,6 +127,7 @@ export class AuthServiceProvider {
 @Module({
     imports: [
         ConfigService,
+        UsersRepository,
         UserService,
         EmailConfirmsRepository,
         MailService,

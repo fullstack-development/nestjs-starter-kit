@@ -67,7 +67,7 @@ export class HttpInterceptor implements NestInterceptor {
                 username: DB_USER,
                 password: DB_PASSWORD,
                 database: DB_NAME,
-                entities: ['**/*.entity.ts'],
+                entities: ['**/*.entity.js'],
                 synchronize: true,
             }),
         }),

@@ -26,7 +26,6 @@ export class UserServiceProvider {
             email,
             hash: sha256(password),
             created: date.now(),
-            isBanned: false,
             emailConfirmed: false,
         });
         const userResult = await this.usersRepository.findOne({ id });

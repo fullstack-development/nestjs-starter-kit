@@ -1,4 +1,4 @@
-import path from 'path';
+import * as path from 'path';
 import * as dotenv from 'dotenv';
 import * as fs from 'fs';
 import { Injectable, Module } from '@nestjs/common';
@@ -36,8 +36,8 @@ export class ConfigServiceProvider implements ConfigDto {
             );
         }
 
-        this.IS_TEST = envValidation.value.IS_TEST;
-        this.IS_DEV = envValidation.value.IS_DEV;
+        this.IS_DEV = isDev;
+        this.IS_TEST = process.env.TEST === 'true';
         this.DB_ADDRESS = envValidation.value.DB_ADDRESS;
         this.DB_USER = envValidation.value.DB_USER;
         this.DB_PASSWORD = envValidation.value.DB_PASSWORD;

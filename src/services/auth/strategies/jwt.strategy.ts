@@ -20,7 +20,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-user') {
     async validate({ email }: TokenPayload) {
         const user = await this.usersRepository.findOne({ email });
 
-        if (!user.success || user.data.isBanned) {
+        if (!user.success) {
             return undefined;
         }
 

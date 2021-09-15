@@ -1,13 +1,7 @@
 import { Type } from 'class-transformer';
-import { IsString, IsBoolean, IsInt } from 'class-validator';
+import { IsString, IsInt } from 'class-validator';
 
 export class ConfigDto {
-    @IsBoolean()
-    IS_TEST: boolean;
-
-    @IsBoolean()
-    IS_DEV: boolean;
-
     @IsString()
     DB_ADDRESS: string;
 
