@@ -108,7 +108,7 @@ export class BaseRepository<
     }
 
     private fillEntity(data: Partial<T> | Omit<T, 'id'> | Partial<Omit<T, 'id'>>): T {
-        const keys = Object.keys(data);
+        const keys = Object.getOwnPropertyNames(data);
         const entity = new this.entityConstructor();
         for (const key of keys) {
             entity[key] = data[key];
