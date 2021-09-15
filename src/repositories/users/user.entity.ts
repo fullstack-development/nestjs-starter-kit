@@ -3,18 +3,15 @@ import { BaseEntity } from '../../model/repository.model';
 
 @Entity()
 export class UserEntity extends BaseEntity {
-    @Column()
+    @Column({ type: 'text' })
     email: string;
 
-    @Column()
+    @Column({ type: 'varchar', length: 64 })
     hash: string;
 
-    @Column()
+    @Column({ type: 'boolean' })
     emailConfirmed: boolean;
 
-    @Column()
+    @Column({ type: 'timestamptz' })
     created: Date;
-
-    @Column()
-    isBanned: boolean;
 }

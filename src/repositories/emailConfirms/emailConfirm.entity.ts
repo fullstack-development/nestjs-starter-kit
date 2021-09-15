@@ -3,9 +3,9 @@ import { BaseEntity } from '../../model/repository.model';
 
 @Entity()
 export class EmailConfirmEntity extends BaseEntity {
-    @Column()
+    @Column({ type: 'integer' })
     userId: number;
 
-    @Column()
+    @Column({ type: 'varchar', length: 36 })
     confirmId: string;
 }

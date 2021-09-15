@@ -61,9 +61,9 @@ export class HttpInterceptor implements NestInterceptor {
                 DB_NAME,
                 DB_PORT,
             }: ConfigServiceProvider) => ({
-                type: 'mysql',
+                type: 'postgres',
                 host: DB_ADDRESS,
-                port: DB_PORT, // default: 3306
+                port: DB_PORT, // default: 5432
                 username: DB_USER,
                 password: DB_PASSWORD,
                 database: DB_NAME,

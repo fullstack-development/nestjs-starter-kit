@@ -3,21 +3,21 @@ import { BaseEntity } from '../../model/repository.model';
 
 @Entity()
 export class ErrorEntity extends BaseEntity {
-    @Column()
+    @Column({ type: 'varchar', length: 36 })
     uuid: string;
 
-    @Column({ nullable: true })
+    @Column({ type: 'integer', nullable: true })
     userId?: number;
 
-    @Column()
+    @Column({ type: 'text' })
     error: string;
 
-    @Column({ nullable: true })
+    @Column({ type: 'text', nullable: true })
     stackTrace?: string;
 
-    @Column({ nullable: true })
+    @Column({ type: 'text', nullable: true })
     message?: string;
 
-    @Column({ nullable: true, type: 'binary' })
+    @Column({ type: 'binary', nullable: true })
     payload?: Buffer;
 }
