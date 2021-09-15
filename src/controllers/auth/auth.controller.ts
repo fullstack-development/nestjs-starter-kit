@@ -1,5 +1,5 @@
-import { Body, Controller, HttpStatus, Module, Post } from '@nestjs/common';
-import { ControllerResponse, processControllerError } from '../controller.model';
+import { Body, Controller, Module, Post } from '@nestjs/common';
+import { ControllerResponse, Fail, processControllerError, Success } from '../controller.model';
 import { AuthService, AuthServiceProvider } from '../../services/auth/auth.service';
 import { ErrorsService, ErrorsServiceProvider } from '../../services/errors/errors.service';
 import { UseValidationPipe } from '../../utils/validation.utils';
@@ -18,9 +18,9 @@ export class AuthControllerProvider {
         const signUpResult = await this.authService.signUp(body);
         if (!signUpResult.success) {
             const error = await processControllerError(signUpResult, this.errorsService);
-            return ControllerResponse.Fail(error.code, error.body);
+            return Fail(error.code, error.body);
         } else {
-            return ControllerResponse.Success(HttpStatus.OK, { status: true });
+            return Success({ status: true });
         }
     }
 
@@ -30,9 +30,9 @@ export class AuthControllerProvider {
         const signInResult = await this.authService.signIn(body);
         if (!signInResult.success) {
             const error = await processControllerError(signInResult, this.errorsService);
-            return ControllerResponse.Fail(error.code, error.body);
+            return Fail(error.code, error.body);
         } else {
-            return ControllerResponse.Success(HttpStatus.OK, {
+            return Success({
                 status: true,
                 data: signInResult.data,
             });
@@ -45,9 +45,9 @@ export class AuthControllerProvider {
         const confirmEmailResult = await this.authService.confirmEmail(confirmUuid);
         if (!confirmEmailResult.success) {
             const error = await processControllerError(confirmEmailResult, this.errorsService);
-            return ControllerResponse.Fail(error.code, error.body);
+            return Fail(error.code, error.body);
         } else {
-            return ControllerResponse.Success(HttpStatus.OK, {
+            return Success({
                 status: true,
                 data: confirmEmailResult.data,
             });

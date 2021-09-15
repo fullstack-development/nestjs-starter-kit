@@ -9,23 +9,23 @@ export class ControllerResponse {
     success: boolean;
     status: HttpStatus;
     body?: unknown;
-
-    static Success(status: HttpStatus, body: unknown) {
-        const response = new ControllerResponse();
-        response.status = status;
-        response.body = body;
-        response.success = true;
-        return response;
-    }
-
-    static Fail(status: HttpStatus, body: unknown) {
-        const response = new ControllerResponse();
-        response.status = status;
-        response.body = body;
-        response.success = false;
-        return response;
-    }
 }
+
+export const Success = (body: unknown) => {
+    const response = new ControllerResponse();
+    response.status = HttpStatus.OK;
+    response.body = body;
+    response.success = true;
+    return response;
+};
+
+export const Fail = (status: HttpStatus, body: unknown) => {
+    const response = new ControllerResponse();
+    response.status = status;
+    response.body = body;
+    response.success = false;
+    return response;
+};
 
 export const processControllerError = async (
     fail: ResultFail<BaseError>,
