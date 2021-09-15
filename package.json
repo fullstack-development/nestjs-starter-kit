@@ -12,7 +12,12 @@
         "start:dev": "NODE_ENV=development nest start --watch",
         "start:debug": "NODE_ENV=development nest start --debug --watch",
         "start:prod": "NODE_ENV=production node dist/main",
-        "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix"
+        "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+        "migrations:create": "npx typeorm migration:create -o -d migrations -n",
+        "migrations:run:dev": "node migrations.js run --dev",
+        "migrations:revert:dev": "node migrations.js revert --dev",
+        "migrations:run": "node migrations.js run",
+        "migrations:revert": "node migrations.js revert"
     },
     "dependencies": {
         "@medibloc/nestjs-request-context": "^1.0.0",
