@@ -2,13 +2,12 @@ import path from 'path';
 import * as dotenv from 'dotenv';
 import * as fs from 'fs';
 import { Injectable, Module } from '@nestjs/common';
-import { Config, DatabaseConfig, JwtConfig } from './config.model';
-import { ConfigDto } from './config.dto';
+import { ConfigDto } from './config.model';
 import { validateSync } from '../../utils/validation.utils';
 import { ValidationError } from '../../model/errors.model';
 
 @Injectable()
-export class ConfigServiceProvider implements DatabaseConfig, Config, JwtConfig {
+export class ConfigServiceProvider implements ConfigDto {
     readonly IS_TEST: boolean;
     readonly IS_DEV: boolean;
     readonly DB_ADDRESS: string;

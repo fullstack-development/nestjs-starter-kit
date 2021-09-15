@@ -1,11 +1,9 @@
 import * as R from 'ramda';
-import { Controller, Get, HttpStatus, Module, Res, UseGuards } from '@nestjs/common';
-import { Response } from 'express';
-import { processControllerError } from '../../model/controller.model';
+import { Controller, Get, HttpStatus, Module, UseGuards } from '@nestjs/common';
+import { ControllerResponse, processControllerError, RequestUser, User } from '../controller.model';
 import { JwtAuthenticationGuardUser } from '../../services/auth/jwt-authentication.guard';
 import { ErrorsService, ErrorsServiceProvider } from '../../services/errors/errors.service';
 import { UserService, UserServiceProvider } from '../../services/user/user.service';
-import { RequestUser, User } from '../../utils/controller.utils';
 
 @Controller('api/user')
 export class UserControllerProvider {
@@ -16,16 +14,14 @@ export class UserControllerProvider {
 
     @Get('me')
     @UseGuards(JwtAuthenticationGuardUser)
-    async me(@Res() response: Response, @User() user: RequestUser) {
-        const userResult = await this.userService.findUser(user);
+    async me(@User() requestUser: RequestUser): Promise<ControllerResponse> {
+        const userResult = await this.userService.findUser(requestUser);
         if (!userResult.success) {
             const error = await processControllerError(userResult, this.errorsService);
-            response.status(error.code);
-            response.send(error.body);
+            return ControllerResponse.Fail(error.code, error.body);
         } else {
-            const data = R.omit(['hash'])(userResult.data);
-            response.status(HttpStatus.OK);
-            response.send({ status: true, data });
+            const userMe = R.omit(['hash'])(userResult.data);
+            return ControllerResponse.Fail(HttpStatus.OK, { status: true, data: userMe });
         }
     }
 }

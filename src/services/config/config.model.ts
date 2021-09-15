@@ -1,19 +1,36 @@
-export type DatabaseConfig = {
-    DB_ADDRESS: string;
-    DB_USER: string;
-    DB_PASSWORD: string;
-    DB_NAME: string;
-    DB_PORT: number;
-};
+import { Type } from 'class-transformer';
+import { IsString, IsBoolean, IsInt } from 'class-validator';
 
-export type Config = {
-    IS_DEV: boolean;
+export class ConfigDto {
+    @IsBoolean()
     IS_TEST: boolean;
-    DOMAIN: string;
-    PORT_API: number;
-};
 
-export type JwtConfig = {
+    @IsBoolean()
+    IS_DEV: boolean;
+
+    @IsString()
+    DB_ADDRESS: string;
+
+    @IsString()
+    DB_USER: string;
+
+    @IsString()
+    DB_PASSWORD: string;
+
+    @IsString()
+    DB_NAME: string;
+
+    @Type(() => Number)
+    @IsInt()
+    DB_PORT: number;
+
+    @IsString()
     JWT_SECRET: string;
+
+    @IsString()
     JWT_EXPIRES_IN: string;
-};
+
+    @Type(() => Number)
+    @IsInt()
+    PORT_API: number;
+}

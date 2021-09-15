@@ -1,6 +1,5 @@
-import { Body, Controller, HttpStatus, Module, Post, Res } from '@nestjs/common';
-import { Response } from 'express';
-import { processControllerError } from '../../model/controller.model';
+import { Body, Controller, HttpStatus, Module, Post } from '@nestjs/common';
+import { ControllerResponse, processControllerError } from '../controller.model';
 import { AuthService, AuthServiceProvider } from '../../services/auth/auth.service';
 import { ErrorsService, ErrorsServiceProvider } from '../../services/errors/errors.service';
 import { UseValidationPipe } from '../../utils/validation.utils';
@@ -15,43 +14,43 @@ export class AuthControllerProvider {
 
     @Post('sign-up')
     @UseValidationPipe()
-    async signUp(@Body() body: SignUpInput, @Res() response: Response) {
+    async signUp(@Body() body: SignUpInput): Promise<ControllerResponse> {
         const signUpResult = await this.authService.signUp(body);
         if (!signUpResult.success) {
             const error = await processControllerError(signUpResult, this.errorsService);
-            response.status(error.code);
-            response.send(error.body);
+            return ControllerResponse.Fail(error.code, error.body);
         } else {
-            response.status(HttpStatus.OK);
-            response.send({ status: true });
+            return ControllerResponse.Success(HttpStatus.OK, { status: true });
         }
     }
 
     @Post('sign-in')
     @UseValidationPipe()
-    async signIn(@Body() body: SignInInput, @Res() response: Response) {
+    async signIn(@Body() body: SignInInput): Promise<ControllerResponse> {
         const signInResult = await this.authService.signIn(body);
         if (!signInResult.success) {
             const error = await processControllerError(signInResult, this.errorsService);
-            response.status(error.code);
-            response.send(error.body);
+            return ControllerResponse.Fail(error.code, error.body);
         } else {
-            response.status(HttpStatus.OK);
-            response.send({ status: true, data: signInResult.data });
+            return ControllerResponse.Success(HttpStatus.OK, {
+                status: true,
+                data: signInResult.data,
+            });
         }
     }
 
     @Post('confirm-email')
     @UseValidationPipe()
-    async confirmEmail(@Body() { confirmUuid }: ConfirmEmailInput, @Res() response: Response) {
+    async confirmEmail(@Body() { confirmUuid }: ConfirmEmailInput): Promise<ControllerResponse> {
         const confirmEmailResult = await this.authService.confirmEmail(confirmUuid);
         if (!confirmEmailResult.success) {
             const error = await processControllerError(confirmEmailResult, this.errorsService);
-            response.status(error.code);
-            response.send(error.body);
+            return ControllerResponse.Fail(error.code, error.body);
         } else {
-            response.status(HttpStatus.OK);
-            response.send({ status: true, data: confirmEmailResult.data });
+            return ControllerResponse.Success(HttpStatus.OK, {
+                status: true,
+                data: confirmEmailResult.data,
+            });
         }
     }
 }

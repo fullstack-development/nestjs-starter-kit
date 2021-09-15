@@ -18,7 +18,7 @@ import {
 export class UserServiceProvider {
     constructor(private usersRepository: UsersRepositoryProvider) {}
 
-    createUser = async ({ email, password }: UserPayload) => {
+    async createUser({ email, password }: UserPayload) {
         if ((await this.usersRepository.findOne({ email })) !== null) {
             return resultFail(userAlreadyExist());
         }
@@ -34,17 +34,17 @@ export class UserServiceProvider {
             return resultFail(cannotCreateUser(email));
         }
         return userResult;
-    };
+    }
 
-    findVerifiedUser = async ({ email, password }: UserPayload) => {
+    async findVerifiedUser({ email, password }: UserPayload) {
         const userResult = await this.usersRepository.findOne({ email });
         if (!userResult.success || userResult.data.hash !== sha256(password)) {
             return resultFail(emailOrPasswordIncorrect());
         }
         return userResult;
-    };
+    }
 
-    confirmEmail = async (filter: Partial<UserEntity>) => {
+    async confirmEmail(filter: Partial<UserEntity>) {
         const userResult = await this.usersRepository.findOne(filter);
         if (!userResult.success) {
             return userResult;
@@ -54,11 +54,11 @@ export class UserServiceProvider {
             return updated;
         }
         return resultSuccess();
-    };
+    }
 
-    findUser = async (filter: Pick<UserEntity, 'id'>) => {
+    async findUser(filter: Pick<UserEntity, 'id'>) {
         return await this.usersRepository.findOne(filter);
-    };
+    }
 }
 
 @Module({

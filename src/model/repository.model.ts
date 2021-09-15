@@ -1,4 +1,6 @@
-import { Repository, PrimaryGeneratedColumn } from 'typeorm';
+import { RequestContext } from '@medibloc/nestjs-request-context';
+import { PrimaryGeneratedColumn } from 'typeorm';
+import { TransactionsContext } from '../utils/transactions.utils';
 import { BaseError } from './errors.model';
 import { resultFail, resultSuccess } from './result.model';
 
@@ -20,50 +22,97 @@ export class BaseRepository<
     RE extends BaseError = BaseError,
 > {
     constructor(
-        private repository: Repository<T>,
+        private entityConstructor: new () => T,
         private errors: ErrorsConstructors<FE, UE, RE>,
     ) {}
 
-    create = async (entity: Omit<T, 'id'>): Promise<number> => {
+    private get manager() {
+        return RequestContext.get<TransactionsContext>().transactions.Manager;
+    }
+
+    async create(entity: Omit<T, 'id'>): Promise<number> {
+        const data = this.fillEntity(entity);
         // https://github.com/typeorm/typeorm/issues/2904
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const saved = (await this.repository.save(entity as any)) as T;
-        return saved.id;
-    };
+        const saved = await this.manager.insert(this.entityConstructor, data as any);
+        return saved.raw.insertId;
+    }
 
-    findAll = () => this.repository.find();
+    async findAll() {
+        return await this.manager.find(this.entityConstructor);
+    }
 
-    findOne = async (filter: Partial<T>) => {
-        const entity = await this.repository.findOne(filter);
+    async findOne(filter: Partial<T>) {
+        const entity = await this.manager.findOne(this.entityConstructor, { where: filter });
         if (!entity) {
             return resultFail(this.errors.findError());
         }
         return resultSuccess(entity);
-    };
+    }
 
-    updateOne = async (filter: Partial<T>, update: Partial<Omit<T, 'id'>>) => {
-        const entity = await this.findOne(filter);
-        if (!entity.success) {
-            return entity;
-        }
+    async updateOne(filter: Partial<T>, update: Partial<Omit<T, 'id'>>) {
+        const data = this.fillEntity(update);
         // https://github.com/typeorm/typeorm/issues/2904
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const updated = await this.repository.update(filter, update as any);
+        const updated = await this.manager.update(this.entityConstructor, filter, data as any);
         if (!Boolean(updated.affected)) {
             const error = this.errors.updateError();
             error.extra = { ...(error.extra ?? {}), payload: { filter } };
             return resultFail(error);
         }
         return resultSuccess();
-    };
+    }
 
-    removeOne = async (filter: Partial<T>) => {
-        const removed = await this.repository.delete(filter);
-        if (!Boolean(removed.affected)) {
+    async removeOne(filter: Partial<T>) {
+        const removed = await this.manager.remove(this.entityConstructor, filter);
+        if (!removed) {
             const error = this.errors.removeError();
             error.extra = { ...(error.extra ?? {}), payload: { filter } };
             return resultFail(error);
         }
         return resultSuccess();
-    };
+    }
+
+    async increment(filter: Partial<T>, key: keyof T, value: number) {
+        const updated = await this.manager.increment(
+            this.entityConstructor,
+            filter,
+            String(key),
+            value,
+        );
+        if (!Boolean(updated.affected)) {
+            const error = this.errors.updateError();
+            error.extra = { ...(error.extra ?? {}), payload: { filter } };
+            return resultFail(error);
+        }
+        return resultSuccess();
+    }
+
+    async decrement(filter: Partial<T>, key: keyof T, value: number) {
+        const updated = await this.manager.decrement(
+            this.entityConstructor,
+            filter,
+            String(key),
+            value,
+        );
+        if (!Boolean(updated.affected)) {
+            const error = this.errors.updateError();
+            error.extra = { ...(error.extra ?? {}), payload: { filter } };
+            return resultFail(error);
+        }
+        return resultSuccess();
+    }
+
+    async query(query: string) {
+        return await this.manager.query(query);
+    }
+
+    private fillEntity(data: Partial<T> | Omit<T, 'id'> | Partial<Omit<T, 'id'>>): T {
+        const keys = Object.keys(data);
+        const entity = new this.entityConstructor();
+        for (const key of keys) {
+            entity[key] = data[key];
+        }
+        return entity;
+    }
 }
