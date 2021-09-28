@@ -4,7 +4,7 @@ module.exports = {
         project: './tsconfig.json',
         sourceType: 'module',
     },
-    plugins: ['@typescript-eslint/eslint-plugin', 'deprecation'],
+    plugins: ['@typescript-eslint/eslint-plugin', 'deprecation', 'nestjs-kit'],
     extends: [
         'plugin:@typescript-eslint/recommended',
         'prettier/@typescript-eslint',
@@ -16,6 +16,7 @@ module.exports = {
         jest: true,
     },
     rules: {
+        'nestjs-kit/provide-endpoint-return-type': 'error',
         'max-len': [
             'error',
             110,

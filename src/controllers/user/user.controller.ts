@@ -1,6 +1,13 @@
 import * as R from 'ramda';
 import { Controller, Get, Module, UseGuards } from '@nestjs/common';
-import { Fail, processControllerError, RequestUser, Success, User } from '../controller.model';
+import {
+    ControllerResponse,
+    Fail,
+    processControllerError,
+    RequestUser,
+    Success,
+    User,
+} from '../controller.model';
 import { JwtAuthenticationGuardUser } from '../../services/auth/jwt-authentication.guard';
 import { ErrorsService, ErrorsServiceProvider } from '../../services/errors/errors.service';
 import { UserService, UserServiceProvider } from '../../services/user/user.service';
@@ -14,7 +21,7 @@ export class UserControllerProvider {
 
     @Get('me')
     @UseGuards(JwtAuthenticationGuardUser)
-    async me(@User() requestUser: RequestUser) {
+    async me(@User() requestUser: RequestUser): Promise<ControllerResponse> {
         const userResult = await this.userService.findUser(requestUser);
         if (!userResult.success) {
             const error = await processControllerError(userResult, this.errorsService);

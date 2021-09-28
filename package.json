@@ -37,6 +37,7 @@
         "cross-env": "^7.0.3",
         "date-fns": "^2.21.3",
         "dotenv": "^8.2.0",
+        "eslint-plugin-nestjs-kit": "link:./eslint-plugin",
         "iterate": "^0.1.1",
         "monocle-ts": "^2.3.9",
         "mysql2": "^2.2.5",
