@@ -36,7 +36,6 @@ module.exports.rules = {
                         } else {
                             const annotation = node.parent.value.returnType.typeAnnotation;
                             if (annotation.typeName.name === 'Promise') {
-                                console.log(annotation.typeParameters);
                                 if (
                                     !annotation.typeParameters ||
                                     !annotation.typeParameters.params ||
