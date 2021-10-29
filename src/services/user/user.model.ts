@@ -1,27 +1,24 @@
-import { HttpStatus } from '@nestjs/common';
-import { BaseError, makeError } from '../../model/errors.model';
+import { BasicError } from '../../core/errors.core';
 
 export type UserPayload = {
     email: string;
     password: string;
 };
 
-type UserAlreadyExist = BaseError & {
-    error: 'userAlreadyExist';
-};
-export const userAlreadyExist = () =>
-    makeError<UserAlreadyExist>('userAlreadyExist', HttpStatus.OK);
+export class UserAlreadyExist extends BasicError<'userAlreadyExist'> {
+    constructor() {
+        super('userAlreadyExist', { userErrorOnly: true });
+    }
+}
 
-type CannotCreateUser = BaseError & {
-    error: 'cannotCreateUser';
-};
-export const cannotCreateUser = (email: string) =>
-    makeError<CannotCreateUser>('cannotCreateUser', HttpStatus.INTERNAL_SERVER_ERROR, {
-        payload: { email },
-    });
+export class CannotCreateUser extends BasicError<'cannotCreateUser'> {
+    constructor(email: string) {
+        super('cannotCreateUser', { payload: { email } });
+    }
+}
 
-type EmailOrPasswordIncorrect = BaseError & {
-    error: 'emailOrPasswordIncorrect';
-};
-export const emailOrPasswordIncorrect = () =>
-    makeError<EmailOrPasswordIncorrect>('emailOrPasswordIncorrect', HttpStatus.OK);
+export class EmailOrPasswordIncorrect extends BasicError<'emailOrPasswordIncorrect'> {
+    constructor() {
+        super('emailOrPasswordIncorrect', { userErrorOnly: true });
+    }
+}

@@ -1,5 +1,5 @@
 import { Injectable, Module } from '@nestjs/common';
-import { resultFail, resultSuccess } from '../../model/result.model';
+import { isError } from '../../core/errors.core';
 import { UserEntity } from '../../repositories/users/user.entity';
 import {
     UsersRepository,
@@ -8,10 +8,10 @@ import {
 import { date } from '../../utils';
 import { sha256 } from '../../utils/crypt.utils';
 import {
-    cannotCreateUser,
-    emailOrPasswordIncorrect,
+    CannotCreateUser,
+    EmailOrPasswordIncorrect,
     UserPayload,
-    userAlreadyExist,
+    UserAlreadyExist,
 } from './user.model';
 
 @Injectable()
@@ -20,7 +20,7 @@ export class UserServiceProvider {
 
     async createUser({ email, password }: UserPayload) {
         if ((await this.usersRepository.findOne({ email })) !== null) {
-            return resultFail(userAlreadyExist());
+            return new UserAlreadyExist();
         }
         const id = await this.usersRepository.create({
             email,
@@ -29,30 +29,32 @@ export class UserServiceProvider {
             emailConfirmed: false,
         });
         const userResult = await this.usersRepository.findOne({ id });
-        if (!userResult.success) {
-            return resultFail(cannotCreateUser(email));
+        if (isError(userResult)) {
+            return new CannotCreateUser(email);
         }
         return userResult;
     }
 
     async findVerifiedUser({ email, password }: UserPayload) {
         const userResult = await this.usersRepository.findOne({ email });
-        if (!userResult.success || userResult.data.hash !== sha256(password)) {
-            return resultFail(emailOrPasswordIncorrect());
+        if (isError(userResult) || userResult.hash !== sha256(password)) {
+            return new EmailOrPasswordIncorrect();
         }
         return userResult;
     }
 
     async confirmEmail(filter: Partial<UserEntity>) {
         const userResult = await this.usersRepository.findOne(filter);
-        if (!userResult.success) {
+        if (isError(userResult)) {
             return userResult;
         }
-        const updated = await this.usersRepository.updateOne(filter, { emailConfirmed: true });
-        if (!updated.success) {
-            return updated;
+        const updatedResult = await this.usersRepository.updateOne(filter, {
+            emailConfirmed: true,
+        });
+        if (isError(updatedResult)) {
+            return updatedResult;
         }
-        return resultSuccess();
+        return true;
     }
 
     async findUser(filter: Pick<UserEntity, 'id'>) {

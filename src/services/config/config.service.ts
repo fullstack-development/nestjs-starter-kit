@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import { Injectable, Module } from '@nestjs/common';
 import { ConfigDto } from './config.model';
 import { validateSync } from '../../utils/validation.utils';
-import { ValidationError } from '../../model/errors.model';
+import { ValidationError } from '../../core/errors.core';
 
 @Injectable()
 export class ConfigServiceProvider implements ConfigDto {

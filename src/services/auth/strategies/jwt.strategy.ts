@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { TokenPayload } from '../auth.model';
 import { ConfigServiceProvider } from '../../config/config.service';
 import { UsersRepositoryProvider } from '../../../repositories/users/users.repository';
+import { isError } from '../../../core/errors.core';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-user') {
@@ -20,7 +21,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-user') {
     async validate({ email }: TokenPayload) {
         const user = await this.usersRepository.findOne({ email });
 
-        if (!user.success) {
+        if (isError(user)) {
             return undefined;
         }
 

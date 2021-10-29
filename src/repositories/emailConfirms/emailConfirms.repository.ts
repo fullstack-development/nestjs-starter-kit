@@ -1,14 +1,11 @@
 import { Injectable, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { BaseRepository } from '../../model/repository.model';
+import { BaseRepository } from '../../core/repository.core';
 import { EmailConfirmEntity } from './emailConfirm.entity';
 import {
     CannotFindEmailConfirm,
     CannotRemoveEmailConfirm,
     CannotUpdateEmailConfirm,
-    cannotFindEmailConfirm,
-    cannotRemoveEmailConfirm,
-    cannotUpdateEmailConfirm,
 } from './emailConfirm.model';
 
 @Injectable()
@@ -20,9 +17,9 @@ export class EmailConfirmsRepositoryProvider extends BaseRepository<
 > {
     constructor() {
         super(EmailConfirmEntity, {
-            findError: cannotFindEmailConfirm,
-            updateError: cannotUpdateEmailConfirm,
-            removeError: cannotRemoveEmailConfirm,
+            findError: CannotFindEmailConfirm,
+            updateError: CannotUpdateEmailConfirm,
+            removeError: CannotRemoveEmailConfirm,
         });
     }
 }

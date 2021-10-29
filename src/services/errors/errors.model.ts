@@ -1,9 +1,14 @@
-import { HttpStatus } from '@nestjs/common';
-import { BaseError, makeError } from '../../model/errors.model';
+import { BasicError } from '../../core/errors.core';
 import { ErrorEntity } from '../../repositories/errors/errors.entity';
 
-type CannotFindErrorByUuid = BaseError & {
-    error: 'cannotFindErrorByUuid';
-};
-export const cannotFindErrorByUuid = (payload: Pick<ErrorEntity, 'uuid'>) =>
-    makeError<CannotFindErrorByUuid>('cannotFindErrorByUuid', HttpStatus.OK, { payload });
+export class CannotFindErrorByUuid extends BasicError<'cannotFindErrorByUuid'> {
+    constructor(payload: Pick<ErrorEntity, 'uuid'>) {
+        super('cannotFindErrorByUuid', { userErrorOnly: true, payload });
+    }
+}
+
+export class CannotFindNewlyCreatedError extends BasicError<'cannotFindNewlyCreatedError'> {
+    constructor(coreError: BasicError<string>) {
+        super('cannotFindNewlyCreatedError', { payload: { coreError } });
+    }
+}

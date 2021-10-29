@@ -1,19 +1,19 @@
-import { HttpStatus } from '@nestjs/common';
-import { BaseError, makeError } from '../../model/errors.model';
+import { BasicError } from '../../core/errors.core';
 
-export type CannotFindUser = BaseError & {
-    error: 'cannotFindUser';
-};
-export const cannotFindUser = () => makeError<CannotFindUser>('cannotFindUser', HttpStatus.OK);
+export class CannotFindUser extends BasicError<'cannotFindUser'> {
+    constructor() {
+        super('cannotFindUser', { userErrorOnly: true });
+    }
+}
 
-export type CannotUpdateUser = BaseError & {
-    error: 'cannotUpdateUser';
-};
-export const cannotUpdateUser = () =>
-    makeError<CannotUpdateUser>('cannotUpdateUser', HttpStatus.INTERNAL_SERVER_ERROR);
+export class CannotUpdateUser extends BasicError<'cannotUpdateUser'> {
+    constructor() {
+        super('cannotUpdateUser');
+    }
+}
 
-export type CannotRemoveUser = BaseError & {
-    error: 'cannotRemoveUser';
-};
-export const cannotRemoveUser = () =>
-    makeError<CannotRemoveUser>('cannotRemoveUser', HttpStatus.INTERNAL_SERVER_ERROR);
+export class CannotRemoveUser extends BasicError<'cannotRemoveUser'> {
+    constructor() {
+        super('cannotRemoveUser');
+    }
+}

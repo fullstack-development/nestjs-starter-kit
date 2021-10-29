@@ -1,5 +1,5 @@
-import { HttpStatus } from '@nestjs/common';
-import { BaseError, makeError } from '../../model/errors.model';
+import { ApiProperty } from '@nestjs/swagger';
+import { BasicError } from '../../core/errors.core';
 import { UserEntity } from '../../repositories/users/user.entity';
 
 export type TokenPayload = {
@@ -11,42 +11,41 @@ export type UserPayload = {
     password: string;
 };
 
-type EmailNotConfirmed = BaseError & {
-    error: 'emailNotConfirmed';
-};
-export const emailNotConfirmed = () =>
-    makeError<EmailNotConfirmed>('emailNotConfirmed', HttpStatus.OK);
+export class EmailNotConfirmed extends BasicError<'emailNotConfirmed'> {
+    constructor() {
+        super('emailNotConfirmed', { userErrorOnly: true });
+    }
+}
 
-type ConfirmationNotFound = BaseError & {
-    error: 'confirmationNotFound';
-};
-export const confirmationNotFound = () =>
-    makeError<ConfirmationNotFound>('confirmationNotFound', HttpStatus.OK);
+export class ConfirmationNotFound extends BasicError<'confirmationNotFound'> {
+    constructor() {
+        super('confirmationNotFound', { userErrorOnly: true });
+    }
+}
 
-type EmailAlreadyConfirmed = BaseError & {
-    error: 'emailAlreadyConfirmed';
-};
-export const emailAlreadyConfirmed = () =>
-    makeError<EmailAlreadyConfirmed>('emailAlreadyConfirmed', HttpStatus.OK);
+export class EmailAlreadyConfirmed extends BasicError<'emailAlreadyConfirmed'> {
+    constructor() {
+        super('emailAlreadyConfirmed', { userErrorOnly: true });
+    }
+}
 
-type CannotCreateEmailConfirmation = BaseError & {
-    error: 'cannotCreateEmailConfirmation';
-};
-export const cannotCreateEmailConfirmation = (
-    payload: Pick<UserEntity, 'id'> & { createdConfirmId: number },
-) =>
-    makeError<CannotCreateEmailConfirmation>(
-        'cannotCreateEmailConfirmation',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        { payload },
-    );
+export class CannotCreateEmailConfirmation extends BasicError<'cannotCreateEmailConfirmation'> {
+    constructor(payload: Pick<UserEntity, 'id'> & { createdConfirmId: number }) {
+        super('cannotCreateEmailConfirmation', { payload });
+    }
+}
 
-type CannotSendEmailConfirmation = BaseError & {
-    error: 'cannotSendEmailConfirmation';
-};
-export const cannotSendEmailConfirmation = (payload: { sourceError: BaseError }) =>
-    makeError<CannotSendEmailConfirmation>(
-        'cannotSendEmailConfirmation',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        { payload },
-    );
+export class CannotSendEmailConfirmation extends BasicError<'cannotSendEmailConfirmation'> {
+    constructor(payload: { sourceError: BasicError<string> }) {
+        super('cannotSendEmailConfirmation', { payload });
+    }
+}
+
+export class AuthToken {
+    @ApiProperty()
+    token: string;
+
+    constructor(token: string) {
+        this.token = token;
+    }
+}

@@ -16,7 +16,7 @@ module.exports = {
         jest: true,
     },
     rules: {
-        'nestjs-kit/provide-endpoint-return-type': 'error',
+        // 'nestjs-kit/provide-endpoint-return-type': 'error',
         'max-len': [
             'error',
             110,

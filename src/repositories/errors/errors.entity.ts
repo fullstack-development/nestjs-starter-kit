@@ -1,5 +1,5 @@
 import { Entity, Column } from 'typeorm';
-import { BaseEntity } from '../../model/repository.model';
+import { BaseEntity } from '../../core/repository.core';
 
 @Entity()
 export class ErrorEntity extends BaseEntity {
@@ -18,6 +18,6 @@ export class ErrorEntity extends BaseEntity {
     @Column({ type: 'text', nullable: true })
     message?: string;
 
-    @Column({ type: 'bytea', nullable: true })
-    payload?: Buffer;
+    @Column({ type: 'text', nullable: true })
+    payload?: string;
 }
