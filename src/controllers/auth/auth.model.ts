@@ -3,9 +3,11 @@ import { IsEmail, IsString, MaxLength, MinLength } from 'class-validator';
 import { CR_200, CR_200_Fail } from '../../core/controller.core';
 
 export class SignUpInput {
+    @ApiProperty()
     @IsEmail()
     email: string;
 
+    @ApiProperty()
     @IsString()
     @MaxLength(32)
     @MinLength(6)
@@ -13,9 +15,11 @@ export class SignUpInput {
 }
 
 export class SignInInput {
+    @ApiProperty()
     @IsEmail()
     email: string;
 
+    @ApiProperty()
     @IsString()
     @MaxLength(32)
     @MinLength(6)
@@ -23,6 +27,7 @@ export class SignInInput {
 }
 
 export class ConfirmEmailInput {
+    @ApiProperty()
     @IsString()
     confirmUuid: string;
 }
@@ -59,46 +64,46 @@ export class CR_ConfirmEmailSuccess extends CR_200<AuthToken> {
 }
 
 export class CR_UserAlreadyExist extends CR_200_Fail<'userAlreadyExist'> {
-    @ApiProperty({ example: 'userAlreadyExist' })
+    @ApiProperty({ type: 'userAlreadyExist' })
     error: 'userAlreadyExist';
 }
 
 export class CR_CannotCreateUser extends CR_200_Fail<'cannotCreateUser'> {
-    @ApiProperty({ example: 'cannotCreateUser' })
+    @ApiProperty({ type: 'cannotCreateUser' })
     error: 'cannotCreateUser';
 }
 
 export class CR_CannotSendEmailConfirmation extends CR_200_Fail<'cannotSendEmailConfirmation'> {
-    @ApiProperty({ example: 'cannotSendEmailConfirmation' })
+    @ApiProperty({ type: 'cannotSendEmailConfirmation' })
     error: 'cannotSendEmailConfirmation';
 }
 
 export class CR_EmailOrPasswordIncorrect extends CR_200_Fail<'emailOrPasswordIncorrect'> {
-    @ApiProperty({ example: 'emailOrPasswordIncorrect' })
+    @ApiProperty({ type: 'emailOrPasswordIncorrect' })
     error: 'emailOrPasswordIncorrect';
 }
 
 export class CR_EmailNotConfirmed extends CR_200_Fail<'emailNotConfirmed'> {
-    @ApiProperty({ example: 'emailNotConfirmed' })
+    @ApiProperty({ type: 'emailNotConfirmed' })
     error: 'emailNotConfirmed';
 }
 
 export class CR_CannotUpdateUser extends CR_200_Fail<'cannotUpdateUser'> {
-    @ApiProperty({ example: 'cannotUpdateUser' })
+    @ApiProperty({ type: 'cannotUpdateUser' })
     error: 'cannotUpdateUser';
 }
 
 export class CR_CannotFindUser extends CR_200_Fail<'cannotFindUser'> {
-    @ApiProperty({ example: 'cannotFindUser' })
+    @ApiProperty({ type: 'cannotFindUser' })
     error: 'cannotFindUser';
 }
 
 export class CR_ConfirmationNotFound extends CR_200_Fail<'confirmationNotFound'> {
-    @ApiProperty({ example: 'confirmationNotFound' })
+    @ApiProperty({ type: 'confirmationNotFound' })
     error: 'confirmationNotFound';
 }
 
 export class CR_EmailAlreadyConfirmed extends CR_200_Fail<'emailAlreadyConfirmed'> {
-    @ApiProperty({ example: 'emailAlreadyConfirmed' })
+    @ApiProperty({ type: 'emailAlreadyConfirmed' })
     error: 'emailAlreadyConfirmed';
 }

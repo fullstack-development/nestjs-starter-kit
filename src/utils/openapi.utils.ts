@@ -1,4 +1,4 @@
-import { ApiResponse } from '@nestjs/swagger';
+import { ApiResponse, ApiOkResponse, refs, ApiExtraModels } from '@nestjs/swagger';
 
 export function makeApiResponsesDecorator<ISE>(ise: new () => ISE) {
     function ApiResponses<OK>(
@@ -61,34 +61,34 @@ export function makeApiResponsesDecorator<ISE>(ise: new () => ISE) {
         ok: new (...args: Array<unknown>) => unknown,
         errors?: Array<new (...args: Array<unknown>) => unknown>,
     ) {
-        const rOk = ApiResponse({ status: 200, type: ok, description: ok.name });
         const rIse = ApiResponse({ status: 502, type: ise });
-        const rErrors = errors
-            ? errors.map((e) =>
-                  ApiResponse({ status: 200, type: e, description: `Error: ${e.name}` }),
-              )
-            : [];
 
         function decorator(
             prototype: Record<string, unknown>,
             _: symbol,
             descriptor: TypedPropertyDescriptor<() => unknown>,
         ) {
-            const okDecorated = rOk(prototype, _, descriptor);
-            if (!okDecorated) {
-                throw new Error('OK descriptor must be identified');
-            }
-            const iseDecorated = rIse(prototype, _, okDecorated);
+            const iseDecorated = rIse(prototype, _, descriptor);
             if (!iseDecorated) {
                 throw new Error('ISE descriptor must be identified');
             }
 
-            const resultDescriptor = rErrors.reduce((p, c) => {
-                if (!p) {
-                    throw new Error('Descriptor must be identified');
-                }
-                return c(prototype, _, p);
-            }, iseDecorated);
+            let schemas = [ok];
+            if (errors) {
+                schemas = [...schemas, ...errors];
+            }
+            const responsesDescriptor = ApiOkResponse({
+                schema: {
+                    anyOf: refs(...schemas),
+                },
+            });
+            const responsesDecorated = responsesDescriptor(prototype, _, iseDecorated);
+            if (!responsesDecorated) {
+                throw new Error('Responses descriptors must be identified');
+            }
+
+            const extraModelsDescriptor = ApiExtraModels(...schemas, ise);
+            const resultDescriptor = extraModelsDescriptor(prototype, _, responsesDecorated);
             return resultDescriptor;
         }
 

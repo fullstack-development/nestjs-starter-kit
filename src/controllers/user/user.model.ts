@@ -23,6 +23,6 @@ export class CR_Me_Success<T extends User> extends CR_200<T> {
 }
 
 export class CR_Me_CannotFindUser extends CR_200_Fail<'cannotFindUser'> {
-    @ApiProperty({ example: 'cannotFindUser' })
+    @ApiProperty({ type: 'cannotFindUser' })
     error: 'cannotFindUser';
 }

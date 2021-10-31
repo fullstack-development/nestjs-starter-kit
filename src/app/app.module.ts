@@ -10,11 +10,11 @@ import { HttpInterceptor } from '../core/interceptor.core';
 
 @Module({
     imports: [
+        ConfigService,
         RequestContextModule.forRoot({
             contextClass: TransactionsContext,
             isGlobal: true,
         }),
-        ConfigService,
         TypeOrmModule.forRootAsync({
             imports: [ConfigService],
             inject: [ConfigServiceProvider],

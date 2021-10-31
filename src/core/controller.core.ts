@@ -16,7 +16,7 @@ export class ControllerResponse {
 export class CR_200<T> extends ControllerResponse {
     _kind: 'CR_200';
 
-    @ApiProperty()
+    @ApiProperty({ type: 'true' })
     success: true;
 
     body?: T;
@@ -31,7 +31,7 @@ export class CR_200<T> extends ControllerResponse {
 export class CR_200_Fail<T> extends ControllerResponse {
     _kind: 'CR_200_Fail';
 
-    @ApiProperty()
+    @ApiProperty({ type: 'false' })
     success: false;
 
     @ApiProperty()
