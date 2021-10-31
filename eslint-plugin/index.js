@@ -1,17 +1,5 @@
 const endpointDecorators = ['Post', 'Get', 'Delete', 'Put', 'Patch', 'Options', 'Head', 'All'];
 
-const noTypeError = (context, node) =>
-    context.report({
-        node,
-        message: 'Endpoint method must have an explicit return type',
-    });
-const wrongTypeError = (context, node) =>
-    context.report({
-        node,
-        message:
-            'The return type of the endpoint method must be ControllerResponse or Promise<ControllerResponse>',
-    });
-
 module.exports.rules = {
     'provide-endpoint-return-type': {
         create: (context) => ({
@@ -31,24 +19,15 @@ module.exports.rules = {
                                 node.parent.value,
                         )
                     ) {
-                        if (!node.parent.value.returnType) {
-                            noTypeError(context, node);
-                        } else {
-                            const annotation = node.parent.value.returnType.typeAnnotation;
-                            if (annotation.typeName.name === 'Promise') {
-                                if (
-                                    !annotation.typeParameters ||
-                                    !annotation.typeParameters.params ||
-                                    !annotation.typeParameters.params[0] ||
-                                    !annotation.typeParameters.params[0].typeName ||
-                                    annotation.typeParameters.params[0].typeName.name !==
-                                        'ControllerResponse'
-                                ) {
-                                    wrongTypeError(context, node);
-                                }
-                            } else if (annotation.typeName.name !== 'ControllerResponse') {
-                                wrongTypeError(context, node);
-                            }
+                        if (
+                            !node.parent.decorators.some(
+                                (d) => d.expression.callee.name === 'ApiResponses',
+                            )
+                        ) {
+                            context.report({
+                                node,
+                                message: 'ApiResponses decorator is missing',
+                            });
                         }
                     }
                 }
