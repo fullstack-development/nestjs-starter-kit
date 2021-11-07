@@ -77,7 +77,7 @@ export const processControllerError = async <T extends string>(
     if (error.userErrorOnly) {
         const err = new CR_200_Fail<T>();
         err.status = HttpStatus.OK;
-        err.status = HttpStatus.OK;
+        err.error = error.error;
         err.success = false;
         return err;
     } else {
