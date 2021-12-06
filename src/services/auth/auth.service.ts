@@ -106,11 +106,11 @@ export class AuthServiceProvider {
             });
         }
         const link = `${this.configService.DOMAIN}/auth/confirm-email?uuid=${confirmEntityResult.confirmId}`;
-        await this.mailService.sendEmail(
-            'Please confirm email',
-            `<a href="${link}">${link}</a>`,
-            userResult.email,
-        );
+        // await this.mailService.sendEmail(
+        //     'Please confirm email',
+        //     `<a href="${link}">${link}</a>`,
+        //     userResult.email,
+        // );  FIXME: Need mail service implemantation
     }
 }
 

@@ -3,6 +3,8 @@ import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nes
 import { RequestContext } from '@medibloc/nestjs-request-context';
 import { Observable } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
+import * as R from 'ramda';
+
 import { ControllerResponse } from './controller.core';
 import { TransactionsContext } from '../utils/transactions.utils';
 
@@ -16,25 +18,19 @@ export class HttpInterceptor implements NestInterceptor {
         await ctx.transactions.start();
         const response: Response = context.switchToHttp().getResponse();
 
-        return await ctx.transactions.QueryRunner.manager.transaction(async (manager) => {
-            ctx.transactions.setManager(manager);
-            return next.handle().pipe(
-                mergeMap(async (data) => {
-                    if (data instanceof ControllerResponse) {
-                        data.status
-                            ? await ctx.transactions.commit()
-                            : await ctx.transactions.abort();
-                        response.status(data.status);
-                        response.send(data.body);
-                        await ctx.transactions.stop();
-                    } else {
-                        throw new Error(
-                            'Every endpoint return should be instance of ControllerResponse',
-                        );
-                    }
-                    return data;
-                }),
-            );
-        });
+        return next.handle().pipe(
+            mergeMap(async (data) => {
+                if (data instanceof ControllerResponse) {
+                    data.status ? await ctx.transactions.commit() : await ctx.transactions.abort();
+                    response.status(data.status);
+                    await ctx.transactions.stop();
+                } else {
+                    throw new Error(
+                        'Every endpoint return should be instance of ControllerResponse',
+                    );
+                }
+                return R.omit(['status'])(data);
+            }),
+        );
     }
 }

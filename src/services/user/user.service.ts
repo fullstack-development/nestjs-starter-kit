@@ -19,9 +19,10 @@ export class UserServiceProvider {
     constructor(private usersRepository: UsersRepositoryProvider) {}
 
     async createUser({ email, password }: UserPayload) {
-        if ((await this.usersRepository.findOne({ email })) !== null) {
+        if (!isError(await this.usersRepository.findOne({ email }))) {
             return new UserAlreadyExist();
         }
+
         const id = await this.usersRepository.create({
             email,
             hash: sha256(password),

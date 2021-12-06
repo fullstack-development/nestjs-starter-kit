@@ -38,7 +38,7 @@ export class BaseRepository<
         // https://github.com/typeorm/typeorm/issues/2904
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const saved = await this.Manager.insert(this.entityConstructor, data as any);
-        return saved.raw.insertId;
+        return saved.raw[0].id;
     }
 
     async findAll() {

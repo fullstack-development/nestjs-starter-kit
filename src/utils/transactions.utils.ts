@@ -1,5 +1,5 @@
 import { RequestContext } from '@medibloc/nestjs-request-context';
-import { QueryRunner, getConnection, Connection, EntityManager } from 'typeorm';
+import { QueryRunner, getConnection, Connection } from 'typeorm';
 
 export class TransactionsContext extends RequestContext {
     transactions: Transactions;
@@ -12,14 +12,10 @@ export class TransactionsContext extends RequestContext {
 
 export class Transactions {
     private connection: Connection;
-    private manager: EntityManager;
     private queryRunner: QueryRunner;
 
     get Manager() {
-        if (!this.manager) {
-            throw new Error('Manager should be provided');
-        }
-        return this.manager;
+        return this.queryRunner.manager;
     }
 
     get QueryRunner() {
@@ -46,9 +42,5 @@ export class Transactions {
 
     async stop() {
         return await this.queryRunner.release();
-    }
-
-    setManager(manager: EntityManager) {
-        this.manager = manager;
     }
 }
