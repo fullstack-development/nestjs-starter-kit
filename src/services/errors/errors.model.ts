@@ -12,3 +12,9 @@ export class CannotFindNewlyCreatedError extends BasicError<'cannotFindNewlyCrea
         super('cannotFindNewlyCreatedError', { payload: { coreError } });
     }
 }
+
+export class CannotCreateError extends BasicError<'cannotCreateError'> {
+    constructor(coreError: BasicError<string>) {
+        super('cannotCreateError', { payload: { coreError } });
+    }
+}
