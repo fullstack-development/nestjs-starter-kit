@@ -1,5 +1,5 @@
 import { RequestContext } from '@medibloc/nestjs-request-context';
-import { PrimaryGeneratedColumn } from 'typeorm';
+import { PrimaryGeneratedColumn, getRepository } from 'typeorm';
 import { TransactionsContext } from '../utils/transactions.utils';
 import { BasicError } from './errors.core';
 
@@ -28,6 +28,10 @@ export class BaseRepository<
         protected entityConstructor: new () => T,
         protected errors: ErrorsConstructors<FE, UE, RE>,
     ) {}
+
+    get nativeRepository() {
+        return getRepository(this.entityConstructor);
+    }
 
     protected get Manager() {
         return RequestContext.get<TransactionsContext>().transactions.Manager;
