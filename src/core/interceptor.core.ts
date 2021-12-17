@@ -2,7 +2,7 @@ import { Response } from 'express';
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
 import { RequestContext } from '@medibloc/nestjs-request-context';
 import { Observable } from 'rxjs';
-import { mergeMap } from 'rxjs/operators';
+import { catchError, mergeMap } from 'rxjs/operators';
 import * as R from 'ramda';
 
 import { ControllerResponse } from './controller.core';
@@ -30,6 +30,12 @@ export class HttpInterceptor implements NestInterceptor {
                     );
                 }
                 return R.omit(['status'])(data);
+            }),
+            catchError(async (error) => {
+                await ctx.transactions.abort();
+                await ctx.transactions.stop();
+                response.status(error?.status);
+                response.send(error?.response);
             }),
         );
     }
