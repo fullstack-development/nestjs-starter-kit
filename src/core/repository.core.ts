@@ -1,5 +1,5 @@
 import { RequestContext } from '@medibloc/nestjs-request-context';
-import { PrimaryGeneratedColumn } from 'typeorm';
+import { PrimaryGeneratedColumn, getRepository } from 'typeorm';
 import { TransactionsContext } from '../utils/transactions.utils';
 import { BasicError } from './errors.core';
 
@@ -29,6 +29,10 @@ export class BaseRepository<
         protected errors: ErrorsConstructors<FE, UE, RE>,
     ) {}
 
+    get nativeRepository() {
+        return getRepository(this.entityConstructor);
+    }
+
     protected get Manager() {
         return RequestContext.get<TransactionsContext>().transactions.Manager;
     }
@@ -38,7 +42,7 @@ export class BaseRepository<
         // https://github.com/typeorm/typeorm/issues/2904
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const saved = await this.Manager.insert(this.entityConstructor, data as any);
-        return saved.raw.insertId;
+        return saved.raw[0].id;
     }
 
     async findAll() {

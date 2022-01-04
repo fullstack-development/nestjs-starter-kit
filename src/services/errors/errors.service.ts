@@ -8,14 +8,18 @@ import {
 } from '../../repositories/errors/errors.repository';
 import { UserEntity } from '../../repositories/users/user.entity';
 import { uuid } from '../../utils';
-import { CannotFindErrorByUuid, CannotFindNewlyCreatedError } from './errors.model';
+import {
+    CannotFindErrorByUuid,
+    CannotFindNewlyCreatedError,
+    CannotCreateError,
+} from './errors.model';
 
 @Injectable()
 export class ErrorsServiceProvider {
     constructor(private errorsRepository: ErrorsRepositoryProvider) {}
 
     async handleError<T extends string>(fail: BasicError<T>, userId?: UserEntity['id']) {
-        const errorId = await this.errorsRepository.create({
+        const insertErrorResult = await this.errorsRepository.nativeRepository.insert({
             uuid: uuid(),
             userId,
             error: fail.error,
@@ -24,8 +28,14 @@ export class ErrorsServiceProvider {
             payload: fail.payload && JSON.stringify(fail.payload),
         });
 
-        const errorResult = await this.errorsRepository.findOne({ id: errorId });
-        if (isError(errorResult)) {
+        if (!insertErrorResult || !insertErrorResult.raw[0]?.id) {
+            return new CannotCreateError(fail);
+        }
+
+        const errorId = insertErrorResult.raw[0].id;
+
+        const errorResult = await this.errorsRepository.nativeRepository.findOne({ id: errorId });
+        if (!errorResult) {
             return new CannotFindNewlyCreatedError(fail);
         }
         return { uuid: errorResult.uuid };
