@@ -1,0 +1,12 @@
+{
+    "name": "eslint-plugin-nestjs-kit",
+    "version": "0.0.1",
+    "description": "",
+    "main": "index.js",
+    "keywords": [],
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+        "eslint": "^7.32.0"
+    }
+}
