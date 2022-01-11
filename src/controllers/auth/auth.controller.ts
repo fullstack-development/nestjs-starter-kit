@@ -1,5 +1,6 @@
-import { Body, Controller, Module, Post } from '@nestjs/common';
-import { ApiResponses, processControllerError } from '../../core/controller.core';
+import { RequestUser } from './../../core/controller.core';
+import { Body, Controller, Get, Module, Post, UseGuards } from '@nestjs/common';
+import { ApiResponses, processControllerError, User } from '../../core/controller.core';
 import { AuthService, AuthServiceProvider } from '../../services/auth/auth.service';
 import { ErrorsService, ErrorsServiceProvider } from '../../services/errors/errors.service';
 import { UseValidationPipe } from '../../utils/validation.utils';
@@ -19,9 +20,14 @@ import {
     CR_CannotFindUser,
     CR_ConfirmationNotFound,
     CR_EmailAlreadyConfirmed,
+    CR_CannotCreateRefreshToken,
+    CR_UpdateRefreshTokenSuccess,
+    CR_CannotUpdateRefreshToken,
 } from './auth.model';
 import { isError } from '../../core/errors.core';
 import { ApiTags } from '@nestjs/swagger';
+import { AuthToken } from '../../services/auth/auth.model';
+import JwtRefreshGuard from '../../services/auth/jwt-refresh.guard';
 
 @ApiTags('api/auth')
 @Controller('api/auth')
@@ -49,13 +55,22 @@ export class AuthControllerProvider {
 
     @Post('sign-in')
     @UseValidationPipe()
-    @ApiResponses(CR_SignInSuccess, [CR_EmailOrPasswordIncorrect, CR_EmailNotConfirmed])
+    @ApiResponses(CR_SignInSuccess, [
+        CR_CannotFindUser,
+        CR_CannotUpdateRefreshToken,
+        CR_CannotCreateRefreshToken,
+        CR_EmailOrPasswordIncorrect,
+        CR_EmailNotConfirmed,
+    ])
     async signIn(@Body() body: SignInInput) {
         const signInResult = await this.authService.signIn(body);
         if (isError(signInResult)) {
             return await processControllerError(signInResult, this.errorsService);
         } else {
-            return new CR_SignInSuccess(signInResult);
+            return new CR_SignInSuccess({
+                body: new AuthToken(signInResult.accessToken),
+                headers: { 'Set-Cookie': signInResult.refreshCookie },
+            });
         }
     }
 
@@ -63,6 +78,8 @@ export class AuthControllerProvider {
     @UseValidationPipe()
     @ApiResponses(CR_ConfirmEmailSuccess, [
         CR_CannotFindUser,
+        CR_CannotCreateRefreshToken,
+        CR_CannotUpdateRefreshToken,
         CR_EmailAlreadyConfirmed,
         CR_ConfirmationNotFound,
         CR_CannotUpdateUser,
@@ -72,7 +89,30 @@ export class AuthControllerProvider {
         if (isError(confirmEmailResult)) {
             return await processControllerError(confirmEmailResult, this.errorsService);
         } else {
-            return new CR_ConfirmEmailSuccess(confirmEmailResult);
+            return new CR_ConfirmEmailSuccess({
+                body: new AuthToken(confirmEmailResult.accessToken),
+                headers: { 'Set-Cookie': confirmEmailResult.refreshCookie },
+            });
+        }
+    }
+
+    @Get('refresh')
+    @UseGuards(JwtRefreshGuard)
+    @ApiResponses(CR_UpdateRefreshTokenSuccess, [
+        CR_CannotFindUser,
+        CR_CannotUpdateRefreshToken,
+        CR_CannotCreateRefreshToken,
+    ])
+    async handleRefreshToken(@User() user: RequestUser) {
+        const result = await this.authService.generateTokensWithCookie(user.id, user.email);
+
+        if (isError(result)) {
+            return await processControllerError(result, this.errorsService);
+        } else {
+            return new CR_UpdateRefreshTokenSuccess({
+                body: new AuthToken(result.accessToken),
+                headers: { 'Set-Cookie': result.refreshCookie },
+            });
         }
     }
 }

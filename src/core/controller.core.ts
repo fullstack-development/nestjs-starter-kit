@@ -5,10 +5,14 @@ import { IsEmail, IsNumber } from 'class-validator';
 import { validateSync } from '../utils/validation.utils';
 import { makeApiResponsesDecorator } from '../utils/openapi.utils';
 
+export type HeaderValue = string | number | Array<string>;
+
 export class ControllerResponse {
     success: boolean;
 
     status: HttpStatus;
+
+    headers?: Record<string, HeaderValue>;
 
     body?: unknown;
 }
@@ -20,6 +24,8 @@ export class CR_200<T> extends ControllerResponse {
     success: true;
 
     body?: T;
+
+    headers?: Record<string, HeaderValue>;
 
     constructor() {
         super();

@@ -1,5 +1,5 @@
 import { RequestContext } from '@medibloc/nestjs-request-context';
-import { PrimaryGeneratedColumn, getRepository } from 'typeorm';
+import { PrimaryGeneratedColumn, getRepository, FindOneOptions } from 'typeorm';
 import { TransactionsContext } from '../utils/transactions.utils';
 import { BasicError } from './errors.core';
 
@@ -54,6 +54,16 @@ export class BaseRepository<
         if (!entity) {
             return new this.errors.findError();
         }
+        return entity;
+    }
+
+    async findOneRelations(options: FindOneOptions<T>) {
+        const entity = await this.Manager.findOne(this.entityConstructor, options);
+
+        if (!entity) {
+            return new this.errors.findError();
+        }
+
         return entity;
     }
 

@@ -1,6 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsString, MaxLength, MinLength } from 'class-validator';
-import { CR_200, CR_200_Fail } from '../../core/controller.core';
+import { CR_200, CR_200_Fail, HeaderValue } from '../../core/controller.core';
+
+export type ResponseWithHeaders<T> = {
+    body: T;
+    headers: Record<string, HeaderValue>;
+};
 
 export class SignUpInput {
     @ApiProperty()
@@ -36,10 +41,10 @@ export class CR_SignUpSuccess extends CR_200<never> {}
 
 class AuthToken {
     @ApiProperty()
-    token: string;
+    accessToken: string;
 
     constructor(token: string) {
-        this.token = token;
+        this.accessToken = token;
     }
 }
 
@@ -47,9 +52,10 @@ export class CR_SignInSuccess extends CR_200<AuthToken> {
     @ApiProperty({ type: AuthToken })
     override body: AuthToken;
 
-    constructor(body: AuthToken) {
+    constructor(result: ResponseWithHeaders<AuthToken>) {
         super();
-        this.body = body;
+        this.body = result.body;
+        this.headers = result.headers;
     }
 }
 
@@ -57,9 +63,21 @@ export class CR_ConfirmEmailSuccess extends CR_200<AuthToken> {
     @ApiProperty({ type: AuthToken })
     override body: AuthToken;
 
-    constructor(body: AuthToken) {
+    constructor(result: ResponseWithHeaders<AuthToken>) {
         super();
-        this.body = body;
+        this.body = result.body;
+        this.headers = result.headers;
+    }
+}
+
+export class CR_UpdateRefreshTokenSuccess extends CR_200<AuthToken> {
+    @ApiProperty({ type: AuthToken })
+    override body: AuthToken;
+
+    constructor(result: ResponseWithHeaders<AuthToken>) {
+        super();
+        this.body = result.body;
+        this.headers = result.headers;
     }
 }
 
@@ -96,6 +114,16 @@ export class CR_CannotUpdateUser extends CR_200_Fail<'cannotUpdateUser'> {
 export class CR_CannotFindUser extends CR_200_Fail<'cannotFindUser'> {
     @ApiProperty({ type: 'cannotFindUser' })
     error: 'cannotFindUser';
+}
+
+export class CR_CannotCreateRefreshToken extends CR_200_Fail<'cannotCreateRefreshToken'> {
+    @ApiProperty({ type: 'cannotCreateRefreshToken' })
+    error: 'cannotCreateRefreshToken';
+}
+
+export class CR_CannotUpdateRefreshToken extends CR_200_Fail<'cannotUpdateRefreshToken'> {
+    @ApiProperty({ type: 'cannotUpdateRefreshToken' })
+    error: 'cannotUpdateRefreshToken';
 }
 
 export class CR_ConfirmationNotFound extends CR_200_Fail<'confirmationNotFound'> {

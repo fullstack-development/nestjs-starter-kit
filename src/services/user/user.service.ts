@@ -28,6 +28,7 @@ export class UserServiceProvider {
             hash: sha256(password),
             created: date.now(),
             emailConfirmed: false,
+            refreshToken: null,
         });
         const userResult = await this.usersRepository.findOne({ id });
         if (isError(userResult)) {

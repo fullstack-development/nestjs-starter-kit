@@ -1,5 +1,11 @@
 import { Response } from 'express';
-import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
+import {
+    CallHandler,
+    ExecutionContext,
+    HttpStatus,
+    Injectable,
+    NestInterceptor,
+} from '@nestjs/common';
 import { RequestContext } from '@medibloc/nestjs-request-context';
 import { Observable } from 'rxjs';
 import { catchError, mergeMap } from 'rxjs/operators';
@@ -22,6 +28,11 @@ export class HttpInterceptor implements NestInterceptor {
             mergeMap(async (data) => {
                 if (data instanceof ControllerResponse) {
                     data.status ? await ctx.transactions.commit() : await ctx.transactions.abort();
+                    if (data.headers) {
+                        Object.entries(data.headers).forEach(([key, value]) =>
+                            response.setHeader(key, value),
+                        );
+                    }
                     response.status(data.status);
                     await ctx.transactions.stop();
                 } else {
@@ -29,12 +40,12 @@ export class HttpInterceptor implements NestInterceptor {
                         'Every endpoint return should be instance of ControllerResponse',
                     );
                 }
-                return R.omit(['status'])(data);
+                return R.omit(['status', 'headers'])(data);
             }),
             catchError(async (error) => {
                 await ctx.transactions.abort();
                 await ctx.transactions.stop();
-                response.status(error?.status);
+                response.status(error?.status || HttpStatus.INTERNAL_SERVER_ERROR);
                 response.send(error?.response);
             }),
         );

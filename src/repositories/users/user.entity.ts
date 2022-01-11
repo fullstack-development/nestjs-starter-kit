@@ -1,5 +1,6 @@
-import { Entity, Column } from 'typeorm';
+import { Entity, Column, OneToOne } from 'typeorm';
 import { BaseEntity } from '../../core/repository.core';
+import { RefreshTokenEntity } from '../refreshTokens/refreshTokens.entity';
 
 @Entity()
 export class UserEntity extends BaseEntity {
@@ -14,4 +15,7 @@ export class UserEntity extends BaseEntity {
 
     @Column({ type: 'timestamptz' })
     created: Date;
+
+    @OneToOne(() => RefreshTokenEntity, (token) => token.user, { nullable: true })
+    refreshToken: RefreshTokenEntity | null;
 }

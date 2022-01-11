@@ -24,6 +24,12 @@ export class ConfigDto {
     @IsString()
     JWT_EXPIRES_IN: string;
 
+    @IsString()
+    JWT_REFRESH_TOKEN_EXPIRATION_TIME: string;
+
+    @IsString()
+    JWT_REFRESH_TOKEN_SECRET: string;
+
     @Type(() => Number)
     @IsInt()
     PORT_API: number;

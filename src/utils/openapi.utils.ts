@@ -57,6 +57,43 @@ export function makeApiResponsesDecorator<ISE>(ise: new () => ISE) {
     ) => TypedPropertyDescriptor<
         (...props: Array<unknown>) => Promise<OK | ISE | E1 | E2 | E3 | E4>
     >;
+    function ApiResponses<OK, E1, E2, E3, E4, E5>(
+        ok: new (...args: Array<unknown>) => OK,
+        errors: [
+            new (...args: Array<unknown>) => E1,
+            new (...args: Array<unknown>) => E2,
+            new (...args: Array<unknown>) => E3,
+            new (...args: Array<unknown>) => E4,
+            new (...args: Array<unknown>) => E5,
+        ],
+    ): (
+        p: unknown,
+        _: unknown,
+        descriptor: TypedPropertyDescriptor<
+            (...props: Array<unknown>) => Promise<OK | ISE | E1 | E2 | E3 | E4 | E5>
+        >,
+    ) => TypedPropertyDescriptor<
+        (...props: Array<unknown>) => Promise<OK | ISE | E1 | E2 | E3 | E4 | E5>
+    >;
+    function ApiResponses<OK, E1, E2, E3, E4, E5, E6>(
+        ok: new (...args: Array<unknown>) => OK,
+        errors: [
+            new (...args: Array<unknown>) => E1,
+            new (...args: Array<unknown>) => E2,
+            new (...args: Array<unknown>) => E3,
+            new (...args: Array<unknown>) => E4,
+            new (...args: Array<unknown>) => E5,
+            new (...args: Array<unknown>) => E6,
+        ],
+    ): (
+        p: unknown,
+        _: unknown,
+        descriptor: TypedPropertyDescriptor<
+            (...props: Array<unknown>) => Promise<OK | ISE | E1 | E2 | E3 | E4 | E5 | E6>
+        >,
+    ) => TypedPropertyDescriptor<
+        (...props: Array<unknown>) => Promise<OK | ISE | E1 | E2 | E3 | E4 | E5 | E6>
+    >;
     function ApiResponses(
         ok: new (...args: Array<unknown>) => unknown,
         errors?: Array<new (...args: Array<unknown>) => unknown>,

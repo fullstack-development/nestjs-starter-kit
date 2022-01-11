@@ -1,3 +1,5 @@
+import { JwtRefreshTokenStrategy } from './strategies/jwt-refresh.strategy';
+import { sha256 } from './../../utils/crypt.utils';
 import { Injectable, Module } from '@nestjs/common';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { isError } from '../../core/errors.core';
@@ -5,15 +7,22 @@ import {
     EmailConfirmsRepository,
     EmailConfirmsRepositoryProvider,
 } from '../../repositories/emailConfirms/emailConfirms.repository';
+import {
+    RefreshTokensRepository,
+    RefreshTokensRepositoryProvider,
+} from '../../repositories/refreshTokens/refreshTokens.repository';
 import { UserEntity } from '../../repositories/users/user.entity';
-import { UsersRepository } from '../../repositories/users/users.repository';
+import {
+    UsersRepository,
+    UsersRepositoryProvider,
+} from '../../repositories/users/users.repository';
 import { uuid } from '../../utils';
 import { ConfigService, ConfigServiceProvider } from '../config/config.service';
 import { MailService, MailServiceProvider } from '../mail/mail.service';
 import { UserService, UserServiceProvider } from '../user/user.service';
 import {
-    AuthToken,
     CannotCreateEmailConfirmation,
+    CannotCreateRefreshToken,
     CannotSendEmailConfirmation,
     ConfirmationNotFound,
     EmailAlreadyConfirmed,
@@ -26,9 +35,11 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 export class AuthServiceProvider {
     constructor(
         private userService: UserServiceProvider,
+        private userRepository: UsersRepositoryProvider,
         private emailConfirmsRepository: EmailConfirmsRepositoryProvider,
         private jwtService: JwtService,
         private configService: ConfigServiceProvider,
+        private refreshTokensRepository: RefreshTokensRepositoryProvider,
         private mailService: MailServiceProvider,
     ) {}
 
@@ -56,7 +67,7 @@ export class AuthServiceProvider {
             return new EmailNotConfirmed();
         }
 
-        return new AuthToken(this.jwtService.sign({ email: payload.email }));
+        return this.generateTokensWithCookie(userResult.id, userResult.email);
     }
 
     async confirmEmail(confirmId: string) {
@@ -79,7 +90,7 @@ export class AuthServiceProvider {
             return confirmedResult;
         }
 
-        return new AuthToken(this.jwtService.sign({ email: userResult.email }));
+        return this.generateTokensWithCookie(userResult.id, userResult.email);
     }
 
     async sendConfirmEmail(filter: Pick<UserEntity, 'id'>) {
@@ -112,6 +123,68 @@ export class AuthServiceProvider {
         //     userResult.email,
         // );  FIXME: Need mail service implemantation
     }
+
+    async generateTokens(id: number, email: string) {
+        const refreshToken = this.jwtService.sign(
+            { email },
+            {
+                expiresIn: this.configService.JWT_REFRESH_TOKEN_EXPIRATION_TIME,
+                secret: this.configService.JWT_REFRESH_TOKEN_SECRET,
+            },
+        );
+
+        const hashedRefreshToken = sha256(refreshToken);
+
+        const user = await this.userRepository.findOneRelations({
+            where: { id },
+            relations: ['refreshToken'],
+        });
+
+        if (isError(user)) {
+            return user;
+        }
+
+        if (user.refreshToken) {
+            const updatedRefreshToken = await this.refreshTokensRepository.updateOne(
+                {
+                    tokenHash: user.refreshToken.tokenHash,
+                },
+                { tokenHash: hashedRefreshToken },
+            );
+
+            if (isError(updatedRefreshToken)) {
+                return updatedRefreshToken;
+            }
+        } else {
+            const createdRefreshToken = await this.refreshTokensRepository.create({
+                tokenHash: hashedRefreshToken,
+                user,
+            });
+
+            if (!createdRefreshToken) {
+                return new CannotCreateRefreshToken({ email });
+            }
+        }
+
+        return {
+            accessToken: this.jwtService.sign({ email }),
+            refreshToken,
+        };
+    }
+
+    async generateTokensWithCookie(id: number, email: string) {
+        const tokens = await this.generateTokens(id, email);
+
+        if (isError(tokens)) {
+            return tokens;
+        }
+
+        return {
+            accessToken: tokens.accessToken,
+            // eslint-disable-next-line max-len
+            refreshCookie: `Refresh=${tokens.refreshToken}; HttpOnly; Path=/; Max-Age=${this.configService.JWT_REFRESH_TOKEN_EXPIRATION_TIME}`,
+        };
+    }
 }
 
 @Module({
@@ -121,6 +194,8 @@ export class AuthServiceProvider {
         UserService,
         EmailConfirmsRepository,
         MailService,
+        RefreshTokensRepository,
+        UsersRepository,
         JwtModule.registerAsync({
             imports: [ConfigService],
             inject: [ConfigServiceProvider],
@@ -130,7 +205,7 @@ export class AuthServiceProvider {
             }),
         }),
     ],
-    providers: [AuthServiceProvider, JwtStrategy],
+    providers: [AuthServiceProvider, JwtStrategy, JwtRefreshTokenStrategy],
     exports: [AuthServiceProvider],
 })
 export class AuthService {}

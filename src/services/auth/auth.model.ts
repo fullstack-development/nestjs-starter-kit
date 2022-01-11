@@ -41,11 +41,17 @@ export class CannotSendEmailConfirmation extends BasicError<'cannotSendEmailConf
     }
 }
 
+export class CannotCreateRefreshToken extends BasicError<'cannotCreateRefreshToken'> {
+    constructor(payload: { email: string }) {
+        super('cannotCreateRefreshToken', { payload });
+    }
+}
+
 export class AuthToken {
     @ApiProperty()
-    token: string;
+    accessToken: string;
 
     constructor(token: string) {
-        this.token = token;
+        this.accessToken = token;
     }
 }
