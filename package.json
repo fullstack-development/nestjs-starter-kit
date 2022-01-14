@@ -97,6 +97,7 @@
             "ts"
         ],
         "moduleDirectories": ["<rootDir>/node_modules", "<rootDir>/src"],
+        "modulePathIgnorePatterns": ["<rootDir>/dist/", "<rootDir>/eslint-plugin/", "<rootDir>/migrations/", "<rootDir>/coverage/"],
         "testRegex": ".*\\.spec\\.ts$",
         "transform": {
             "^.+\\.(t|j)s$": "ts-jest"
@@ -104,7 +105,7 @@
         "collectCoverageFrom": [
             "**/*.(t|j)s"
         ],
-        "coverageDirectory": "../coverage",
+        "coverageDirectory": "coverage",
         "testEnvironment": "node"
     }
 }
