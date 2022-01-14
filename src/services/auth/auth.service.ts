@@ -161,7 +161,7 @@ export class AuthServiceProvider {
                 user,
             });
 
-            if (!createdRefreshToken) {
+            if (!createdRefreshToken && createdRefreshToken !== 0) {
                 return new CannotCreateRefreshToken({ email });
             }
         }
@@ -195,7 +195,6 @@ export class AuthServiceProvider {
         EmailConfirmsRepository,
         MailService,
         RefreshTokensRepository,
-        UsersRepository,
         JwtModule.registerAsync({
             imports: [ConfigService],
             inject: [ConfigServiceProvider],
