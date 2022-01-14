@@ -28,7 +28,10 @@ export class ErrorsServiceProvider {
             payload: fail.payload && JSON.stringify(fail.payload),
         });
 
-        if (!insertErrorResult || !insertErrorResult.raw[0]?.id) {
+        if (
+            !insertErrorResult ||
+            (!insertErrorResult.raw[0]?.id && insertErrorResult.raw[0]?.id !== 0)
+        ) {
             return new CannotCreateError(fail);
         }
 
