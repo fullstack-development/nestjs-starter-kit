@@ -1,18 +1,22 @@
+import { CannotFindNewlyCreatedError } from './../../services/errors/errors.model';
 import { CR_200_Fail, CR_502 } from './../controller.core';
 import { Test } from '@nestjs/testing';
 import { processControllerError } from '../controller.core';
 import { BasicError } from '../errors.core';
-import { ErrorsServiceFake } from './__mocks__/ErrorsServiceFake';
+import { createMock, DeepMocked } from '@golevelup/ts-jest';
+import { ErrorsServiceProvider } from '../../services/errors/errors.service';
 
 describe('Controller Core', () => {
-    let errorsService: ErrorsServiceFake;
+    let errorsService: DeepMocked<ErrorsServiceProvider>;
 
     beforeEach(async () => {
         const module = await Test.createTestingModule({
-            providers: [{ provide: 'ErrorsServiceProvider', useClass: ErrorsServiceFake }],
+            providers: [
+                { provide: ErrorsServiceProvider, useValue: createMock<ErrorsServiceProvider>() },
+            ],
         }).compile();
 
-        errorsService = module.get('ErrorsServiceProvider');
+        errorsService = module.get(ErrorsServiceProvider);
     });
 
     it('errors service should be defined', () => {
@@ -40,7 +44,9 @@ describe('Controller Core', () => {
         });
 
         it('should throw error if error not handled', async () => {
-            errorsService.handleError.mockResolvedValue(new BasicError('error'));
+            errorsService.handleError.mockResolvedValue(
+                new CannotFindNewlyCreatedError(new BasicError('test error')),
+            );
 
             expect(async () =>
                 processControllerError(
