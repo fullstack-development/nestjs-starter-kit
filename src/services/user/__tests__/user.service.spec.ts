@@ -1,30 +1,32 @@
+import { CannotFindUser } from './../../../repositories/users/user.model';
 import { UserPayload } from './../../auth/auth.model';
 import { getUserStub } from './__mocks__/user.stub';
 import { Test } from '@nestjs/testing';
+import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { UserEntity } from '../../../repositories/users/user.entity';
 import { UserServiceProvider } from './../user.service';
-import { UsersRepositoryFake } from './__mocks__/UsersRepositoryFake';
 import { BasicError, isError } from '../../../core/errors.core';
+import { UsersRepositoryProvider } from '../../../repositories/users/users.repository';
 
 describe('UserService', () => {
     let userService: UserServiceProvider;
-    let usersRepository: UsersRepositoryFake;
+    let usersRepository: DeepMocked<UsersRepositoryProvider>;
     let user: UserEntity;
 
     beforeEach(async () => {
         const module = await Test.createTestingModule({
             providers: [
                 UserServiceProvider,
-                { provide: 'UsersRepositoryProvider', useClass: UsersRepositoryFake },
+                {
+                    provide: UsersRepositoryProvider,
+                    useValue: createMock<UsersRepositoryProvider>(),
+                },
             ],
         }).compile();
 
         userService = module.get(UserServiceProvider);
-        usersRepository = module.get('UsersRepositoryProvider');
-
-        beforeEach(() => {
-            user = getUserStub();
-        });
+        usersRepository = module.get(UsersRepositoryProvider);
+        user = getUserStub();
     });
 
     it('should be defined service and repository', () => {
@@ -82,7 +84,7 @@ describe('UserService', () => {
         });
 
         it('should return error by incorrect email', async () => {
-            usersRepository.findOne.mockResolvedValue(new BasicError('cannotFindError'));
+            usersRepository.findOne.mockResolvedValue(new CannotFindUser());
 
             const result = await userService.findVerifiedUser({
                 email: 'test@axample.com',

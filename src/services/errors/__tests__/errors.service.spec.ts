@@ -1,27 +1,30 @@
-import { BasicError, isError } from './../../../core/errors.core';
-import { ErrorsRepositoryFake } from './__mocks__/ErrorsRepositoryFake';
+import { CannotFindError } from './../../../repositories/errors/errors.model';
+import { createMock, DeepMocked } from '@golevelup/ts-jest';
+import { isError } from './../../../core/errors.core';
 import { Test } from '@nestjs/testing';
 import { ErrorEntity } from './../../../repositories/errors/errors.entity';
 import { ErrorsServiceProvider } from './../errors.service';
 import { getErrorStub } from './__mocks__/error.stub';
+import { ErrorsRepositoryProvider } from '../../../repositories/errors/errors.repository';
+import { InsertResult } from 'typeorm';
 
 describe('ErrorsService', () => {
     let errorsService: ErrorsServiceProvider;
-    let errorsRepository: ErrorsRepositoryFake;
+    let errorsRepository: DeepMocked<ErrorsRepositoryProvider>;
 
     beforeEach(async () => {
         const module = await Test.createTestingModule({
             providers: [
                 ErrorsServiceProvider,
                 {
-                    provide: 'ErrorsRepositoryProvider',
-                    useClass: ErrorsRepositoryFake,
+                    provide: ErrorsRepositoryProvider,
+                    useValue: createMock<ErrorsRepositoryProvider>(),
                 },
             ],
         }).compile();
 
-        errorsService = module.get<ErrorsServiceProvider>(ErrorsServiceProvider);
-        errorsRepository = module.get<ErrorsRepositoryFake>('ErrorsRepositoryProvider');
+        errorsService = module.get(ErrorsServiceProvider);
+        errorsRepository = module.get(ErrorsRepositoryProvider);
     });
 
     it('should be defined service and repository', () => {
@@ -33,8 +36,10 @@ describe('ErrorsService', () => {
         let error: ErrorEntity;
         beforeEach(() => {
             error = getErrorStub();
-            errorsRepository.findOne.mockResolvedValue(error);
-            errorsRepository.insert.mockResolvedValue({ raw: [{ id: 0 }] });
+            errorsRepository.getNativeRepository().findOne.mockResolvedValue(error);
+            errorsRepository
+                .getNativeRepository()
+                .insert.mockResolvedValue({ raw: [{ id: 0 }] } as InsertResult);
         });
         it('should return a uuid', async () => {
             const handleResult = await errorsService.handleError({ error: 'mock error' });
@@ -44,7 +49,9 @@ describe('ErrorsService', () => {
         });
 
         it('should return create error', async () => {
-            errorsRepository.insert.mockResolvedValue(undefined);
+            errorsRepository
+                .getNativeRepository()
+                .insert.mockResolvedValue(undefined as unknown as InsertResult);
 
             const handleResult = await errorsService.handleError({ error: 'mock error' });
 
@@ -53,7 +60,7 @@ describe('ErrorsService', () => {
         });
 
         it('should return find error', async () => {
-            errorsRepository.findOne.mockResolvedValue(undefined);
+            errorsRepository.getNativeRepository().findOne.mockResolvedValue(undefined);
             const handleResult = await errorsService.handleError({ error: 'mock error' });
 
             expect(isError(handleResult)).toBeTruthy();
@@ -67,7 +74,7 @@ describe('ErrorsService', () => {
         let error: ErrorEntity;
         beforeEach(() => {
             error = getErrorStub();
-            errorsRepository.findOne.mockReturnValue(Promise.resolve(error));
+            errorsRepository.findOne.mockResolvedValue(error);
         });
 
         it('should return error by uuid', async () => {
@@ -77,7 +84,7 @@ describe('ErrorsService', () => {
         });
 
         it('should return cannot find error by unknown uuid', async () => {
-            errorsRepository.findOne.mockReturnValue(Promise.resolve(new BasicError('test error')));
+            errorsRepository.findOne.mockResolvedValue(new CannotFindError());
             const errorResult = await errorsService.getErrorByUuid({ uuid: 'incorrect uuid' });
 
             expect(isError(errorResult)).toBeTruthy();
