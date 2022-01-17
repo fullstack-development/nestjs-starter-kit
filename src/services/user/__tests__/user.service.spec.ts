@@ -1,12 +1,12 @@
 import { CannotFindUser } from './../../../repositories/users/user.model';
 import { UserPayload } from './../../auth/auth.model';
-import { getUserStub } from './__mocks__/user.stub';
 import { Test } from '@nestjs/testing';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { UserEntity } from '../../../repositories/users/user.entity';
 import { UserServiceProvider } from './../user.service';
 import { BasicError, isError } from '../../../core/errors.core';
 import { UsersRepositoryProvider } from '../../../repositories/users/users.repository';
+import { getUserStub } from '../../../__stubs__/user.stub';
 
 describe('UserService', () => {
     let userService: UserServiceProvider;

@@ -1,4 +1,4 @@
-import { ErrorEntity } from './../../../../repositories/errors/errors.entity';
+import { ErrorEntity } from '../repositories/errors/errors.entity';
 
 export const getErrorStub = (): ErrorEntity => {
     return {

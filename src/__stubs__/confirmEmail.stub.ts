@@ -1,4 +1,4 @@
-import { EmailConfirmEntity } from './../../../../repositories/emailConfirms/emailConfirm.entity';
+import { EmailConfirmEntity } from '../repositories/emailConfirms/emailConfirm.entity';
 
 export const getConfirmEmailStub = (): EmailConfirmEntity => {
     return {

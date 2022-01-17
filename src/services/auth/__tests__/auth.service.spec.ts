@@ -1,28 +1,31 @@
+import { CannotFindEmailConfirm } from './../../../repositories/emailConfirms/emailConfirm.model';
+import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { BasicError } from './../../../core/errors.core';
-import { RefreshTokensRepositoryFake } from './__mocks__/RefreshTokensRepositoryFake';
-import { JwtServiceFake } from './__mocks__/JwtServiceFake';
-import { EmailConfirmsRepositoryFake } from './__mocks__/EmailConfirmsFake';
-import { UsersRepositoryFake } from './__mocks__/UsersRepositoryFake';
 import { ConfigServiceFake } from './__mocks__/ConfigServiceFake';
 import { Test } from '@nestjs/testing';
 import { AuthServiceProvider } from '../auth.service';
-import { UserServiceFake } from './__mocks__/UserServiceFake';
-import { MailServiceFake } from './__mocks__/MailServiceFake';
 import { UserEntity } from '../../../repositories/users/user.entity';
-import { getUserStub } from './__mocks__/user.stub';
+import { getUserStub } from '../../../__stubs__/user.stub';
 import { isError } from '../../../core/errors.core';
 import { EmailConfirmEntity } from '../../../repositories/emailConfirms/emailConfirm.entity';
-import { getConfirmEmailStub } from './__mocks__/confirmEmail.stub';
+import { getConfirmEmailStub } from '../../../__stubs__/confirmEmail.stub';
+import { ConfigServiceProvider } from '../../config/config.service';
+import { UsersRepositoryProvider } from '../../../repositories/users/users.repository';
+import { JwtService } from '@nestjs/jwt';
+import { EmailConfirmsRepositoryProvider } from '../../../repositories/emailConfirms/emailConfirms.repository';
+import { RefreshTokensRepositoryProvider } from '../../../repositories/refreshTokens/refreshTokens.repository';
+import { MailServiceProvider } from '../../mail/mail.service';
+import { UserServiceProvider } from '../../user/user.service';
 
 describe('AuthService', () => {
     let authService: AuthServiceProvider;
     let configService: ConfigServiceFake;
-    let usersRepository: UsersRepositoryFake;
-    let emailConfirmsRepository: EmailConfirmsRepositoryFake;
-    let jwtService: JwtServiceFake;
-    let refreshTokensRepository: RefreshTokensRepositoryFake;
-    let userService: UserServiceFake;
-    let mailService: MailServiceFake;
+    let usersRepository: DeepMocked<UsersRepositoryProvider>;
+    let emailConfirmsRepository: DeepMocked<EmailConfirmsRepositoryProvider>;
+    let jwtService: DeepMocked<JwtService>;
+    let refreshTokensRepository: DeepMocked<RefreshTokensRepositoryProvider>;
+    let userService: DeepMocked<UserServiceProvider>;
+    let mailService: DeepMocked<MailServiceProvider>;
 
     let user: UserEntity;
 
@@ -30,39 +33,42 @@ describe('AuthService', () => {
         const module = await Test.createTestingModule({
             providers: [
                 AuthServiceProvider,
-                { provide: 'ConfigServiceProvider', useClass: ConfigServiceFake },
-                { provide: 'UsersRepositoryProvider', useClass: UsersRepositoryFake },
+                { provide: ConfigServiceProvider, useClass: ConfigServiceFake },
                 {
-                    provide: 'EmailConfirmsRepositoryProvider',
-                    useClass: EmailConfirmsRepositoryFake,
+                    provide: UsersRepositoryProvider,
+                    useValue: createMock<UsersRepositoryProvider>(),
                 },
                 {
-                    provide: 'JwtService',
-                    useClass: JwtServiceFake,
+                    provide: EmailConfirmsRepositoryProvider,
+                    useValue: createMock<EmailConfirmsRepositoryProvider>(),
                 },
                 {
-                    provide: 'RefreshTokensRepositoryProvider',
-                    useClass: RefreshTokensRepositoryFake,
+                    provide: JwtService,
+                    useValue: createMock<JwtService>(),
                 },
                 {
-                    provide: 'UserServiceProvider',
-                    useClass: UserServiceFake,
+                    provide: RefreshTokensRepositoryProvider,
+                    useValue: createMock<RefreshTokensRepositoryProvider>(),
                 },
                 {
-                    provide: 'MailServiceProvider',
-                    useClass: MailServiceFake,
+                    provide: UserServiceProvider,
+                    useValue: createMock<UserServiceProvider>(),
+                },
+                {
+                    provide: MailServiceProvider,
+                    useValue: createMock<MailServiceProvider>(),
                 },
             ],
         }).compile();
 
         authService = module.get(AuthServiceProvider);
-        configService = module.get('ConfigServiceProvider');
-        usersRepository = module.get('UsersRepositoryProvider');
-        emailConfirmsRepository = module.get('EmailConfirmsRepositoryProvider');
-        jwtService = module.get('JwtService');
-        refreshTokensRepository = module.get('RefreshTokensRepositoryProvider');
-        userService = module.get('UserServiceProvider');
-        mailService = module.get('MailServiceProvider');
+        configService = module.get(ConfigServiceProvider);
+        usersRepository = module.get(UsersRepositoryProvider);
+        emailConfirmsRepository = module.get(EmailConfirmsRepositoryProvider);
+        jwtService = module.get(JwtService);
+        refreshTokensRepository = module.get(RefreshTokensRepositoryProvider);
+        userService = module.get(UserServiceProvider);
+        mailService = module.get(MailServiceProvider);
         user = getUserStub();
     });
 
@@ -135,7 +141,7 @@ describe('AuthService', () => {
         it('should return error if not created refresh token', async () => {
             jwtService.sign.mockReturnValueOnce('refreshToken').mockReturnValueOnce('accessToken');
             usersRepository.findOneRelations.mockResolvedValue(user);
-            refreshTokensRepository.create.mockResolvedValue(undefined);
+            refreshTokensRepository.create.mockResolvedValue(undefined as unknown as number);
 
             const generatedResult = await authService.generateTokens(user.id, user.email);
 
@@ -347,7 +353,7 @@ describe('AuthService', () => {
         });
 
         it('should return error if confirmation not found', async () => {
-            emailConfirmsRepository.findOne.mockResolvedValue(new BasicError(''));
+            emailConfirmsRepository.findOne.mockResolvedValue(new CannotFindEmailConfirm());
 
             const confirmResult = await authService.confirmEmail('1');
 
