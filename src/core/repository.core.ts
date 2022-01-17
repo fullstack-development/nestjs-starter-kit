@@ -29,7 +29,7 @@ export class BaseRepository<
         protected errors: ErrorsConstructors<FE, UE, RE>,
     ) {}
 
-    get nativeRepository() {
+    getNativeRepository() {
         return getRepository(this.entityConstructor);
     }
 

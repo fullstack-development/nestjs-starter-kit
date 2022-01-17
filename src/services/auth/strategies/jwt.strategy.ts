@@ -18,6 +18,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-user') {
     }
 
     async validate({ email }: TokenPayload) {
-        return await this.usersRepository.nativeRepository.findOne({ email });
+        return await this.usersRepository.getNativeRepository().findOne({ email });
     }
 }

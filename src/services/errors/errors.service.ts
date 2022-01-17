@@ -19,7 +19,7 @@ export class ErrorsServiceProvider {
     constructor(private errorsRepository: ErrorsRepositoryProvider) {}
 
     async handleError<T extends string>(fail: BasicError<T>, userId?: UserEntity['id']) {
-        const insertErrorResult = await this.errorsRepository.nativeRepository.insert({
+        const insertErrorResult = await this.errorsRepository.getNativeRepository().insert({
             uuid: uuid(),
             userId,
             error: fail.error,
@@ -37,7 +37,9 @@ export class ErrorsServiceProvider {
 
         const errorId = insertErrorResult.raw[0].id;
 
-        const errorResult = await this.errorsRepository.nativeRepository.findOne({ id: errorId });
+        const errorResult = await this.errorsRepository
+            .getNativeRepository()
+            .findOne({ id: errorId });
         if (!errorResult) {
             return new CannotFindNewlyCreatedError(fail);
         }
