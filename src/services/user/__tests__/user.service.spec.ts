@@ -6,7 +6,7 @@ import { UserEntity } from '../../../repositories/users/user.entity';
 import { UserServiceProvider } from './../user.service';
 import { BasicError, isError } from '../../../core/errors.core';
 import { UsersRepositoryProvider } from '../../../repositories/users/users.repository';
-import { getUserStub } from '../../../__stubs__/user.stub';
+import { getUserStub } from '../../../__mocks__/user.stub';
 
 describe('UserService', () => {
     let userService: UserServiceProvider;

@@ -1,14 +1,14 @@
 import { CannotFindEmailConfirm } from './../../../repositories/emailConfirms/emailConfirm.model';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { BasicError } from './../../../core/errors.core';
-import { ConfigServiceFake } from './__mocks__/ConfigServiceFake';
+import { ConfigServiceFake } from '../../../__mocks__/ConfigServiceFake';
 import { Test } from '@nestjs/testing';
 import { AuthServiceProvider } from '../auth.service';
 import { UserEntity } from '../../../repositories/users/user.entity';
-import { getUserStub } from '../../../__stubs__/user.stub';
+import { getUserStub } from '../../../__mocks__/user.stub';
 import { isError } from '../../../core/errors.core';
 import { EmailConfirmEntity } from '../../../repositories/emailConfirms/emailConfirm.entity';
-import { getConfirmEmailStub } from '../../../__stubs__/confirmEmail.stub';
+import { getConfirmEmailStub } from '../../../__mocks__/confirmEmail.stub';
 import { ConfigServiceProvider } from '../../config/config.service';
 import { UsersRepositoryProvider } from '../../../repositories/users/users.repository';
 import { JwtService } from '@nestjs/jwt';

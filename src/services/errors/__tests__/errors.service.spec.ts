@@ -4,7 +4,7 @@ import { isError } from './../../../core/errors.core';
 import { Test } from '@nestjs/testing';
 import { ErrorEntity } from './../../../repositories/errors/errors.entity';
 import { ErrorsServiceProvider } from './../errors.service';
-import { getErrorStub } from '../../../__stubs__/error.stub';
+import { getErrorStub } from '../../../__mocks__/error.stub';
 import { ErrorsRepositoryProvider } from '../../../repositories/errors/errors.repository';
 import { InsertResult } from 'typeorm';
 

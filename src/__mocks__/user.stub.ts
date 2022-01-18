@@ -6,7 +6,7 @@ export const getUserStub = (): UserEntity => {
         email: 'test@example.com',
         hash: 'test hash',
         emailConfirmed: false,
-        created: new Date(),
+        created: new Date().toISOString() as unknown as Date,
         refreshToken: null,
     };
 };
