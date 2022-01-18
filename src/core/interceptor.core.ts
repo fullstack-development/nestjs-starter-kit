@@ -45,8 +45,8 @@ export class HttpInterceptor implements NestInterceptor {
             catchError(async (error) => {
                 await ctx.transactions.abort();
                 await ctx.transactions.stop();
-                response.status(error?.status || HttpStatus.INTERNAL_SERVER_ERROR);
-                response.send(error?.response);
+                response.status(error?.status ?? HttpStatus.INTERNAL_SERVER_ERROR);
+                response.send(error?.response ?? error?.message);
             }),
         );
     }
