@@ -132,6 +132,6 @@ describe('UserController', () => {
     });
 
     afterAll(async () => {
-        await appWrap.app?.close();
+        await appWrap.app.close();
     });
 });
