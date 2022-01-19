@@ -1,3 +1,4 @@
+import { getInsertResult } from './../../../__mocks__/error.stub';
 import { CannotFindError } from './../../../repositories/errors/errors.model';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { isError } from './../../../core/errors.core';
@@ -37,9 +38,7 @@ describe('ErrorsService', () => {
         beforeEach(() => {
             error = getErrorStub();
             errorsRepository.getNativeRepository().findOne.mockResolvedValue(error);
-            errorsRepository
-                .getNativeRepository()
-                .insert.mockResolvedValue({ raw: [{ id: 0 }] } as InsertResult);
+            errorsRepository.getNativeRepository().insert.mockResolvedValue(getInsertResult());
         });
         it('should return a uuid', async () => {
             const handleResult = await errorsService.handleError({ error: 'mock error' });
