@@ -49,8 +49,8 @@ async function main() {
         });
     } catch (e) {
         throw e;
+    } finally {
+        fs.rmSync(configFile);
     }
-
-    fs.rmSync(configFile);
 }
 main();
