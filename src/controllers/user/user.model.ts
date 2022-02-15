@@ -12,11 +12,11 @@ class User {
     created: Date;
 }
 
-export class CR_Me_Success<T extends User> extends CR_200<T> {
+export class CR_Me_Success extends CR_200<User> {
     @ApiProperty()
-    override body: T;
+    override body: User;
 
-    constructor(body: T) {
+    constructor(body: User) {
         super();
         this.body = body;
     }

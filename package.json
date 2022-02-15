@@ -34,7 +34,7 @@
         "class-transformer": "^0.3.1",
         "class-validator": "^0.12.2",
         "concurrently": "^6.0.0",
-        "cookie-parser": "^1.4.5",
+        "cookie-parser": "^1.4.6",
         "cross-env": "^7.0.3",
         "date-fns": "^2.21.3",
         "dotenv": "^8.2.0",

@@ -29,7 +29,7 @@ export class UserControllerProvider {
         if (isError(userResult)) {
             return await processControllerError(userResult, this.errorsService);
         } else {
-            const user = R.omit(['hash', 'id'])(userResult);
+            const user = R.omit(['hash', 'id', 'refreshToken'])(userResult);
             return new CR_Me_Success(user);
         }
     }

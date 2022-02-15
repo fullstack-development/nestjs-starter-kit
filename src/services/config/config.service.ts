@@ -17,6 +17,8 @@ export class ConfigServiceProvider implements ConfigDto {
     readonly DB_PORT: number;
     readonly JWT_SECRET: string;
     readonly JWT_EXPIRES_IN: string;
+    readonly JWT_REFRESH_TOKEN_EXPIRATION_TIME: string;
+    readonly JWT_REFRESH_TOKEN_SECRET: string;
     readonly DOMAIN: string;
     readonly PORT_API: number;
 
@@ -45,6 +47,9 @@ export class ConfigServiceProvider implements ConfigDto {
         this.DB_PORT = envValidation.value.DB_PORT;
         this.JWT_SECRET = envValidation.value.JWT_SECRET;
         this.JWT_EXPIRES_IN = envValidation.value.JWT_EXPIRES_IN;
+        this.JWT_REFRESH_TOKEN_EXPIRATION_TIME =
+            envValidation.value.JWT_REFRESH_TOKEN_EXPIRATION_TIME;
+        this.JWT_REFRESH_TOKEN_SECRET = envValidation.value.JWT_REFRESH_TOKEN_SECRET;
         this.PORT_API = envValidation.value.PORT_API;
         this.DOMAIN = isDev ? `http://localhost:${this.PORT_API}` : 'https://staging.teraswap.ru';
     }
