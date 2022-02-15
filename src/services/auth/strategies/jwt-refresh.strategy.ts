@@ -28,7 +28,7 @@ export class JwtRefreshTokenStrategy extends PassportStrategy(Strategy, 'jwt-ref
     }
 
     async validate(request: Request, { email }: TokenPayload) {
-        const user = await this.userRepository.nativeRepository.findOne({
+        const user = await this.userRepository.getNativeRepository().findOne({
             where: { email },
             relations: ['refreshToken'],
         });
