@@ -1,31 +1,15 @@
+import { RequestContext } from '@medibloc/nestjs-request-context';
 import { Injectable, Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { BaseRepository } from '../../core/repository.core';
-import { EmailConfirmEntity } from './emailConfirm.entity';
-import {
-    CannotFindEmailConfirm,
-    CannotRemoveEmailConfirm,
-    CannotUpdateEmailConfirm,
-} from './emailConfirm.model';
+import { TransactionsContext } from '../../utils/transactions.utils';
 
 @Injectable()
-export class EmailConfirmsRepositoryProvider extends BaseRepository<
-    EmailConfirmEntity,
-    CannotFindEmailConfirm,
-    CannotUpdateEmailConfirm,
-    CannotRemoveEmailConfirm
-> {
-    constructor() {
-        super(EmailConfirmEntity, {
-            findError: CannotFindEmailConfirm,
-            updateError: CannotUpdateEmailConfirm,
-            removeError: CannotRemoveEmailConfirm,
-        });
+export class EmailConfirmsRepositoryProvider {
+    public get Dao() {
+        return RequestContext.get<TransactionsContext>().transactions.Prisma.emailConfirm;
     }
 }
 
 @Module({
-    imports: [TypeOrmModule.forFeature([EmailConfirmEntity])],
     providers: [EmailConfirmsRepositoryProvider],
     exports: [EmailConfirmsRepositoryProvider],
 })

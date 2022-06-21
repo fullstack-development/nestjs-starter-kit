@@ -1,14 +1,13 @@
-import { InsertResult } from 'typeorm';
-import { ErrorEntity } from '../repositories/errors/errors.entity';
+import { Error } from '@prisma/client';
 
-export const getErrorStub = (): ErrorEntity => {
+export const getErrorStub = (): Error => {
     return {
-        uuid: 'test uuid',
         id: 0,
+        uuid: 'test uuid',
         error: 'test error',
+        userId: 1,
+        stack: '',
+        message: '',
+        payload: '',
     };
-};
-
-export const getInsertResult = (): InsertResult => {
-    return { raw: [{ id: 0 }] } as InsertResult;
 };

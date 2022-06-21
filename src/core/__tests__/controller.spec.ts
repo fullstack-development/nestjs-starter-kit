@@ -1,8 +1,7 @@
-import { CannotFindNewlyCreatedError } from './../../services/errors/errors.model';
 import { CR_200_Fail, CR_502 } from './../controller.core';
 import { Test } from '@nestjs/testing';
 import { processControllerError } from '../controller.core';
-import { BasicError } from '../errors.core';
+import { BaseError } from '../errors.core';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { ErrorsServiceProvider } from '../../services/errors/errors.service';
 
@@ -26,7 +25,7 @@ describe('Controller Core', () => {
     describe('process contoller error', () => {
         it('should correct handle user errors', async () => {
             const processResult = await processControllerError(
-                new BasicError('test error', { userErrorOnly: true }),
+                new BaseError('test error', { userErrorOnly: true }),
                 errorsService,
             );
 
@@ -36,24 +35,11 @@ describe('Controller Core', () => {
         it('should correct handle not user errors', async () => {
             errorsService.handleError.mockResolvedValue({ uuid: 'test uuid' });
             const processResult = await processControllerError(
-                new BasicError('test error', { userErrorOnly: false }),
+                new BaseError('test error', { userErrorOnly: false }),
                 errorsService,
             );
 
             expect(processResult instanceof CR_502).toBeTruthy();
-        });
-
-        it('should throw error if error not handled', async () => {
-            errorsService.handleError.mockResolvedValue(
-                new CannotFindNewlyCreatedError(new BasicError('test error')),
-            );
-
-            expect(async () =>
-                processControllerError(
-                    new BasicError('test error', { userErrorOnly: false }),
-                    errorsService,
-                ),
-            ).rejects.toThrow('Cannot find newly created error');
         });
     });
 });

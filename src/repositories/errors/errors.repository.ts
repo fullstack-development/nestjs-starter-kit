@@ -1,27 +1,15 @@
+import { RequestContext } from '@medibloc/nestjs-request-context';
 import { Injectable, Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { BaseRepository } from '../../core/repository.core';
-import { ErrorEntity } from './errors.entity';
-import { CannotFindError, CannotRemoveError, CannotUpdateError } from './errors.model';
+import { TransactionsContext } from '../../utils/transactions.utils';
 
 @Injectable()
-export class ErrorsRepositoryProvider extends BaseRepository<
-    ErrorEntity,
-    CannotFindError,
-    CannotUpdateError,
-    CannotRemoveError
-> {
-    constructor() {
-        super(ErrorEntity, {
-            findError: CannotFindError,
-            updateError: CannotUpdateError,
-            removeError: CannotRemoveError,
-        });
+export class ErrorsRepositoryProvider {
+    public get Dao() {
+        return RequestContext.get<TransactionsContext>().transactions.Prisma.error;
     }
 }
 
 @Module({
-    imports: [TypeOrmModule.forFeature([ErrorEntity])],
     providers: [ErrorsRepositoryProvider],
     exports: [ErrorsRepositoryProvider],
 })

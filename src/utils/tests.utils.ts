@@ -1,6 +1,6 @@
-import { JwtAuthenticationGuardUser } from './../services/auth/jwt-authentication.guard';
 import * as request from 'supertest';
 import { INestApplication, Type } from '@nestjs/common';
+import { JwtUserGuard } from '../services/auth/jwt-user.guard';
 
 type CheckSecureEndpointOptions = {
     controller: Type<unknown>;
@@ -13,13 +13,7 @@ type CheckSecureEndpointOptions = {
 export type AppWrap = { app: INestApplication };
 
 export const checkSecureEndpoint = (options: CheckSecureEndpointOptions) => {
-    const {
-        guard: staticGuard = JwtAuthenticationGuardUser,
-        controller,
-        methodName,
-        url,
-        appWrap,
-    } = options;
+    const { guard: staticGuard = JwtUserGuard, controller, methodName, url, appWrap } = options;
 
     it(`should secure by ${staticGuard.name}`, async () => {
         const guards = Reflect.getMetadata('__guards__', controller.prototype[methodName]);

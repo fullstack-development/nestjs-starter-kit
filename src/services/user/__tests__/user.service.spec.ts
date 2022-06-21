@@ -1,25 +1,32 @@
-import { CannotFindUser } from './../../../repositories/users/user.model';
-import { UserPayload } from './../../auth/auth.model';
-import { Test } from '@nestjs/testing';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import { UserEntity } from '../../../repositories/users/user.entity';
+import { Test } from '@nestjs/testing';
+import { User } from '@prisma/client';
+import { UserPayload } from './../../auth/auth.model';
 import { UserServiceProvider } from './../user.service';
-import { BasicError, isError } from '../../../core/errors.core';
+import { isError } from '../../../core/errors.core';
 import { UsersRepositoryProvider } from '../../../repositories/users/users.repository';
 import { getUserStub } from '../../../__mocks__/user.stub';
+import { EmailOrPasswordIncorrect, UserAlreadyExist } from '../user.model';
+import { CannotFindUser } from '../../../repositories/repositoryErrors.model';
 
 describe('UserService', () => {
     let userService: UserServiceProvider;
-    let usersRepository: DeepMocked<UsersRepositoryProvider>;
-    let user: UserEntity;
+
+    let usersRepository: { Dao: DeepMocked<UsersRepositoryProvider['Dao']> };
+    let user: User;
 
     beforeEach(async () => {
+        const usersDaoMock = createMock<UsersRepositoryProvider['Dao']>();
         const module = await Test.createTestingModule({
             providers: [
                 UserServiceProvider,
                 {
                     provide: UsersRepositoryProvider,
-                    useValue: createMock<UsersRepositoryProvider>(),
+                    useValue: {
+                        get Dao() {
+                            return usersDaoMock;
+                        },
+                    },
                 },
             ],
         }).compile();
@@ -35,122 +42,106 @@ describe('UserService', () => {
     });
 
     describe('create user', () => {
-        it('should success create', async () => {
-            usersRepository.findOne
-                .mockResolvedValueOnce(new BasicError('cannotFindUser'))
-                .mockResolvedValueOnce(user);
-            usersRepository.create.mockResolvedValue(user.id);
+        it('should return userAlreadyExist error', async () => {
+            usersRepository.Dao.findFirst.mockResolvedValueOnce(user);
+            const createPayload: UserPayload = { email: user.email, password: 'test password' };
+
+            const userResult = await userService.createUser(createPayload);
+
+            expect(isError(userResult)).toBeTruthy();
+            expect(userResult).toBeInstanceOf(UserAlreadyExist);
+        });
+
+        it('should return created user', async () => {
+            usersRepository.Dao.findFirst.mockResolvedValueOnce(null);
+            usersRepository.Dao.create.mockResolvedValueOnce(user);
             const createPayload: UserPayload = { email: user.email, password: 'test password' };
 
             const userResult = await userService.createUser(createPayload);
 
             expect(isError(userResult)).toBeFalsy();
-        });
-
-        it('should return userAlreadyExist error', async () => {
-            usersRepository.findOne.mockResolvedValueOnce(user);
-            const createPayload: UserPayload = { email: user.email, password: 'test password' };
-
-            const userResult = await userService.createUser(createPayload);
-
-            expect(isError(userResult)).toBeTruthy();
-            expect(userResult).toEqual(expect.objectContaining({ error: 'userAlreadyExist' }));
-        });
-
-        it('should return cannotCreateUser error', async () => {
-            usersRepository.findOne.mockResolvedValue(new BasicError('cannotFindUser'));
-            const createPayload: UserPayload = { email: user.email, password: 'test password' };
-
-            const userResult = await userService.createUser(createPayload);
-
-            expect(isError(userResult)).toBeTruthy();
-            expect(userResult).toEqual(expect.objectContaining({ error: 'cannotCreateUser' }));
+            expect(userResult).toEqual(user);
         });
     });
 
-    describe('find verified user', () => {
-        it('should success return user by correct email and password', async () => {
-            usersRepository.findOne.mockResolvedValue({
-                ...user,
-                hash: 'ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f',
+    describe('findVerifiedUser', () => {
+        describe('should return EmailOrPasswordIncorrect error', () => {
+            it('on user is null', async () => {
+                usersRepository.Dao.findFirst.mockResolvedValueOnce(null);
+
+                const result = await userService.findVerifiedUser({
+                    email: 'test@axample.com',
+                    password: 'password',
+                });
+
+                expect(isError(result)).toBeTruthy();
+                expect(result).toBeInstanceOf(EmailOrPasswordIncorrect);
             });
+
+            it('on hash not valid', async () => {
+                usersRepository.Dao.findFirst.mockResolvedValueOnce(user);
+
+                const result = await userService.findVerifiedUser({
+                    email: 'test@axample.com',
+                    password: '12345678',
+                });
+
+                expect(isError(result)).toBeTruthy();
+                expect(result).toBeInstanceOf(EmailOrPasswordIncorrect);
+            });
+        });
+
+        it('should return user on success', async () => {
+            usersRepository.Dao.findFirst.mockResolvedValueOnce(user);
 
             const result = await userService.findVerifiedUser({
                 email: 'test@axample.com',
-                password: '12345678',
+                password: 'password',
             });
 
             expect(isError(result)).toBeFalsy();
-        });
-
-        it('should return error by incorrect email', async () => {
-            usersRepository.findOne.mockResolvedValue(new CannotFindUser());
-
-            const result = await userService.findVerifiedUser({
-                email: 'test@axample.com',
-                password: '12345678',
-            });
-
-            expect(isError(result)).toBeTruthy();
-        });
-
-        it('should return error by incorrect password', async () => {
-            usersRepository.findOne.mockResolvedValue({
-                ...user,
-                hash: 'ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f',
-            });
-
-            const result = await userService.findVerifiedUser({
-                email: 'test@axample.com',
-                password: '1234567',
-            });
-
-            expect(isError(result)).toBeTruthy();
+            expect(result).toEqual(user);
         });
     });
 
-    describe('confirm email', () => {
-        it('should success confirm email', async () => {
-            usersRepository.findOne.mockResolvedValue(user);
-            usersRepository.updateOne.mockResolvedValue(undefined);
+    describe('confirmEmail', () => {
+        it('should return CannotFindUser error', async () => {
+            usersRepository.Dao.findFirst.mockResolvedValueOnce(null);
 
-            const confirmResult = await userService.confirmEmail({ id: user.id });
+            const result = await userService.confirmEmail({ id: user.id });
 
-            expect(isError(confirmResult)).toBeFalsy();
+            expect(isError(result)).toBeTruthy();
+            expect(result).toBeInstanceOf(CannotFindUser);
         });
 
-        it('should return error if user not found', async () => {
-            usersRepository.findOne.mockResolvedValue(new BasicError('cannotFindUser'));
-            const confirmResult = await userService.confirmEmail({ id: user.id });
+        it('should undefined true on success', async () => {
+            usersRepository.Dao.findFirst.mockResolvedValueOnce(user);
+            usersRepository.Dao.update.mockResolvedValueOnce({ ...user, emailConfirmed: true });
 
-            expect(isError(confirmResult)).toBeTruthy();
-            expect(confirmResult).toEqual(expect.objectContaining({ error: 'cannotFindUser' }));
-        });
+            const result = await userService.confirmEmail({ id: user.id });
 
-        it('should return error if user not updated', async () => {
-            usersRepository.findOne.mockResolvedValue(user);
-            usersRepository.updateOne.mockResolvedValue(new BasicError('cannotUpdateUser'));
-            const confirmResult = await userService.confirmEmail({ id: user.id });
-
-            expect(isError(confirmResult)).toBeTruthy();
-            expect(confirmResult).toEqual(expect.objectContaining({ error: 'cannotUpdateUser' }));
+            expect(isError(result)).toBeFalsy();
+            expect(result).toEqual(undefined);
         });
     });
 
-    describe('find user', () => {
-        it('should return user', async () => {
-            usersRepository.findOne.mockResolvedValue(user);
-            const userResult = await userService.findUser({ id: user.id });
+    describe('findUser', () => {
+        it('should return CannotFindUser error', async () => {
+            usersRepository.Dao.findFirst.mockResolvedValueOnce(null);
 
-            expect(isError(userResult)).toBeFalsy();
+            const result = await userService.findUser({ id: user.id });
+
+            expect(isError(result)).toBeTruthy();
+            expect(result).toBeInstanceOf(CannotFindUser);
         });
 
-        it('should return error', async () => {
-            usersRepository.findOne.mockResolvedValue(new BasicError('cannotFindUser'));
-            const userResult = await userService.findUser({ id: user.id });
+        it('should return user on success', async () => {
+            usersRepository.Dao.findFirst.mockResolvedValueOnce(user);
 
-            expect(isError(userResult)).toBeTruthy();
-            expect(userResult).toEqual(expect.objectContaining({ error: 'cannotFindUser' }));
+            const result = await userService.findUser({ id: user.id });
+
+            expect(isError(result)).toBeFalsy();
+            expect(result).toEqual(user);
         });
     });
 });

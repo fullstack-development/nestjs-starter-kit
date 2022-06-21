@@ -1,66 +1,61 @@
 import { Injectable, Module } from '@nestjs/common';
-import { isError } from '../../core/errors.core';
-import { UserEntity } from '../../repositories/users/user.entity';
+import { User } from '@prisma/client';
+import { CannotFindUser } from '../../repositories/repositoryErrors.model';
 import {
     UsersRepository,
     UsersRepositoryProvider,
 } from '../../repositories/users/users.repository';
 import { date } from '../../utils';
 import { sha256 } from '../../utils/crypt.utils';
-import {
-    CannotCreateUser,
-    EmailOrPasswordIncorrect,
-    UserPayload,
-    UserAlreadyExist,
-} from './user.model';
+import { EmailOrPasswordIncorrect, UserPayload, UserAlreadyExist } from './user.model';
 
 @Injectable()
 export class UserServiceProvider {
-    constructor(private usersRepository: UsersRepositoryProvider) {}
+    constructor(private users: UsersRepositoryProvider) {}
 
     async createUser({ email, password }: UserPayload) {
-        if (!isError(await this.usersRepository.findOne({ email }))) {
+        if ((await this.users.Dao.findFirst({ where: { email } })) !== null) {
             return new UserAlreadyExist();
         }
 
-        const id = await this.usersRepository.create({
-            email,
-            hash: sha256(password),
-            created: date.now(),
-            emailConfirmed: false,
-            refreshToken: null,
+        return await this.users.Dao.create({
+            data: {
+                email,
+                hash: sha256(password),
+                created: date.now(),
+                emailConfirmed: false,
+            },
         });
-        const userResult = await this.usersRepository.findOne({ id });
-        if (isError(userResult)) {
-            return new CannotCreateUser(email);
-        }
-        return userResult;
     }
 
     async findVerifiedUser({ email, password }: UserPayload) {
-        const userResult = await this.usersRepository.findOne({ email });
-        if (isError(userResult) || userResult.hash !== sha256(password)) {
+        const user = await this.users.Dao.findFirst({ where: { email } });
+        if (user === null || user.hash !== sha256(password)) {
             return new EmailOrPasswordIncorrect();
         }
-        return userResult;
+        return user;
     }
 
-    async confirmEmail(filter: Partial<UserEntity>) {
-        const userResult = await this.usersRepository.findOne(filter);
-        if (isError(userResult)) {
-            return userResult;
+    async confirmEmail(where: Partial<User>) {
+        const user = await this.users.Dao.findFirst({ where });
+        if (user === null) {
+            return new CannotFindUser();
         }
-        const updatedResult = await this.usersRepository.updateOne(filter, {
-            emailConfirmed: true,
+
+        await this.users.Dao.update({
+            where,
+            data: {
+                emailConfirmed: true,
+            },
         });
-        if (isError(updatedResult)) {
-            return updatedResult;
-        }
-        return true;
     }
 
-    async findUser(filter: Pick<UserEntity, 'id'>) {
-        return await this.usersRepository.findOne(filter);
+    async findUser(where: { id: number } | { email: string }) {
+        const user = await this.users.Dao.findFirst({
+            where,
+            include: { refreshToken: true, emailConfirm: true },
+        });
+        return user || new CannotFindUser();
     }
 }
 

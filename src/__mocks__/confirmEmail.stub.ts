@@ -1,9 +1,9 @@
-import { EmailConfirmEntity } from '../repositories/emailConfirms/emailConfirm.entity';
+import { EmailConfirm } from '@prisma/client';
 
-export const getConfirmEmailStub = (): EmailConfirmEntity => {
+export const getConfirmEmailStub = (): EmailConfirm => {
     return {
         id: 0,
-        confirmId: 'test uuid',
+        confirmUuid: 'test uuid',
         userId: 0,
     };
 };

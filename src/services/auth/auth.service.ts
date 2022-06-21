@@ -11,45 +11,39 @@ import {
     RefreshTokensRepository,
     RefreshTokensRepositoryProvider,
 } from '../../repositories/refreshTokens/refreshTokens.repository';
-import { UserEntity } from '../../repositories/users/user.entity';
-import {
-    UsersRepository,
-    UsersRepositoryProvider,
-} from '../../repositories/users/users.repository';
 import { uuid } from '../../utils';
 import { ConfigService, ConfigServiceProvider } from '../config/config.service';
 import { MailService, MailServiceProvider } from '../mail/mail.service';
 import { UserService, UserServiceProvider } from '../user/user.service';
 import {
-    CannotCreateEmailConfirmation,
-    CannotCreateRefreshToken,
     CannotSendEmailConfirmation,
-    ConfirmationNotFound,
     EmailAlreadyConfirmed,
     EmailNotConfirmed,
     UserPayload,
 } from './auth.model';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { CannotFindEmailConfirm } from '../../repositories/repositoryErrors.model';
+import { User } from '@prisma/client';
+import { DatabaseService } from '../database/database.service';
 
 @Injectable()
 export class AuthServiceProvider {
     constructor(
         private userService: UserServiceProvider,
-        private userRepository: UsersRepositoryProvider,
-        private emailConfirmsRepository: EmailConfirmsRepositoryProvider,
+        private emailConfirms: EmailConfirmsRepositoryProvider,
         private jwtService: JwtService,
         private configService: ConfigServiceProvider,
-        private refreshTokensRepository: RefreshTokensRepositoryProvider,
+        private refreshTokens: RefreshTokensRepositoryProvider,
         private mailService: MailServiceProvider,
     ) {}
 
     async signUp(payload: UserPayload) {
-        const userResult = await this.userService.createUser(payload);
-        if (isError(userResult)) {
-            return userResult;
+        const user = await this.userService.createUser(payload);
+        if (isError(user)) {
+            return user;
         }
 
-        const sendEmailResult = await this.sendConfirmEmail({ id: userResult.id });
+        const sendEmailResult = await this.sendConfirmEmail({ id: user.id });
         if (isError(sendEmailResult)) {
             return new CannotSendEmailConfirmation({
                 sourceError: sendEmailResult,
@@ -70,10 +64,12 @@ export class AuthServiceProvider {
         return this.generateTokensWithCookie(userResult.id, userResult.email);
     }
 
-    async confirmEmail(confirmId: string) {
-        const confirmEntityResult = await this.emailConfirmsRepository.findOne({ confirmId });
-        if (isError(confirmEntityResult)) {
-            return new ConfirmationNotFound();
+    async confirmEmail(confirmUuid: string) {
+        const confirmEntityResult = await this.emailConfirms.Dao.findFirst({
+            where: { confirmUuid },
+        });
+        if (confirmEntityResult === null) {
+            return new CannotFindEmailConfirm();
         }
 
         const userResult = await this.userService.findUser({ id: confirmEntityResult.userId });
@@ -93,8 +89,8 @@ export class AuthServiceProvider {
         return this.generateTokensWithCookie(userResult.id, userResult.email);
     }
 
-    async sendConfirmEmail(filter: Pick<UserEntity, 'id'>) {
-        const userResult = await this.userService.findUser(filter);
+    async sendConfirmEmail(where: Pick<User, 'id'>) {
+        const userResult = await this.userService.findUser(where);
         if (isError(userResult)) {
             return userResult;
         }
@@ -103,25 +99,18 @@ export class AuthServiceProvider {
             return new EmailAlreadyConfirmed();
         }
 
-        const confirmEntityId = await this.emailConfirmsRepository.create({
-            userId: userResult.id,
-            confirmId: uuid(),
+        const confirm = await this.emailConfirms.Dao.create({
+            data: {
+                userId: userResult.id,
+                confirmUuid: uuid(),
+            },
         });
-        const confirmEntityResult = await this.emailConfirmsRepository.findOne({
-            id: confirmEntityId,
-        });
-        if (isError(confirmEntityResult)) {
-            return new CannotCreateEmailConfirmation({
-                id: filter.id,
-                createdConfirmId: confirmEntityId,
-            });
-        }
-        const link = `${this.configService.DOMAIN}/auth/confirm-email?uuid=${confirmEntityResult.confirmId}`;
+        const link = `${this.configService.DOMAIN}/auth/confirm-email?uuid=${confirm.confirmUuid}`;
         // await this.mailService.sendEmail(
         //     'Please confirm email',
         //     `<a href="${link}">${link}</a>`,
         //     userResult.email,
-        // );  FIXME: Need mail service implemantation
+        // );  FIXME: Need mail service implementation
     }
 
     async generateTokens(id: number, email: string) {
@@ -135,35 +124,25 @@ export class AuthServiceProvider {
 
         const hashedRefreshToken = sha256(refreshToken);
 
-        const user = await this.userRepository.findOneRelations({
-            where: { id },
-            relations: ['refreshToken'],
-        });
-
+        const user = await this.userService.findUser({ id });
         if (isError(user)) {
             return user;
         }
 
         if (user.refreshToken) {
-            const updatedRefreshToken = await this.refreshTokensRepository.updateOne(
-                {
-                    tokenHash: user.refreshToken.tokenHash,
+            await this.refreshTokens.Dao.update({
+                where: {
+                    id: user.refreshToken.id,
                 },
-                { tokenHash: hashedRefreshToken },
-            );
-
-            if (isError(updatedRefreshToken)) {
-                return updatedRefreshToken;
-            }
-        } else {
-            const createdRefreshToken = await this.refreshTokensRepository.create({
-                tokenHash: hashedRefreshToken,
-                user,
+                data: { hash: hashedRefreshToken },
             });
-
-            if (!createdRefreshToken && createdRefreshToken !== 0) {
-                return new CannotCreateRefreshToken({ email });
-            }
+        } else {
+            await this.refreshTokens.Dao.create({
+                data: {
+                    hash: hashedRefreshToken,
+                    userId: user.id,
+                },
+            });
         }
 
         return {
@@ -190,7 +169,7 @@ export class AuthServiceProvider {
 @Module({
     imports: [
         ConfigService,
-        UsersRepository,
+        DatabaseService,
         UserService,
         EmailConfirmsRepository,
         MailService,

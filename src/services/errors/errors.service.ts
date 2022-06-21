@@ -1,62 +1,44 @@
 import { Module } from '@nestjs/common';
 import { Injectable } from '@nestjs/common';
-import { BasicError, isError } from '../../core/errors.core';
-import { ErrorEntity } from '../../repositories/errors/errors.entity';
+import { Error, User } from '@prisma/client';
+import { BaseError } from '../../core/errors.core';
 import {
     ErrorsRepository,
     ErrorsRepositoryProvider,
 } from '../../repositories/errors/errors.repository';
-import { UserEntity } from '../../repositories/users/user.entity';
+import { CannotFindError } from '../../repositories/repositoryErrors.model';
 import { uuid } from '../../utils';
-import {
-    CannotFindErrorByUuid,
-    CannotFindNewlyCreatedError,
-    CannotCreateError,
-} from './errors.model';
+import { DatabaseService, DatabaseServiceProvider } from '../database/database.service';
 
 @Injectable()
 export class ErrorsServiceProvider {
-    constructor(private errorsRepository: ErrorsRepositoryProvider) {}
+    constructor(private errors: ErrorsRepositoryProvider, private db: DatabaseServiceProvider) {}
 
-    async handleError<T extends string>(fail: BasicError<T>, userId?: UserEntity['id']) {
-        const insertErrorResult = await this.errorsRepository.getNativeRepository().insert({
-            uuid: uuid(),
-            userId,
-            error: fail.error,
-            stackTrace: fail.stackTrace,
-            message: fail.message,
-            payload: fail.payload && JSON.stringify(fail.payload),
+    async handleError<T extends string>(fail: BaseError<T>, userId?: User['id']) {
+        const error = await this.db.Prisma.error.create({
+            data: {
+                uuid: uuid(),
+                userId: userId || -1,
+                error: fail.error,
+                stack: fail.stackTrace || '',
+                message: fail.message,
+                payload: fail.payload && JSON.stringify(fail.payload),
+            },
         });
-
-        if (
-            !insertErrorResult ||
-            (!insertErrorResult.raw[0]?.id && insertErrorResult.raw[0]?.id !== 0)
-        ) {
-            return new CannotCreateError(fail);
-        }
-
-        const errorId = insertErrorResult.raw[0].id;
-
-        const errorResult = await this.errorsRepository
-            .getNativeRepository()
-            .findOne({ id: errorId });
-        if (!errorResult) {
-            return new CannotFindNewlyCreatedError(fail);
-        }
-        return { uuid: errorResult.uuid };
+        return { uuid: error.uuid };
     }
 
-    async getErrorByUuid(filter: Pick<ErrorEntity, 'uuid'>) {
-        const errorResult = await this.errorsRepository.findOne(filter);
-        if (isError(errorResult)) {
-            return new CannotFindErrorByUuid(filter);
+    async getErrorByUuid(where: Pick<Error, 'uuid'>) {
+        const error = await this.errors.Dao.findFirst({ where });
+        if (error === null) {
+            return new CannotFindError();
         }
-        return errorResult;
+        return error;
     }
 }
 
 @Module({
-    imports: [ErrorsRepository],
+    imports: [ErrorsRepository, DatabaseService],
     providers: [ErrorsServiceProvider],
     exports: [ErrorsServiceProvider],
 })

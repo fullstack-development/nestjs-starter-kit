@@ -52,6 +52,10 @@ export class ConfigServiceProvider implements ConfigDto {
         this.JWT_REFRESH_TOKEN_SECRET = envValidation.value.JWT_REFRESH_TOKEN_SECRET;
         this.PORT_API = envValidation.value.PORT_API;
         this.DOMAIN = isDev ? `http://localhost:${this.PORT_API}` : 'https://staging.teraswap.ru';
+
+        process.env[
+            'DATABASE_URL'
+        ] = `postgres://${this.DB_USER}:${this.DB_PASSWORD}@${this.DB_ADDRESS}:${this.DB_PORT}/${this.DB_NAME}`;
     }
 }
 

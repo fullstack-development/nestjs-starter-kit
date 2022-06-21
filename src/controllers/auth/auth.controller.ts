@@ -1,6 +1,6 @@
 import { RequestUser } from './../../core/controller.core';
 import { Body, Controller, Get, Module, Post, UseGuards } from '@nestjs/common';
-import { ApiResponses, processControllerError, User } from '../../core/controller.core';
+import { processControllerError, User } from '../../core/controller.core';
 import { AuthService, AuthServiceProvider } from '../../services/auth/auth.service';
 import { ErrorsService, ErrorsServiceProvider } from '../../services/errors/errors.service';
 import { UseValidationPipe } from '../../utils/validation.utils';
@@ -11,25 +11,12 @@ import {
     CR_SignUpSuccess,
     CR_SignInSuccess,
     CR_ConfirmEmailSuccess,
-    CR_CannotCreateUser,
-    CR_CannotSendEmailConfirmation,
-    CR_UserAlreadyExist,
-    CR_EmailOrPasswordIncorrect,
-    CR_EmailNotConfirmed,
-    CR_CannotUpdateUser,
-    CR_CannotFindUser,
-    CR_ConfirmationNotFound,
-    CR_EmailAlreadyConfirmed,
-    CR_CannotCreateRefreshToken,
     CR_UpdateRefreshTokenSuccess,
-    CR_CannotUpdateRefreshToken,
 } from './auth.model';
 import { isError } from '../../core/errors.core';
-import { ApiTags } from '@nestjs/swagger';
 import { AuthToken } from '../../services/auth/auth.model';
-import JwtRefreshGuard from '../../services/auth/jwt-refresh.guard';
+import { JwtUserRefreshGuard } from '../../services/auth/jwt-user-refresh.guard';
 
-@ApiTags('api/auth')
 @Controller('api/auth')
 export class AuthControllerProvider {
     constructor(
@@ -39,11 +26,6 @@ export class AuthControllerProvider {
 
     @Post('sign-up')
     @UseValidationPipe()
-    @ApiResponses(CR_SignUpSuccess, [
-        CR_CannotCreateUser,
-        CR_CannotSendEmailConfirmation,
-        CR_UserAlreadyExist,
-    ])
     async signUp(@Body() body: SignUpInput) {
         const signUpResult = await this.authService.signUp(body);
         if (isError(signUpResult)) {
@@ -55,13 +37,6 @@ export class AuthControllerProvider {
 
     @Post('sign-in')
     @UseValidationPipe()
-    @ApiResponses(CR_SignInSuccess, [
-        CR_CannotFindUser,
-        CR_CannotUpdateRefreshToken,
-        CR_CannotCreateRefreshToken,
-        CR_EmailOrPasswordIncorrect,
-        CR_EmailNotConfirmed,
-    ])
     async signIn(@Body() body: SignInInput) {
         const signInResult = await this.authService.signIn(body);
         if (isError(signInResult)) {
@@ -76,14 +51,6 @@ export class AuthControllerProvider {
 
     @Post('confirm-email')
     @UseValidationPipe()
-    @ApiResponses(CR_ConfirmEmailSuccess, [
-        CR_CannotFindUser,
-        CR_CannotCreateRefreshToken,
-        CR_CannotUpdateRefreshToken,
-        CR_EmailAlreadyConfirmed,
-        CR_ConfirmationNotFound,
-        CR_CannotUpdateUser,
-    ])
     async confirmEmail(@Body() { confirmUuid }: ConfirmEmailInput) {
         const confirmEmailResult = await this.authService.confirmEmail(confirmUuid);
         if (isError(confirmEmailResult)) {
@@ -97,12 +64,7 @@ export class AuthControllerProvider {
     }
 
     @Get('refresh')
-    @UseGuards(JwtRefreshGuard)
-    @ApiResponses(CR_UpdateRefreshTokenSuccess, [
-        CR_CannotFindUser,
-        CR_CannotUpdateRefreshToken,
-        CR_CannotCreateRefreshToken,
-    ])
+    @UseGuards(JwtUserRefreshGuard)
     async handleRefreshToken(@User() user: RequestUser) {
         const result = await this.authService.generateTokensWithCookie(user.id, user.email);
 

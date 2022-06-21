@@ -1,23 +1,17 @@
-import { BasicError } from '../../core/errors.core';
+import { BaseError } from '../../core/errors.core';
 
 export type UserPayload = {
     email: string;
     password: string;
 };
 
-export class UserAlreadyExist extends BasicError<'userAlreadyExist'> {
+export class UserAlreadyExist extends BaseError<'userAlreadyExist'> {
     constructor() {
         super('userAlreadyExist', { userErrorOnly: true });
     }
 }
 
-export class CannotCreateUser extends BasicError<'cannotCreateUser'> {
-    constructor(email: string) {
-        super('cannotCreateUser', { payload: { email } });
-    }
-}
-
-export class EmailOrPasswordIncorrect extends BasicError<'emailOrPasswordIncorrect'> {
+export class EmailOrPasswordIncorrect extends BaseError<'emailOrPasswordIncorrect'> {
     constructor() {
         super('emailOrPasswordIncorrect', { userErrorOnly: true });
     }

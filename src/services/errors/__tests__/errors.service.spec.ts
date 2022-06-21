@@ -1,31 +1,47 @@
-import { getInsertResult } from './../../../__mocks__/error.stub';
-import { CannotFindError } from './../../../repositories/errors/errors.model';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import { isError } from './../../../core/errors.core';
+import { BaseError, isError } from './../../../core/errors.core';
 import { Test } from '@nestjs/testing';
-import { ErrorEntity } from './../../../repositories/errors/errors.entity';
 import { ErrorsServiceProvider } from './../errors.service';
 import { getErrorStub } from '../../../__mocks__/error.stub';
 import { ErrorsRepositoryProvider } from '../../../repositories/errors/errors.repository';
-import { InsertResult } from 'typeorm';
+import { DatabaseServiceProvider } from '../../database/database.service';
+import { CannotFindError } from '../../../repositories/repositoryErrors.model';
+import { Error } from '@prisma/client';
 
 describe('ErrorsService', () => {
+    let error: Error;
     let errorsService: ErrorsServiceProvider;
-    let errorsRepository: DeepMocked<ErrorsRepositoryProvider>;
+    let errorsRepository: { Dao: DeepMocked<ErrorsRepositoryProvider['Dao']> };
+    let db: { Prisma: { error: DeepMocked<DatabaseServiceProvider['Prisma']['error']> } };
 
     beforeEach(async () => {
+        error = getErrorStub();
+        const errorsDaoMock = createMock<ErrorsRepositoryProvider['Dao']>();
+        const prismaErrorMock = createMock<DatabaseServiceProvider['Prisma']['error']>();
         const module = await Test.createTestingModule({
             providers: [
                 ErrorsServiceProvider,
                 {
                     provide: ErrorsRepositoryProvider,
-                    useValue: createMock<ErrorsRepositoryProvider>(),
+                    useValue: {
+                        get Dao() {
+                            return errorsDaoMock;
+                        },
+                    },
+                },
+                {
+                    provide: DatabaseServiceProvider,
+                    useValue: {
+                        get Prisma() {
+                            return { error: prismaErrorMock };
+                        },
+                    },
                 },
             ],
         }).compile();
-
         errorsService = module.get(ErrorsServiceProvider);
         errorsRepository = module.get(ErrorsRepositoryProvider);
+        db = module.get(DatabaseServiceProvider);
     });
 
     it('should be defined service and repository', () => {
@@ -33,60 +49,34 @@ describe('ErrorsService', () => {
         expect(errorsRepository).toBeDefined();
     });
 
-    describe('handling error', () => {
-        let error: ErrorEntity;
-        beforeEach(() => {
-            error = getErrorStub();
-            errorsRepository.getNativeRepository().findOne.mockResolvedValue(error);
-            errorsRepository.getNativeRepository().insert.mockResolvedValue(getInsertResult());
-        });
-        it('should return a uuid', async () => {
-            const handleResult = await errorsService.handleError({ error: 'mock error' });
+    describe('handleError', () => {
+        it('should return Error on success', async () => {
+            db.Prisma.error.create.mockResolvedValueOnce(error);
 
-            expect(isError(handleResult)).toBeFalsy();
-            expect(handleResult).toEqual(expect.objectContaining({ uuid: expect.any(String) }));
-        });
+            const result = await errorsService.handleError(new BaseError(error.error));
 
-        it('should return create error', async () => {
-            errorsRepository
-                .getNativeRepository()
-                .insert.mockResolvedValue(undefined as unknown as InsertResult);
-
-            const handleResult = await errorsService.handleError({ error: 'mock error' });
-
-            expect(isError(handleResult)).toBeTruthy();
-            expect(handleResult).toEqual(expect.objectContaining({ error: 'cannotCreateError' }));
-        });
-
-        it('should return find error', async () => {
-            errorsRepository.getNativeRepository().findOne.mockResolvedValue(undefined);
-            const handleResult = await errorsService.handleError({ error: 'mock error' });
-
-            expect(isError(handleResult)).toBeTruthy();
-            expect(handleResult).toEqual(
-                expect.objectContaining({ error: 'cannotFindNewlyCreatedError' }),
-            );
+            expect(isError(result)).toBeFalsy();
+            expect(result).toEqual({ uuid: error.uuid });
         });
     });
 
-    describe('find error by uuid', () => {
-        let error: ErrorEntity;
-        beforeEach(() => {
-            error = getErrorStub();
-            errorsRepository.findOne.mockResolvedValue(error);
+    describe('getErrorByUuid', () => {
+        it('should return CannotFindError error', async () => {
+            errorsRepository.Dao.findFirst.mockResolvedValueOnce(null);
+
+            const result = await errorsService.getErrorByUuid({ uuid: '' });
+
+            expect(isError(result)).toBeTruthy();
+            expect(result).toBeInstanceOf(CannotFindError);
         });
 
-        it('should return error by uuid', async () => {
-            const errorResult = await errorsService.getErrorByUuid({ uuid: 'test uuid' });
+        it('should return Error on success', async () => {
+            errorsRepository.Dao.findFirst.mockResolvedValueOnce(error);
 
-            expect(isError(errorResult)).toBeFalsy();
-        });
+            const result = await errorsService.getErrorByUuid({ uuid: '' });
 
-        it('should return cannot find error by unknown uuid', async () => {
-            errorsRepository.findOne.mockResolvedValue(new CannotFindError());
-            const errorResult = await errorsService.getErrorByUuid({ uuid: 'incorrect uuid' });
-
-            expect(isError(errorResult)).toBeTruthy();
+            expect(isError(result)).toBeFalsy();
+            expect(result).toEqual(error);
         });
     });
 });
