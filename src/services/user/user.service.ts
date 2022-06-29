@@ -33,6 +33,7 @@ export class UserServiceProvider {
         if (user === null || user.hash !== sha256(password)) {
             return new EmailOrPasswordIncorrect();
         }
+
         return user;
     }
 
@@ -55,6 +56,7 @@ export class UserServiceProvider {
             where,
             include: { refreshToken: true, emailConfirm: true },
         });
+
         return user || new CannotFindUser();
     }
 }

@@ -57,6 +57,17 @@ describe('ErrorsService', () => {
 
             expect(isError(result)).toBeFalsy();
             expect(result).toEqual({ uuid: error.uuid });
+            expect(db.Prisma.error.create).toBeCalledTimes(1);
+            expect(db.Prisma.error.create).toBeCalledWith({
+                data: {
+                    uuid: 'uuid-1',
+                    userId: -1,
+                    error: error.error,
+                    stack: '',
+                    message: undefined,
+                    payload: undefined,
+                },
+            });
         });
     });
 
@@ -77,6 +88,12 @@ describe('ErrorsService', () => {
 
             expect(isError(result)).toBeFalsy();
             expect(result).toEqual(error);
+            expect(errorsRepository.Dao.findFirst).toBeCalledTimes(1);
+            expect(errorsRepository.Dao.findFirst).toBeCalledWith({
+                where: {
+                    uuid: '',
+                },
+            });
         });
     });
 });

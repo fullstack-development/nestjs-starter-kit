@@ -26,11 +26,9 @@ export class HttpInterceptor implements NestInterceptor {
     ): Promise<Observable<unknown>> {
         const response: Response = context.switchToHttp().getResponse();
         const ctx = RequestContext.get<TransactionsContext>();
-
         return from(
             this.db.Prisma.$transaction((prisma) => {
                 ctx.transactions.init(prisma);
-
                 return next
                     .handle()
                     .pipe(

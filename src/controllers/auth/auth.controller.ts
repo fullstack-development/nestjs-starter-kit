@@ -27,6 +27,7 @@ export class AuthControllerProvider {
     @Post('sign-up')
     @UseValidationPipe()
     async signUp(@Body() body: SignUpInput) {
+        console.log('inside controller', body);
         const signUpResult = await this.authService.signUp(body);
         if (isError(signUpResult)) {
             return await processControllerError(signUpResult, this.errorsService);
