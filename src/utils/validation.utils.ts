@@ -5,6 +5,7 @@ import {
     validateSync as classValidateSync,
     ValidationError,
 } from 'class-validator';
+import { ValidatorOptions } from 'class-validator/types/validation/ValidatorOptions';
 
 type ValidationSuccess<T> = {
     status: 'success';
@@ -16,24 +17,26 @@ type ValidationFail = {
     status: 'fail';
 };
 
-export const validate = <C>(
+export function validate<C>(
     SchemeClass: new () => C,
     data: unknown,
-): Promise<ValidationSuccess<C> | ValidationFail> => {
+    options?: ValidatorOptions,
+): Promise<ValidationSuccess<C> | ValidationFail> {
     const value = plainToClass(SchemeClass, data);
-    return classValidate(value).then((errors) =>
+    return classValidate(value, options).then((errors) =>
         errors.length > 0 ? { errors, status: 'fail' } : { value, status: 'success' },
     );
-};
+}
 
-export const validateSync = <C>(
+export function validateSync<C>(
     SchemeClass: new () => C,
     data: unknown,
-): ValidationSuccess<C> | ValidationFail => {
+    options?: ValidatorOptions,
+): ValidationSuccess<C> | ValidationFail {
     const value = plainToClass(SchemeClass, data);
-    const errors = classValidateSync(value);
+    const errors = classValidateSync(value, options);
     return errors.length > 0 ? { errors, status: 'fail' } : { value, status: 'success' };
-};
+}
 
 class CustomValidationPipe extends ValidationPipe {
     constructor() {

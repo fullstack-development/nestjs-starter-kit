@@ -1,5 +1,5 @@
 import { JwtRefreshTokenStrategy } from './strategies/jwt-refresh.strategy';
-import { sha256 } from './../../utils/crypt.utils';
+import { sha256 } from '../../utils/crypt.utils';
 import { Injectable, Module } from '@nestjs/common';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { isError } from '../../core/errors.core';

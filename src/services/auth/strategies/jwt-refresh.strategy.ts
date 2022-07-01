@@ -1,3 +1,4 @@
+import * as R from 'ramda';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
@@ -34,7 +35,7 @@ export class JwtRefreshTokenStrategy extends PassportStrategy(Strategy, 'jwt-ref
         const token: string | undefined = request.cookies?.Refresh;
 
         if (user && refreshToken && token && sha256(token) === refreshToken) {
-            return user;
+            return R.pick(['id', 'email'], user);
         }
     }
 }

@@ -1,9 +1,9 @@
 import { EmailConfirm, RefreshToken, User } from '@prisma/client';
 
-export const getUserStub = (): User & {
+export function getUserStub(): User & {
     refreshToken: RefreshToken | null;
     emailConfirm: EmailConfirm | null;
-} => {
+} {
     return {
         id: 0,
         email: 'test@example.com',
@@ -13,4 +13,4 @@ export const getUserStub = (): User & {
         refreshToken: null,
         emailConfirm: null,
     };
-};
+}

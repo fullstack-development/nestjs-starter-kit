@@ -43,3 +43,7 @@ export class BaseError<E> {
 export function isError<T, E>(value: T | BaseError<E>): value is BaseError<E> {
     return value instanceof BaseError;
 }
+
+export function isBaseErrorString(be: BaseError<unknown>): be is BaseError<string> {
+    return typeof be.error === 'string';
+}

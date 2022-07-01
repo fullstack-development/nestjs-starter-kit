@@ -1,5 +1,5 @@
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import { BaseError } from './../../../core/errors.core';
+import { BaseError } from '../../../core/errors.core';
 import { ConfigServiceFake } from '../../../__mocks__/ConfigServiceFake';
 import { Test } from '@nestjs/testing';
 import { AuthServiceProvider } from '../auth.service';
@@ -13,7 +13,7 @@ import { EmailConfirmsRepositoryProvider } from '../../../repositories/emailConf
 import { RefreshTokensRepositoryProvider } from '../../../repositories/refreshTokens/refreshTokens.repository';
 import { MailServiceProvider } from '../../mail/mail.service';
 import { UserServiceProvider } from '../../user/user.service';
-import { EmailConfirm, User } from '@prisma/client';
+import { EmailConfirm } from '@prisma/client';
 import { sha256 } from '../../../utils/crypt.utils';
 import {
     CannotFindEmailConfirm,

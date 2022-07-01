@@ -1,3 +1,4 @@
+import * as R from 'ramda';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
@@ -15,6 +16,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-user') {
     }
 
     async validate({ email }: TokenPayload) {
-        return await this.db.Prisma.user.findFirst({ where: { email } });
+        return R.pick(['id', 'email'], await this.db.Prisma.user.findFirst({ where: { email } }));
     }
 }

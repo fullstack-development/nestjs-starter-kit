@@ -1,87 +1,51 @@
 import { createParamDecorator, ExecutionContext, HttpStatus } from '@nestjs/common';
-import { BaseError, isError } from './errors.core';
 import { IsEmail, IsNumber } from 'class-validator';
 import { validateSync } from '../utils/validation.utils';
+import { BaseError, isError } from './errors.core';
 
 export type HeaderValue = string | number | Array<string>;
 
+type ControllerResponseOptions = {
+    body?: unknown;
+    headers?: Record<string, HeaderValue>;
+};
+
+type ControllerResponseErrorOptions = {
+    error: string;
+    headers?: Record<string, HeaderValue>;
+};
+
 export class ControllerResponse {
-    success: boolean;
     status: HttpStatus;
+    success?: boolean;
     headers?: Record<string, HeaderValue>;
     body?: unknown;
-}
 
-export class CR_200<T> extends ControllerResponse {
-    _kind: 'CR_200';
+    public static Success(options?: ControllerResponseOptions) {
+        const response = new ControllerResponse();
+        response.success = true;
+        response.status = HttpStatus.OK;
+        response.body = options?.body;
+        response.headers = options?.headers;
+        return response;
+    }
 
-    success: true;
-    body?: T;
-    headers?: Record<string, HeaderValue>;
+    public static Fail(options: ControllerResponseErrorOptions) {
+        const response = new ControllerResponse();
+        response.success = false;
+        response.status = HttpStatus.OK;
+        response.body = { error: options.error };
+        response.headers = options.headers;
+        return response;
+    }
 
-    constructor() {
-        super();
-        this.success = true;
-        this.status = HttpStatus.OK;
+    public static Error(status: HttpStatus, body?: unknown) {
+        const response = new ControllerResponse();
+        response.status = status;
+        response.body = body;
+        return response;
     }
 }
-
-export class CR_200_Fail<T> extends ControllerResponse {
-    _kind: 'CR_200_Fail';
-
-    success: false;
-    error: T;
-    message?: string;
-
-    constructor() {
-        super();
-        this.success = false;
-    }
-}
-
-export class CR_502 extends ControllerResponse {
-    _kind: 'CR_502';
-
-    errorId: string;
-}
-
-export class CR_400<T> extends ControllerResponse {
-    _kind: 'CR_400';
-
-    error: T;
-    message: string;
-}
-
-interface IErrorsServiceHandler {
-    handleError: <T extends string>(
-        error: BaseError<T>,
-        userId?: number,
-    ) => Promise<BaseError<string> | { uuid: string }>;
-}
-
-export const processControllerError = async <T extends string>(
-    error: BaseError<T>,
-    errorsService: IErrorsServiceHandler,
-) => {
-    if (error.userErrorOnly) {
-        const err = new CR_200_Fail<T>();
-        err.status = HttpStatus.OK;
-        err.error = error.error;
-        err.success = false;
-        return err;
-    } else {
-        const errorIdResult = await errorsService.handleError(error);
-        if (isError(errorIdResult)) {
-            throw new Error('Cannot find newly created error');
-        }
-
-        const err = new CR_502();
-        err.errorId = errorIdResult.uuid;
-        err.status = HttpStatus.INTERNAL_SERVER_ERROR;
-        err.success = false;
-        return err;
-    }
-};
 
 export class RequestUser {
     @IsNumber()
@@ -93,9 +57,25 @@ export class RequestUser {
 
 export const User = createParamDecorator((data: unknown, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest();
-    const user = validateSync(RequestUser, request.user);
+    const user = validateSync(RequestUser, request.user, {
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        forbidUnknownValues: true,
+    });
     if (user.status === 'fail') {
         throw new Error('Cannot get user from request, but authentication was passed');
     }
     return user.value;
 });
+
+export function mapResponse<T, EI, EO>(data: T | BaseError<EI>) {
+    return async (
+        onData: (data: T) => ControllerResponse | Promise<ControllerResponse>,
+        onError?: (e: BaseError<EI>) => BaseError<EO> | Promise<BaseError<EO>>,
+    ) =>
+        isError(data)
+            ? onError
+                ? Promise.resolve(onError(data))
+                : Promise.resolve(data)
+            : Promise.resolve(onData(data));
+}

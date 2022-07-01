@@ -6,12 +6,6 @@ export class CannotFindEmailConfirm extends BaseError<'cannotFindEmailConfirm'> 
     }
 }
 
-export class CannotFindError extends BaseError<'cannotFindError'> {
-    constructor(payload?: Record<string, unknown>) {
-        super('cannotFindError', { userErrorOnly: true, payload });
-    }
-}
-
 export class CannotFindUser extends BaseError<'cannotFindUser'> {
     constructor(payload?: Record<string, unknown>) {
         super('cannotFindUser', { userErrorOnly: true, payload });
