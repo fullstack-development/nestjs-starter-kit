@@ -7,11 +7,9 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TransactionsContext } from '../utils/transactions.utils';
 import { HttpInterceptor } from '../core/interceptor.core';
 import { DatabaseService } from '../services/database/database.service';
-import { Logger } from '../core/logger.core';
 
 @Module({
     imports: [
-        Logger,
         ConfigService,
         DatabaseService,
         RequestContextModule.forRoot({
