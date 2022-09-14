@@ -1,13 +1,10 @@
-import { CannotFindEmailConfirm } from './../../../repositories/emailConfirms/emailConfirm.model';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import { BasicError } from './../../../core/errors.core';
+import { BaseError } from '../../../core/errors.core';
 import { ConfigServiceFake } from '../../../__mocks__/ConfigServiceFake';
 import { Test } from '@nestjs/testing';
 import { AuthServiceProvider } from '../auth.service';
-import { UserEntity } from '../../../repositories/users/user.entity';
 import { getUserStub } from '../../../__mocks__/user.stub';
 import { isError } from '../../../core/errors.core';
-import { EmailConfirmEntity } from '../../../repositories/emailConfirms/emailConfirm.entity';
 import { getConfirmEmailStub } from '../../../__mocks__/confirmEmail.stub';
 import { ConfigServiceProvider } from '../../config/config.service';
 import { UsersRepositoryProvider } from '../../../repositories/users/users.repository';
@@ -16,39 +13,39 @@ import { EmailConfirmsRepositoryProvider } from '../../../repositories/emailConf
 import { RefreshTokensRepositoryProvider } from '../../../repositories/refreshTokens/refreshTokens.repository';
 import { MailServiceProvider } from '../../mail/mail.service';
 import { UserServiceProvider } from '../../user/user.service';
+import { EmailConfirm } from '@prisma/client';
+import { sha256 } from '../../../utils/crypt.utils';
+import {
+    CannotFindEmailConfirm,
+    CannotFindUser,
+} from '../../../repositories/repositoryErrors.model';
 
 describe('AuthService', () => {
     let authService: AuthServiceProvider;
     let configService: ConfigServiceFake;
-    let usersRepository: DeepMocked<UsersRepositoryProvider>;
-    let emailConfirmsRepository: DeepMocked<EmailConfirmsRepositoryProvider>;
     let jwtService: DeepMocked<JwtService>;
-    let refreshTokensRepository: DeepMocked<RefreshTokensRepositoryProvider>;
     let userService: DeepMocked<UserServiceProvider>;
     let mailService: DeepMocked<MailServiceProvider>;
 
-    let user: UserEntity;
+    let usersRepository: { Dao: DeepMocked<UsersRepositoryProvider['Dao']> };
+    let emailConfirmsRepository: { Dao: DeepMocked<EmailConfirmsRepositoryProvider['Dao']> };
+    let refreshTokensRepository: { Dao: DeepMocked<RefreshTokensRepositoryProvider['Dao']> };
+
+    let user: ReturnType<typeof getUserStub>;
 
     beforeEach(async () => {
+        const usersDaoMock = createMock<UsersRepositoryProvider['Dao']>();
+        const emailConfirmsDaoMock =
+            createMock<DeepMocked<EmailConfirmsRepositoryProvider['Dao']>>();
+        const refreshTokensDaoMock =
+            createMock<DeepMocked<RefreshTokensRepositoryProvider['Dao']>>();
         const module = await Test.createTestingModule({
             providers: [
                 AuthServiceProvider,
                 { provide: ConfigServiceProvider, useClass: ConfigServiceFake },
                 {
-                    provide: UsersRepositoryProvider,
-                    useValue: createMock<UsersRepositoryProvider>(),
-                },
-                {
-                    provide: EmailConfirmsRepositoryProvider,
-                    useValue: createMock<EmailConfirmsRepositoryProvider>(),
-                },
-                {
                     provide: JwtService,
                     useValue: createMock<JwtService>(),
-                },
-                {
-                    provide: RefreshTokensRepositoryProvider,
-                    useValue: createMock<RefreshTokensRepositoryProvider>(),
                 },
                 {
                     provide: UserServiceProvider,
@@ -57,6 +54,30 @@ describe('AuthService', () => {
                 {
                     provide: MailServiceProvider,
                     useValue: createMock<MailServiceProvider>(),
+                },
+                {
+                    provide: RefreshTokensRepositoryProvider,
+                    useValue: {
+                        get Dao() {
+                            return refreshTokensDaoMock;
+                        },
+                    },
+                },
+                {
+                    provide: UsersRepositoryProvider,
+                    useValue: {
+                        get Dao() {
+                            return usersDaoMock;
+                        },
+                    },
+                },
+                {
+                    provide: EmailConfirmsRepositoryProvider,
+                    useValue: {
+                        get Dao() {
+                            return emailConfirmsDaoMock;
+                        },
+                    },
                 },
             ],
         }).compile();
@@ -86,8 +107,8 @@ describe('AuthService', () => {
     describe('generate access and refresh tokens', () => {
         it('should success generate token for new user', async () => {
             jwtService.sign.mockReturnValueOnce('refreshToken').mockReturnValueOnce('accessToken');
-            usersRepository.findOneRelations.mockResolvedValue(user);
-            refreshTokensRepository.create.mockResolvedValue(0);
+            userService.findUser.mockResolvedValueOnce(user);
+            refreshTokensRepository.Dao.create.mockResolvedValue({ userId: 0, id: 0, hash: '' });
 
             const generatedResult = await authService.generateTokens(user.id, user.email);
 
@@ -98,20 +119,29 @@ describe('AuthService', () => {
                     refreshToken: 'refreshToken',
                 }),
             );
+            expect(refreshTokensRepository.Dao.create).toBeCalledTimes(1);
+            expect(refreshTokensRepository.Dao.create).toBeCalledWith({
+                data: {
+                    hash: sha256('refreshToken'),
+                    userId: 0,
+                },
+            });
         });
 
         it('should success update token for user with old refresh token', async () => {
-            const userWithRefreshToken: UserEntity = {
+            const refreshToken = {
+                id: 0,
+                hash: 'e1eae9e373ba62a80cdbd4422fc002553447aeb38fdb8dbf511a52d3e8c5e417',
+                userId: 0,
+                user,
+            };
+            const userWithRefreshToken = {
                 ...getUserStub(),
-                refreshToken: {
-                    id: 0,
-                    tokenHash: 'e1eae9e373ba62a80cdbd4422fc002553447aeb38fdb8dbf511a52d3e8c5e417',
-                    user,
-                },
+                refreshToken,
             };
             jwtService.sign.mockReturnValueOnce('refreshToken').mockReturnValueOnce('accessToken');
-            usersRepository.findOneRelations.mockResolvedValue(userWithRefreshToken);
-            refreshTokensRepository.updateOne.mockResolvedValue(undefined);
+            userService.findUser.mockResolvedValueOnce(userWithRefreshToken);
+            refreshTokensRepository.Dao.update.mockResolvedValue(refreshToken);
 
             const generatedResult = await authService.generateTokens(user.id, user.email);
 
@@ -122,68 +152,37 @@ describe('AuthService', () => {
                     refreshToken: 'refreshToken',
                 }),
             );
+            expect(refreshTokensRepository.Dao.update).toBeCalledTimes(1);
+            expect(refreshTokensRepository.Dao.update).toBeCalledWith({
+                where: {
+                    id: 0,
+                },
+                data: { hash: 'e1eae9e373ba62a80cdbd4422fc002553447aeb38fdb8dbf511a52d3e8c5e417' },
+            });
         });
 
         it('should return error if not found user', async () => {
             jwtService.sign.mockReturnValueOnce('refreshToken').mockReturnValueOnce('accessToken');
-            usersRepository.findOneRelations.mockResolvedValue(new BasicError('cannotFindUser'));
+            userService.findUser.mockResolvedValueOnce(new CannotFindUser());
 
             const generatedResult = await authService.generateTokens(user.id, user.email);
 
             expect(isError(generatedResult)).toBeTruthy();
-            expect(generatedResult).toEqual(
-                expect.objectContaining({
-                    error: 'cannotFindUser',
-                }),
-            );
-        });
-
-        it('should return error if not created refresh token', async () => {
-            jwtService.sign.mockReturnValueOnce('refreshToken').mockReturnValueOnce('accessToken');
-            usersRepository.findOneRelations.mockResolvedValue(user);
-            refreshTokensRepository.create.mockResolvedValue(undefined as unknown as number);
-
-            const generatedResult = await authService.generateTokens(user.id, user.email);
-
-            expect(isError(generatedResult)).toBeTruthy();
-            expect(generatedResult).toEqual(
-                expect.objectContaining({
-                    error: 'cannotCreateRefreshToken',
-                }),
-            );
-        });
-
-        it('should return error if not updated refresh token', async () => {
-            const userWithRefreshToken: UserEntity = {
-                ...getUserStub(),
-                refreshToken: {
-                    id: 0,
-                    tokenHash: 'e1eae9e373ba62a80cdbd4422fc002553447aeb38fdb8dbf511a52d3e8c5e417',
-                    user,
-                },
-            };
-            jwtService.sign.mockReturnValueOnce('refreshToken').mockReturnValueOnce('accessToken');
-            usersRepository.findOneRelations.mockResolvedValue(userWithRefreshToken);
-            refreshTokensRepository.updateOne.mockResolvedValue(
-                new BasicError('cannotUpdateRefreshToken'),
-            );
-
-            const generatedResult = await authService.generateTokens(user.id, user.email);
-
-            expect(isError(generatedResult)).toBeTruthy();
-            expect(generatedResult).toEqual(
-                expect.objectContaining({
-                    error: 'cannotUpdateRefreshToken',
-                }),
-            );
+            expect(generatedResult).toBeInstanceOf(CannotFindUser);
         });
     });
 
     describe('generate refresh cookie', () => {
         it('should correct generate cookie with token', async () => {
+            const refreshToken = {
+                id: 0,
+                hash: 'e1eae9e373ba62a80cdbd4422fc002553447aeb38fdb8dbf511a52d3e8c5e417',
+                userId: 0,
+                user,
+            };
             jwtService.sign.mockReturnValueOnce('refreshToken').mockReturnValueOnce('accessToken');
-            usersRepository.findOneRelations.mockResolvedValue(user);
-            refreshTokensRepository.create.mockResolvedValue(0);
+            userService.findUser.mockResolvedValueOnce(user);
+            refreshTokensRepository.Dao.create.mockResolvedValue(refreshToken);
 
             const generatedResult = await authService.generateTokensWithCookie(user.id, user.email);
 
@@ -199,7 +198,7 @@ describe('AuthService', () => {
 
         it('should return error if generating fail', async () => {
             jwtService.sign.mockReturnValueOnce('refreshToken').mockReturnValueOnce('accessToken');
-            usersRepository.findOneRelations.mockResolvedValue(new BasicError('cannotFindUser'));
+            userService.findUser.mockResolvedValueOnce(new CannotFindUser());
 
             const generatedResult = await authService.generateTokensWithCookie(user.id, user.email);
 
@@ -208,7 +207,7 @@ describe('AuthService', () => {
     });
 
     describe('sign-up', () => {
-        let confirmMail: EmailConfirmEntity;
+        let confirmMail: EmailConfirm;
 
         beforeEach(() => {
             confirmMail = getConfirmEmailStub();
@@ -217,8 +216,8 @@ describe('AuthService', () => {
         it('should correct sign-up', async () => {
             userService.createUser.mockResolvedValue(user);
             userService.findUser.mockResolvedValue(user);
-            emailConfirmsRepository.create.mockResolvedValue(0);
-            emailConfirmsRepository.findOne.mockResolvedValue(confirmMail);
+            emailConfirmsRepository.Dao.create.mockResolvedValue(confirmMail);
+            emailConfirmsRepository.Dao.findFirst.mockResolvedValue(confirmMail);
 
             const createdResult = await authService.signUp({
                 email: 'test@example.com',
@@ -229,7 +228,7 @@ describe('AuthService', () => {
         });
 
         it('should return error if user already exist', async () => {
-            userService.createUser.mockResolvedValue(new BasicError('userAlreadyExist'));
+            userService.createUser.mockResolvedValue(new BaseError('userAlreadyExist'));
 
             const createdResult = await authService.signUp({
                 email: 'test@example.com',
@@ -258,10 +257,16 @@ describe('AuthService', () => {
 
     describe('sign-in', () => {
         it('should success sign-in with correct login and password', async () => {
+            const refreshToken = {
+                id: 0,
+                hash: 'e1eae9e373ba62a80cdbd4422fc002553447aeb38fdb8dbf511a52d3e8c5e417',
+                userId: 0,
+                user,
+            };
             userService.findVerifiedUser.mockResolvedValue({ ...user, emailConfirmed: true });
             jwtService.sign.mockReturnValueOnce('refreshToken').mockReturnValueOnce('accessToken');
-            usersRepository.findOneRelations.mockResolvedValue(user);
-            refreshTokensRepository.create.mockResolvedValue(user.id);
+            userService.findUser.mockResolvedValueOnce(user);
+            refreshTokensRepository.Dao.create.mockResolvedValue(refreshToken);
 
             const signInResult = await authService.signIn({
                 email: user.email,
@@ -279,7 +284,7 @@ describe('AuthService', () => {
 
         it('should return error with incorrect login or password', async () => {
             userService.findVerifiedUser.mockResolvedValue(
-                new BasicError('emailOrPasswordIncorrect'),
+                new BaseError('emailOrPasswordIncorrect'),
             );
 
             const signInResult = await authService.signIn({
@@ -313,19 +318,25 @@ describe('AuthService', () => {
     });
 
     describe('confirm email', () => {
-        let confirmMail: EmailConfirmEntity;
+        let confirmMail: EmailConfirm;
 
         beforeEach(() => {
             confirmMail = getConfirmEmailStub();
         });
 
         it('should confirm email', async () => {
-            emailConfirmsRepository.findOne.mockResolvedValue(confirmMail);
+            const refreshToken = {
+                id: 0,
+                hash: 'e1eae9e373ba62a80cdbd4422fc002553447aeb38fdb8dbf511a52d3e8c5e417',
+                userId: 0,
+                user,
+            };
+            emailConfirmsRepository.Dao.findFirst.mockResolvedValue(confirmMail);
             userService.findUser.mockResolvedValue(user);
-            userService.confirmEmail.mockResolvedValue(true);
+            userService.confirmEmail.mockResolvedValue(undefined);
             jwtService.sign.mockReturnValueOnce('refreshToken').mockReturnValueOnce('accessToken');
-            usersRepository.findOneRelations.mockResolvedValue(user);
-            refreshTokensRepository.create.mockResolvedValue(user.id);
+            userService.findUser.mockResolvedValueOnce(user);
+            refreshTokensRepository.Dao.create.mockResolvedValue(refreshToken);
 
             const confirmResult = await authService.confirmEmail('1');
 
@@ -339,7 +350,7 @@ describe('AuthService', () => {
         });
 
         it('should return error if email already confirmed', async () => {
-            emailConfirmsRepository.findOne.mockResolvedValue(confirmMail);
+            emailConfirmsRepository.Dao.findFirst.mockResolvedValue(confirmMail);
             userService.findUser.mockResolvedValue({ ...user, emailConfirmed: true });
 
             const confirmResult = await authService.confirmEmail('1');
@@ -353,16 +364,12 @@ describe('AuthService', () => {
         });
 
         it('should return error if confirmation not found', async () => {
-            emailConfirmsRepository.findOne.mockResolvedValue(new CannotFindEmailConfirm());
+            emailConfirmsRepository.Dao.findFirst.mockResolvedValue(null);
 
             const confirmResult = await authService.confirmEmail('1');
 
             expect(isError(confirmResult)).toBeTruthy();
-            expect(confirmResult).toEqual(
-                expect.objectContaining({
-                    error: 'confirmationNotFound',
-                }),
-            );
+            expect(confirmResult).toBeInstanceOf(CannotFindEmailConfirm);
         });
     });
 });

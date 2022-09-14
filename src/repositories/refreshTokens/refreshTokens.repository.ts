@@ -1,30 +1,15 @@
-import {
-    CannotFindRefreshToken,
-    CannotUpdateRefreshToken,
-    CannotRemoveRefreshToken,
-} from './refreshTokens.model';
-import { RefreshTokenEntity } from './refreshTokens.entity';
 import { Injectable, Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { BaseRepository } from '../../core/repository.core';
+import { RequestContext } from '@medibloc/nestjs-request-context';
+import { TransactionsContext } from '../../utils/transactions.utils';
+
 @Injectable()
-export class RefreshTokensRepositoryProvider extends BaseRepository<
-    RefreshTokenEntity,
-    CannotFindRefreshToken,
-    CannotUpdateRefreshToken,
-    CannotRemoveRefreshToken
-> {
-    constructor() {
-        super(RefreshTokenEntity, {
-            findError: CannotFindRefreshToken,
-            updateError: CannotUpdateRefreshToken,
-            removeError: CannotRemoveRefreshToken,
-        });
+export class RefreshTokensRepositoryProvider {
+    public get Dao() {
+        return RequestContext.get<TransactionsContext>().transactions.Prisma.refreshToken;
     }
 }
 
 @Module({
-    imports: [TypeOrmModule.forFeature([RefreshTokenEntity])],
     providers: [RefreshTokensRepositoryProvider],
     exports: [RefreshTokensRepositoryProvider],
 })

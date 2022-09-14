@@ -1,10 +1,10 @@
 module.exports = {
     parser: '@typescript-eslint/parser',
+    plugins: ['@typescript-eslint/eslint-plugin', 'deprecation'],
     parserOptions: {
-        project: './tsconfig.json',
+        project: './tsconfig.eslint.json',
         sourceType: 'module',
     },
-    plugins: ['@typescript-eslint/eslint-plugin', 'deprecation', 'nestjs-kit'],
     extends: [
         'plugin:@typescript-eslint/recommended',
         'prettier/@typescript-eslint',
@@ -16,7 +16,6 @@ module.exports = {
         jest: true,
     },
     rules: {
-        'nestjs-kit/provide-endpoint-return-type': 'error',
         'max-len': [
             'error',
             110,
@@ -28,7 +27,6 @@ module.exports = {
         '@typescript-eslint/interface-name-prefix': 'off',
         '@typescript-eslint/explicit-function-return-type': 'off',
         '@typescript-eslint/explicit-module-boundary-types': 'off',
-        '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/array-type': [
             'error',
             {

@@ -1,30 +1,35 @@
+import * as cookieParser from 'cookie-parser';
 import * as request from 'supertest';
-import { HttpInterceptor } from '../../../core/interceptor.core';
-import { ErrorsServiceProvider } from '../../../services/errors/errors.service';
-import { Test } from '@nestjs/testing';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import { UsersRepositoryProvider } from '../../../repositories/users/users.repository';
-import { getUserStub } from '../../../__mocks__/user.stub';
-import { UserControllerProvider } from '../user.controller';
-import { ErrorsRepositoryProvider } from '../../../repositories/errors/errors.repository';
-import { UserServiceProvider } from '../../../services/user/user.service';
-import { JwtModule, JwtService } from '@nestjs/jwt';
-import { ConfigServiceProvider } from '../../../services/config/config.service';
-import { JwtStrategy } from '../../../services/auth/strategies/jwt.strategy';
-import { ConfigServiceFake } from '../../../__mocks__/ConfigServiceFake';
 import { RequestContextModule } from '@medibloc/nestjs-request-context';
+import { JwtModule, JwtService } from '@nestjs/jwt';
+import { Test } from '@nestjs/testing';
+import { HttpInterceptor } from '../../../core/interceptor.core';
+import { JwtStrategy } from '../../../services/auth/strategies/jwt.strategy';
+import { ConfigServiceProvider } from '../../../services/config/config.service';
+import { UserServiceProvider } from '../../../services/user/user.service';
+import { ConfigServiceFake } from '../../../__mocks__/ConfigServiceFake';
 import { TransactionsContextFake } from '../../../__mocks__/TransactionsContextFake';
-import * as R from 'ramda';
-import { UserEntity } from '../../../repositories/users/user.entity';
-import { CannotFindUser } from '../../../repositories/users/user.model';
 import { AppWrap, checkSecureEndpoint } from '../../../utils/tests.utils';
+import { JwtRefreshTokenStrategy } from '../../../services/auth/strategies/jwt-refresh.strategy';
+import { getUserStub } from '../../../__mocks__/user.stub';
+import { DatabaseServiceProvider } from '../../../services/database/database.service';
+import { ModuleRef } from '@nestjs/core';
+import { UserControllerProvider } from '../user.controller';
+import { EmailConfirm, RefreshToken, User } from '@prisma/client';
+import {
+    DeepMockedDatabaseServiceProvider,
+    getMockedDatabase,
+} from '../../../__mocks__/DatabaseServiceProviderFake';
 
 describe('UserController', () => {
     const appWrap = {} as AppWrap;
-    let usersRepository: DeepMocked<UsersRepositoryProvider>;
+    let db: DeepMockedDatabaseServiceProvider;
+    let userService: DeepMocked<UserServiceProvider>;
     let jwtService: JwtService;
 
     beforeAll(async () => {
+        const dbMock = getMockedDatabase();
         const configService = new ConfigServiceFake();
         const module = await Test.createTestingModule({
             imports: [
@@ -38,34 +43,50 @@ describe('UserController', () => {
                 }),
             ],
             providers: [
-                UserServiceProvider,
-                ErrorsServiceProvider,
-                JwtStrategy,
                 {
                     provide: ConfigServiceProvider,
                     useClass: ConfigServiceFake,
                 },
                 {
-                    provide: UsersRepositoryProvider,
-                    useValue: createMock<UsersRepositoryProvider>(),
+                    provide: DatabaseServiceProvider,
+                    useValue: dbMock,
                 },
                 {
-                    provide: ErrorsRepositoryProvider,
-                    useValue: createMock<ErrorsRepositoryProvider>(),
+                    provide: UserServiceProvider,
+                    useValue: createMock<UserServiceProvider>(),
                 },
+                JwtStrategy,
+                JwtRefreshTokenStrategy,
             ],
             controllers: [UserControllerProvider],
         }).compile();
-
-        usersRepository = module.get(UsersRepositoryProvider);
+        db = module.get(DatabaseServiceProvider);
+        userService = module.get(UserServiceProvider);
         jwtService = module.get(JwtService);
+
         appWrap.app = module.createNestApplication();
-        appWrap.app.useGlobalInterceptors(new HttpInterceptor());
+        appWrap.app.useGlobalInterceptors(
+            new HttpInterceptor(
+                createMock<ModuleRef>(),
+                db as unknown as DatabaseServiceProvider,
+            ),
+        );
+        appWrap.app.use(cookieParser());
         await appWrap.app.init();
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        db.Prisma.$transaction.mockImplementation((cb: (arg: any) => any) => cb({}));
+    });
+
+    afterAll(async () => {
+        await appWrap.app.close();
     });
 
     describe('GET /api/user/me', () => {
-        let user: UserEntity;
+        let user: User & {
+            refreshToken: RefreshToken | null;
+            emailConfirm: EmailConfirm | null;
+        };
 
         beforeEach(() => {
             user = getUserStub();
@@ -76,62 +97,36 @@ describe('UserController', () => {
             methodName: 'me',
             controller: UserControllerProvider,
             appWrap,
+            db: {
+                get get() {
+                    return db;
+                },
+            },
+            jwtService: {
+                get get() {
+                    return jwtService;
+                },
+            },
         });
 
-        it('should return 401 error if user not found in DB, but token is valid', async () => {
-            const token = jwtService.sign({ email: user.email });
-            usersRepository.getNativeRepository().findOne.mockResolvedValue(undefined);
-
-            const response = await request(appWrap.app.getHttpServer())
-                .get('/api/user/me')
-                .auth(token, { type: 'bearer' });
-
-            expect(response.statusCode).toEqual(401);
-            expect(response.body).toEqual(expect.objectContaining({ message: 'Unauthorized' }));
-        });
-
-        it('should return cannot find error if user exist but not returned from db', async () => {
-            const token = jwtService.sign({ email: user.email });
-            usersRepository.findOne.mockResolvedValue(new CannotFindUser());
-            usersRepository.getNativeRepository().findOne.mockResolvedValue(user);
-
+        it('should return valid response', async () => {
+            db.Prisma.user.findFirst.mockResolvedValueOnce(user);
+            userService.findUser.mockResolvedValueOnce(user);
+            const token = jwtService.sign({ id: user.id, email: user.email });
             const response = await request(appWrap.app.getHttpServer())
                 .get('/api/user/me')
                 .auth(token, { type: 'bearer' });
 
             expect(response.statusCode).toEqual(200);
-            expect(response.body.error).toEqual(new CannotFindUser().error);
-        });
-
-        it('should return 500 error if throw exception', async () => {
-            const token = jwtService.sign({ email: user.email });
-            usersRepository.getNativeRepository().findOne.mockResolvedValue(user);
-            usersRepository.findOne.mockImplementation(() => {
-                throw new Error('exception');
+            expect(response.body).toEqual({
+                success: true,
+                data: {
+                    email: user.email,
+                    emailConfirmed: user.emailConfirmed,
+                    created: user.created,
+                },
             });
-
-            const response = await request(appWrap.app.getHttpServer())
-                .get('/api/user/me')
-                .auth(token, { type: 'bearer' });
-
-            expect(response.statusCode).toEqual(500);
-            expect(response.text).toEqual('exception');
+            expect(userService.findUser).toBeCalledWith({ id: user.id, email: user.email });
         });
-
-        it('should success return user', async () => {
-            const token = jwtService.sign({ email: user.email });
-            usersRepository.getNativeRepository().findOne.mockResolvedValue(user);
-            usersRepository.findOne.mockResolvedValue(user);
-            const response = await request(appWrap.app.getHttpServer())
-                .get('/api/user/me')
-                .auth(token, { type: 'bearer' });
-
-            expect(response.statusCode).toEqual(200);
-            expect(response.body.body).toEqual(R.omit(['refreshToken', 'hash', 'id'], user));
-        });
-    });
-
-    afterAll(async () => {
-        await appWrap.app.close();
     });
 });

@@ -1,0 +1,33 @@
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+generator client {
+    provider        = "prisma-client-js"
+    previewFeatures = ["interactiveTransactions"]
+}
+
+model User {
+    id             Int           @id @default(autoincrement())
+    email          String
+    hash           String
+    created        DateTime
+    emailConfirmed Boolean
+    refreshToken   RefreshToken? @relation("UserRefreshToken")
+    emailConfirm   EmailConfirm? @relation("UserEmailConfirm")
+}
+
+model RefreshToken {
+    id     Int    @id @default(autoincrement())
+    hash   String
+    user   User   @relation("UserRefreshToken", fields: [userId], references: [id])
+    userId Int    @unique
+}
+
+model EmailConfirm {
+    id          Int    @id @default(autoincrement())
+    confirmUuid String
+    user        User   @relation("UserEmailConfirm", fields: [userId], references: [id])
+    userId      Int    @unique
+}

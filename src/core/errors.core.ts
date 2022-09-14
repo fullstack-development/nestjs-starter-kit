@@ -15,7 +15,7 @@ export class ValidationError {
     }
 }
 
-export class BasicError<E> {
+export class BaseError<E> {
     error: E;
     userErrorOnly?: boolean;
     message?: string;
@@ -40,6 +40,10 @@ export class BasicError<E> {
     }
 }
 
-export function isError<T, E>(value: T | BasicError<E>): value is BasicError<E> {
-    return value instanceof BasicError;
+export function isError<T, E>(value: T | BaseError<E>): value is BaseError<E> {
+    return value instanceof BaseError;
+}
+
+export function isBaseErrorString(be: BaseError<unknown>): be is BaseError<string> {
+    return typeof be.error === 'string';
 }
