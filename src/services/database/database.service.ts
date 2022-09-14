@@ -1,12 +1,12 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { ConfigService, ConfigServiceProvider } from '../config/config.service';
 import { Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import { Logger, LoggerProvider } from '../../core/logger.core';
 
 @Injectable()
 export class DatabaseServiceProvider {
     private readonly prisma: PrismaClient;
+    private readonly logger = new Logger(DatabaseServiceProvider.name);
 
     /**
      * !!! NO DB TRANSACTION INSTANCE !!!
@@ -18,7 +18,6 @@ export class DatabaseServiceProvider {
     constructor(
         // import the config to make sure it is initialized first
         private cfg: ConfigServiceProvider,
-        private logger: LoggerProvider,
     ) {
         this.prisma = new PrismaClient();
         this.prisma

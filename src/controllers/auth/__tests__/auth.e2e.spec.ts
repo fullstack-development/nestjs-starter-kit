@@ -18,7 +18,6 @@ import { JwtRefreshTokenStrategy } from '../../../services/auth/strategies/jwt-r
 import { getUserStub } from '../../../__mocks__/user.stub';
 import { DatabaseServiceProvider } from '../../../services/database/database.service';
 import { ModuleRef } from '@nestjs/core';
-import { LoggerProvider } from '../../../core/logger.core';
 
 describe('AuthController', () => {
     const appWrap = {} as AppWrap;
@@ -79,7 +78,6 @@ describe('AuthController', () => {
             new HttpInterceptor(
                 createMock<ModuleRef>(),
                 db as unknown as DatabaseServiceProvider,
-                createMock<LoggerProvider>(),
             ),
         );
         appWrap.app.use(cookieParser());

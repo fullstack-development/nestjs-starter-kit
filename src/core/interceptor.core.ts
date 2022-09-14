@@ -5,6 +5,7 @@ import {
     ExecutionContext,
     HttpStatus,
     Injectable,
+    Logger,
     NestInterceptor,
     OnModuleInit,
 } from '@nestjs/common';
@@ -20,16 +21,15 @@ import {
     ErrorHandleMiddlewareProvider,
 } from './errorHandleMiddleware.core';
 import { ModuleRef } from '@nestjs/core';
-import { LoggerProvider } from './logger.core';
 
 @Injectable()
 export class HttpInterceptor implements NestInterceptor, OnModuleInit {
     private errorHandleMiddleware: ErrorHandleMiddlewareProvider | null = null;
+    private logger = new Logger(HttpInterceptor.name);
 
     constructor(
         private moduleRef: ModuleRef,
         private db: DatabaseServiceProvider,
-        private logger: LoggerProvider,
     ) {}
 
     async onModuleInit() {

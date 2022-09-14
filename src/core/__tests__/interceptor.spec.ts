@@ -2,7 +2,6 @@ import { BaseError } from '../errors.core';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { DatabaseServiceProvider } from '../../services/database/database.service';
 import { HttpInterceptor } from '../interceptor.core';
-import { Logger, LoggerProvider } from '../logger.core';
 import { ModuleRef } from '@nestjs/core';
 import { Controller, Get } from '@nestjs/common';
 import { ErrorHandleMiddlewareProvider } from '../errorHandleMiddleware.core';
@@ -28,7 +27,6 @@ describe('Interceptor', () => {
     const appWrap = {} as AppWrap;
 
     let interceptor: HttpInterceptor;
-    let logger: DeepMocked<LoggerProvider>;
     let moduleRef: DeepMocked<ModuleRef>;
     let db: {
         Prisma: DeepMocked<DatabaseServiceProvider['Prisma']>;
@@ -52,10 +50,6 @@ describe('Interceptor', () => {
                         },
                     },
                 },
-                {
-                    provide: LoggerProvider,
-                    useValue: createMock<Logger>(),
-                },
             ],
             controllers: [TestController],
         }).compile();
@@ -63,12 +57,10 @@ describe('Interceptor', () => {
         moduleRef = createMock<ModuleRef>();
 
         db = module.get(DatabaseServiceProvider);
-        logger = module.get(LoggerProvider);
 
         interceptor = new HttpInterceptor(
             moduleRef,
             db as unknown as DatabaseServiceProvider,
-            logger,
         );
         appWrap.app = module.createNestApplication();
         appWrap.app.useGlobalInterceptors(interceptor);
@@ -80,7 +72,6 @@ describe('Interceptor', () => {
 
     afterEach(() => {
         moduleRef.resolve.mockClear();
-        logger.log.mockClear();
         testResponse.response.mockClear();
     });
 
@@ -203,29 +194,14 @@ describe('Interceptor', () => {
     describe('onModuleInit and errorHandleMiddleware', () => {
         const errorHandleMiddleware = createMock<ErrorHandleMiddlewareProvider>();
 
-        it('should log a message if error handler not provided', async () => {
-            moduleRef.resolve.mockResolvedValueOnce(null);
-
-            await interceptor.onModuleInit();
-
-            expect(moduleRef.resolve).toBeCalledTimes(1);
-            expect(logger.log).toBeCalledTimes(1);
-            expect(logger.log).toBeCalledWith('No error handler where provided');
-        });
-
-        it('no logs on successful resolve ErrorHandleMiddlewareProvider', async () => {
-            moduleRef.resolve.mockResolvedValueOnce(errorHandleMiddleware);
-
-            await interceptor.onModuleInit();
-
-            expect(moduleRef.resolve).toBeCalledTimes(1);
-            expect(logger.log).toBeCalledTimes(0);
-        });
 
         it('errorHandleMiddleware should be called', async () => {
+            moduleRef.resolve.mockResolvedValueOnce(errorHandleMiddleware);
             testResponse.response.mockImplementationOnce(() => {
                 throw 'Test error';
             });
+
+            await interceptor.onModuleInit();
             await request(appWrap.app.getHttpServer()).get('/test/request').send();
 
             expect(errorHandleMiddleware.handleError).toBeCalledTimes(1);
