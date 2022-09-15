@@ -64,6 +64,13 @@ export class AuthServiceProvider {
         return this.generateTokensWithCookie(userResult.id, userResult.email);
     }
 
+    async signOut(email: string) {
+        const user = await this.userService.findUser({ email });
+        if (!isError(user)) {
+            await this.refreshTokens.Dao.delete({ where: { userId: user.id } });
+        }
+    }
+
     async confirmEmail(confirmUuid: string) {
         const confirmEntityResult = await this.emailConfirms.Dao.findFirst({
             where: { confirmUuid },
@@ -115,7 +122,7 @@ export class AuthServiceProvider {
 
     async generateTokens(id: number, email: string) {
         const refreshToken = this.jwtService.sign(
-            { email },
+            { email, date: Date.now() },
             {
                 expiresIn: this.configService.JWT_REFRESH_TOKEN_EXPIRATION_TIME,
                 secret: this.configService.JWT_REFRESH_TOKEN_SECRET,
@@ -146,7 +153,7 @@ export class AuthServiceProvider {
         }
 
         return {
-            accessToken: this.jwtService.sign({ email }),
+            accessToken: this.jwtService.sign({ email, date: Date.now() }),
             refreshToken,
         };
     }
@@ -160,8 +167,9 @@ export class AuthServiceProvider {
 
         return {
             accessToken: tokens.accessToken,
-            // eslint-disable-next-line max-len
-            refreshCookie: `Refresh=${tokens.refreshToken}; HttpOnly; Path=/; Max-Age=${this.configService.JWT_REFRESH_TOKEN_EXPIRATION_TIME}`,
+            refreshCookie:
+                `Refresh=${tokens.refreshToken}; HttpOnly; ` +
+                `Path=/; Max-Age=${this.configService.JWT_REFRESH_TOKEN_EXPIRATION_TIME}`,
         };
     }
 }

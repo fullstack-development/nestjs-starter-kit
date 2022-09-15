@@ -372,4 +372,29 @@ describe('AuthService', () => {
             expect(confirmResult).toBeInstanceOf(CannotFindEmailConfirm);
         });
     });
+
+    describe('signOut', () => {
+        it('should delete refresh token from database on signOut', async () => {
+            userService.findUser.mockResolvedValueOnce(user);
+
+            await authService.signOut(user.email);
+
+            expect(userService.findUser).toBeCalledTimes(1);
+            expect(userService.findUser).toBeCalledWith({ email: user.email });
+            expect(refreshTokensRepository.Dao.delete).toBeCalledTimes(1);
+            expect(refreshTokensRepository.Dao.delete).toBeCalledWith({
+                where: { userId: user.id },
+            });
+        });
+
+        it('should not call delete on error when findUser function is called', async () => {
+            userService.findUser.mockResolvedValueOnce(new CannotFindUser());
+
+            await authService.signOut(user.email);
+
+            expect(userService.findUser).toBeCalledTimes(1);
+            expect(userService.findUser).toBeCalledWith({ email: user.email });
+            expect(refreshTokensRepository.Dao.delete).toBeCalledTimes(0);
+        });
+    });
 });
