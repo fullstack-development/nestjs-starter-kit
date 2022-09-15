@@ -22,9 +22,10 @@ import {
     UserPayload,
 } from './auth.model';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { CannotFindEmailConfirm } from '../../repositories/repositoryErrors.model';
+import { CannotFindEmailConfirm, CannotFindUser } from '../../repositories/repositoryErrors.model';
 import { User } from '@prisma/client';
 import { DatabaseService } from '../database/database.service';
+import { EmailOrPasswordIncorrect, UserAlreadyExist } from '../user/user.model';
 
 @Injectable()
 export class AuthServiceProvider {
@@ -40,7 +41,7 @@ export class AuthServiceProvider {
     async signUp(payload: UserPayload) {
         const user = await this.userService.createUser(payload);
         if (isError(user)) {
-            return user;
+            return user as UserAlreadyExist;
         }
 
         const sendEmailResult = await this.sendConfirmEmail({ id: user.id });
@@ -54,7 +55,7 @@ export class AuthServiceProvider {
     async signIn(payload: UserPayload) {
         const userResult = await this.userService.findVerifiedUser(payload);
         if (isError(userResult)) {
-            return userResult;
+            return userResult as EmailOrPasswordIncorrect;
         }
 
         if (!userResult.emailConfirmed) {
@@ -62,6 +63,13 @@ export class AuthServiceProvider {
         }
 
         return this.generateTokensWithCookie(userResult.id, userResult.email);
+    }
+
+    async signOut(email: string) {
+        const user = await this.userService.findUser({ email });
+        if (!isError(user)) {
+            await this.refreshTokens.Dao.delete({ where: { userId: user.id } });
+        }
     }
 
     async confirmEmail(confirmUuid: string) {
@@ -74,7 +82,7 @@ export class AuthServiceProvider {
 
         const userResult = await this.userService.findUser({ id: confirmEntityResult.userId });
         if (isError(userResult)) {
-            return userResult;
+            return userResult as CannotFindUser;
         }
 
         if (userResult.emailConfirmed) {
@@ -83,7 +91,7 @@ export class AuthServiceProvider {
 
         const confirmedResult = await this.userService.confirmEmail({ id: userResult.id });
         if (isError(confirmedResult)) {
-            return confirmedResult;
+            return confirmedResult as CannotFindUser;
         }
 
         return this.generateTokensWithCookie(userResult.id, userResult.email);
@@ -92,7 +100,7 @@ export class AuthServiceProvider {
     async sendConfirmEmail(where: Pick<User, 'id'>) {
         const userResult = await this.userService.findUser(where);
         if (isError(userResult)) {
-            return userResult;
+            return userResult as CannotFindUser;
         }
 
         if (userResult.emailConfirmed) {
@@ -115,7 +123,7 @@ export class AuthServiceProvider {
 
     async generateTokens(id: number, email: string) {
         const refreshToken = this.jwtService.sign(
-            { email },
+            { email, date: Date.now() },
             {
                 expiresIn: this.configService.JWT_REFRESH_TOKEN_EXPIRATION_TIME,
                 secret: this.configService.JWT_REFRESH_TOKEN_SECRET,
@@ -126,7 +134,7 @@ export class AuthServiceProvider {
 
         const user = await this.userService.findUser({ id });
         if (isError(user)) {
-            return user;
+            return user as CannotFindUser;
         }
 
         if (user.refreshToken) {
@@ -146,7 +154,7 @@ export class AuthServiceProvider {
         }
 
         return {
-            accessToken: this.jwtService.sign({ email }),
+            accessToken: this.jwtService.sign({ email, date: Date.now() }),
             refreshToken,
         };
     }
@@ -155,13 +163,14 @@ export class AuthServiceProvider {
         const tokens = await this.generateTokens(id, email);
 
         if (isError(tokens)) {
-            return tokens;
+            return tokens as CannotFindUser;
         }
 
         return {
             accessToken: tokens.accessToken,
-            // eslint-disable-next-line max-len
-            refreshCookie: `Refresh=${tokens.refreshToken}; HttpOnly; Path=/; Max-Age=${this.configService.JWT_REFRESH_TOKEN_EXPIRATION_TIME}`,
+            refreshCookie:
+                `Refresh=${tokens.refreshToken}; HttpOnly; ` +
+                `Path=/; Max-Age=${this.configService.JWT_REFRESH_TOKEN_EXPIRATION_TIME}`,
         };
     }
 }

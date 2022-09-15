@@ -31,7 +31,6 @@ export class JwtRefreshTokenStrategy extends PassportStrategy(Strategy, 'jwt-ref
         });
 
         const refreshToken = user?.refreshToken?.hash;
-
         const token: string | undefined = request.cookies?.Refresh;
 
         if (user && refreshToken && token && sha256(token) === refreshToken) {
