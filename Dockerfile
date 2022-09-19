@@ -2,10 +2,6 @@ FROM node:14-alpine as deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 COPY yarn.lock package.json ./
-COPY eslint-plugin/yarn.lock ./eslint-plugin/
-COPY eslint-plugin/package.json ./eslint-plugin/
-RUN ls
-RUN cd eslint-plugin && yarn install --frozen-lockfile --silent && cd ../
 RUN yarn install --frozen-lockfile --silent
 
 FROM node:14-alpine as builder
