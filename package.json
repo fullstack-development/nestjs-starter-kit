@@ -1,0 +1,16 @@
+{
+    "name": "node-starter-kit",
+    "version": "2.0.0",
+    "description": "",
+    "author": "",
+    "private": true,
+    "license": "UNLICENSED",
+    "scripts": {
+        "prepare": "husky install"
+    },
+    "devDependencies": {
+        "@commitlint/cli": "^17.1.2",
+        "@commitlint/config-conventional": "^17.1.0",
+        "husky": "^8.0.1"
+    }
+}
