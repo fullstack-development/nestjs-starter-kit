@@ -3,7 +3,6 @@
 .git
 Dockerfile
 node_modules
-eslint-plugin/node_modules
 dist
 env
 coverage

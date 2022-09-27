@@ -1,7 +1,22 @@
-FROM node:16.17-alpine3.15
+FROM node:14-alpine as deps
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+COPY yarn.lock package.json ./
+RUN yarn install --frozen-lockfile --silent
 
-COPY . /stk
-WORKDIR /stk
+FROM node:14-alpine as builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+RUN yarn build
+
+FROM node:14-alpine as runner
+WORKDIR /app
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nestjs -u 1001
+
+COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
+COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
 
 ENV DB_ADDRESS=$DB_ADDRESS
 ENV DB_USER=$DB_USER
@@ -14,9 +29,8 @@ ENV PORT_API=$PORT_API
 ENV JWT_REFRESH_TOKEN_SECRET=$JWT_REFRESH_TOKEN_SECRET 
 ENV JWT_REFRESH_TOKEN_EXPIRATION_TIME=$JWT_REFRESH_TOKEN_EXPIRATION_TIME
 
-RUN yarn
-RUN yarn build
+USER nestjs
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "DB_ADDRESS=$DB_ADDRESS DB_USER=$DB_USER DB_PASSWORD=$DB_PASSWORD DB_NAME=$DB_NAME DB_PORT=$DB_PORT JWT_SECRET=$JWT_SECRET JWT_EXPIRES_IN=$JWT_EXPIRES_IN PORT_API=$PORT_API JWT_REFRESH_TOKEN_SECRET=$JWT_REFRESH_TOKEN_SECRET JWT_REFRESH_TOKEN_EXPIRATION_TIME=$JWT_REFRESH_TOKEN_EXPIRATION_TIME yarn start:prod"]
+CMD ["sh", "-c", "DB_ADDRESS=$DB_ADDRESS DB_USER=$DB_USER DB_PASSWORD=$DB_PASSWORD DB_NAME=$DB_NAME DB_PORT=$DB_PORT JWT_SECRET=$JWT_SECRET JWT_EXPIRES_IN=$JWT_EXPIRES_IN PORT_API=$PORT_API JWT_REFRESH_TOKEN_SECRET=$JWT_REFRESH_TOKEN_SECRET JWT_REFRESH_TOKEN_EXPIRATION_TIME=$JWT_REFRESH_TOKEN_EXPIRATION_TIME NODE_ENV=production node dist/main"]

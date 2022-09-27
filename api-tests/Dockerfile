@@ -12,4 +12,4 @@ RUN apk --no-cache add curl
 RUN apk --no-cache add bash
 RUN yarn
 
-CMD [ "bash", "ADDRESS_API=$ADDRESS_API PORT_API=$PORT_API MAX_TRIES=$MAX_TRIES /stk/run.sh" ]
+CMD [ "sh", "-c", "ADDRESS_API=$ADDRESS_API PORT_API=$PORT_API MAX_TRIES=$MAX_TRIES /stk/run.sh" ]
