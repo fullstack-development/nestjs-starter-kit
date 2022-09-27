@@ -12,14 +12,16 @@ describe('Auth Controller', () => {
     });
 });
 
-const signUpSpec = () => spec().post(`http://localhost:${process.env['PORT']}/auth/sign-up`);
+const signUpSpec = () =>
+    spec().post(`http://${process.env['ADDRESS_API']}:${process.env['PORT_API']}/auth/sign-up`);
 const signUp = {
     spec: signUpSpec,
     send: (data: { email: string; password: string }) =>
         signUpSpec().withBody(data).expectStatus(200).toss(),
 };
 
-const signInSpec = () => spec().post(`http://localhost:${process.env['PORT']}/auth/sign-in`);
+const signInSpec = () =>
+    spec().post(`http://${process.env['ADDRESS_API']}:${process.env['PORT_API']}/auth/sign-in`);
 const signIn = {
     spec: signInSpec,
     send: async (data: { email: string; password: string }): Promise<SignInBody> => {
@@ -33,7 +35,9 @@ const signIn = {
 };
 
 const confirmEmailSpec = () =>
-    spec().post(`http://localhost:${process.env['PORT']}/auth/confirm-email`);
+    spec().post(
+        `http://${process.env['ADDRESS_API']}:${process.env['PORT_API']}/auth/confirm-email`,
+    );
 const confirmEmail = {
     spec: confirmEmailSpec,
     send: async (data: { confirmUuid: string }) => {
@@ -45,7 +49,8 @@ const confirmEmail = {
     },
 };
 
-const refreshSpec = () => spec().post(`http://localhost:${process.env['PORT']}/auth/refresh`);
+const refreshSpec = () =>
+    spec().post(`http://${process.env['ADDRESS_API']}:${process.env['PORT_API']}/auth/refresh`);
 const refresh = {
     spec: refreshSpec,
     send: async (refreshToken: string) => {

@@ -7,6 +7,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TransactionsContext } from '../utils/transactions.utils';
 import { HttpInterceptor } from '../core/interceptor.core';
 import { DatabaseService } from '../services/database/database.service';
+import { AppController } from '../controllers/app.controller';
 
 @Module({
     imports: [
@@ -16,6 +17,7 @@ import { DatabaseService } from '../services/database/database.service';
             contextClass: TransactionsContext,
             isGlobal: true,
         }),
+        AppController,
         AuthController,
         UserController,
     ],

@@ -1,0 +1,50 @@
+version: '3.5'
+
+networks:
+  stk_test_network:
+    external: true
+
+services:
+  postgres:
+    container_name: stk_db_container
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234567890
+      POSTGRES_DB: stkdb
+      LC_ALL: C.UTF-8
+    ports:
+      - "5455:5432"
+    networks:
+      - stk_test_network
+  api:
+    container_name: stk_api_container
+    build: ./api
+    environment:
+      PORT_API: 3000
+      DB_PORT: 5432
+      DB_ADDRESS: postgres
+      DB_PASSWORD: 1234567890
+      DB_USER: postgres
+      DB_NAME: stkdb
+      JWT_SECRET: secret
+      JWT_EXPIRES_IN: 1 days
+      JWT_REFRESH_TOKEN_SECRET: secret_refresh
+      JWT_REFRESH_TOKEN_EXPIRATION_TIME: 2 days
+    ports:
+      - "3000:3000"
+    networks:
+      - stk_test_network
+    depends_on:
+      - postgres
+  test:
+    container_name: stk_test_container
+    build: ./api-tests
+    environment:
+      ADDRESS_API: api
+      PORT_API: 3000
+      MAX_TRIES: 15
+    networks:
+      - stk_test_network
+    depends_on:
+      - api
