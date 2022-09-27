@@ -21,7 +21,7 @@
         "prisma:migrate:dev": "npx prisma migrate dev --schema=\"./src/schema.prisma\"",
         "prisma:migrate:deploy": "npx prisma migrate deploy --schema=\"./src/schema.prisma\"",
         "prisma:migrate:reset": "npx prisma migrate reset",
-        "prepare": "husky install"
+        "prepare": "cd .. && husky install"
     },
     "dependencies": {
         "@medibloc/nestjs-request-context": "^1.0.0",
