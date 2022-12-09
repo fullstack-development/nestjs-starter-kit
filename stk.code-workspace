@@ -1,0 +1,14 @@
+{
+  "folders": [
+    {
+      "path": "api"
+    },
+    {
+      "path": "e2e"
+    },
+  ],
+  "settings": {
+    "conventionalCommits.scopes": [],
+    "typescript.tsdk": "e2e/node_modules/typescript/lib"
+  }
+}

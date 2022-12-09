@@ -1,0 +1,46 @@
+version: '3.5'
+
+services:
+  postgres:
+    container_name: stk_db_container
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234567890
+      POSTGRES_DB: stkdb
+      LC_ALL: C.UTF-8
+    ports:
+      - "5455:5432"
+  api:
+    container_name: stk_api_container
+    build:
+      context: ./api
+      dockerfile: Dockerfile_test
+    environment:
+      PORT_API: 3000
+      DB_PORT: 5432
+      DB_ADDRESS: postgres
+      DB_PASSWORD: 1234567890
+      DB_USER: postgres
+      DB_NAME: stkdb
+      JWT_SECRET: secret
+      JWT_EXPIRES_IN: 1 days
+      JWT_REFRESH_TOKEN_SECRET: secret_refresh
+      JWT_REFRESH_TOKEN_EXPIRATION_TIME: 2 days
+      AUTH_CODE_EXPIRES_IN_MINUTES: 10
+      FULL_PRODUCTION_MODE: "false"
+      BLOCKPASS_SECRET_KEY: test_secret
+      BLOCKPASS_CLIENT_ID: test_66a38
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+  test:
+    container_name: stk_test_container
+    build: ./api-tests
+    environment:
+      ADDRESS_API: api
+      PORT_API: 3000
+      MAX_TRIES: 20
+    depends_on:
+      - api

@@ -1,0 +1,2847 @@
+openapi: 3.0.3
+info:
+    title: FantasyPad
+    description: Provided FantasyPad API endpoints.
+    version: 1.0.0
+
+paths:
+    /api/auth/code:
+        post:
+            summary: 'Returns an authorization code (uuid version 4) for signing via wallet.'
+            tags:
+                - api/auth
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/AuthCodeInput'
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/AuthCodeResponse'
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/BadRequest'
+                '500':
+                    description: '**Internal server error**'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/InternalServerError'
+    /api/auth/sign-in:
+        post:
+            summary: 'Returns an access token and refresh token(in cookie).'
+            description: "**Important!** sign message must be look like: I'm owner of wallet with (user wallet). Authorization code: (user code)"
+            tags:
+                - api/auth
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/SignInInput'
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: '#/components/responses/SignIn_200_SuccessResponse'
+                                    - $ref: '#/components/responses/SignIn_200_FailResponse'
+                    headers:
+                        Set-Cookie:
+                            $ref: '#/components/headers/SignIn-Set-Cookie'
+                    description: ''
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/BadRequest'
+                '500':
+                    description: '**Internal server error**'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/InternalServerError'
+    /api/auth/refresh:
+        get:
+            summary: 'Request new access token'
+            tags:
+                - api/auth
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: '#/components/responses/Refresh_200_SuccessResponse'
+                                    - $ref: '#/components/responses/Refresh_200_FailResponse'
+                    headers:
+                        Set-Cookie:
+                            $ref: '#/components/headers/Refresh-Set-Cookie'
+                '500':
+                    description: '**Internal server error**'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/InternalServerError'
+    /api/user/me:
+        get:
+            summary: 'Return current user by accessToken'
+            tags:
+                - api/user
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/MeUser_200'
+                '500':
+                    description: '**Internal server error**'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/InternalServerError'
+    /api/user/whitelists/{wallet}:
+        get:
+            summary: 'Get user whitelists with tree'
+            tags:
+                - api/user
+            parameters:
+                - in: query
+                  name: wallet
+                  schema:
+                      type: string
+                  description: 'User wallet address'
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/WhitelistsWithTree_200_Success'
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/BadRequest'
+                '500':
+                    description: '**Internal server error**'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/InternalServerError'
+    /api/kyc/status:
+        get:
+            summary: Returns KYC status.
+            tags:
+                - api/kyc
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                anyOf:
+                                    - $ref: '#/components/responses/StatusKycSuccess'
+                                    - $ref: '#/components/responses/StatusKyc_200_Fail'
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/BadRequest'
+                '500':
+                    description: '**Internal server error**'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/InternalServerError'
+    /api/igo/register:
+        post:
+            summary: Register user in IGO.
+            tags:
+                - api/igo
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                id:
+                                    type: integer
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                anyOf:
+                                    - $ref: '#/components/responses/RegisterIGOSuccess'
+                                    - $ref: '#/components/responses/RegisterIGOFail'
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/BadRequest'
+                '401':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/Forbidden_401'
+                '500':
+                    description: '**Internal server error**'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/InternalServerError'
+    /api/admin/create-admin:
+        post:
+            summary: 'Create new admin user with wallet and role'
+            description: |
+                **Rule guard**
+                ```
+                ADMIN__CREATE_ADMIN
+                ```
+            tags:
+                - api/admin
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreateAdminInput'
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: '#/components/responses/CreateAdmin_200_SuccessResponse'
+                                    - $ref: '#/components/responses/CreateAdmin_200_FailResponse'
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/BadRequest'
+                '500':
+                    description: '**Internal server error**'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/InternalServerError'
+    /api/admin/me:
+        get:
+            summary: 'Return current admin by accessToken with role and rules'
+            tags:
+                - api/admin
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/MeAdmin_200'
+                '500':
+                    description: '**Internal server error**'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/InternalServerError'
+    /api/admin:
+        get:
+            summary: 'Return all admins'
+            tags:
+                - api/admin
+            description: |
+                **Rule guard**
+                ```
+                ADMIN__GET_ADMIN
+                ```
+            parameters:
+                - in: query
+                  name: rules
+                  schema:
+                      type: array
+                      items:
+                          $ref: '#/components/schemas/Rules'
+                  description: 'Any rules from Rules schema'
+                - $ref: '#/components/parameters/sort_by_page'
+                - $ref: '#/components/parameters/sort_by_pageSize'
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/AllAdmin_200'
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/BadRequest'
+                '403':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/ForbiddenServerError'
+                '500':
+                    description: '**Internal server error**'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/InternalServerError'
+    /api/admin/delete/{id}:
+        delete:
+            summary: 'Delete admin by id'
+            tags:
+                - api/admin
+            description: |
+                **Rule guard**
+                ```
+                ADMIN__DELETE_ADMIN
+                ```
+            parameters:
+                - in: path
+                  name: id
+                  schema:
+                      type: integer
+                  description: 'Numeric id of admin'
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                anyOf:
+                                    - $ref: '#/components/responses/MeAdmin_200'
+                                    - $ref: '#/components/responses/DeleteAdmin_200_Failure'
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/BadRequest'
+                '403':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/ForbiddenServerError'
+                '404':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/NotFound'
+                '500':
+                    description: '**Internal server error**'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/InternalServerError'
+    /api/admin/auth/code:
+        post:
+            summary: 'Returns an authorization code for admin (uuid version 4) for signing via wallet.'
+            tags:
+                - api/admin/auth
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/AuthCodeAdminInput'
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/AuthCodeAdmin_200_Response'
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/BadRequest'
+                '500':
+                    description: '**Internal server error**'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/InternalServerError'
+    /api/admin/auth/sign-in:
+        post:
+            summary: 'Returns an access token and refresh token(in cookie).'
+            description: "**Important!** sign message must be look like: I'm owner of wallet with (admin wallet). Authorization code: (admin auth code)"
+            tags:
+                - api/admin/auth
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/SignInAdminInput'
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: '#/components/responses/SignInAdmin_200_SuccessResponse'
+                                    - $ref: '#/components/responses/SignInAdmin_200_FailResponse'
+                    headers:
+                        Set-Cookie:
+                            $ref: '#/components/headers/SignIn-Set-Cookie'
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/BadRequest'
+                '500':
+                    description: '**Internal server error**'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/InternalServerError'
+    /api/admin/auth/refresh:
+        get:
+            summary: 'Request new access token'
+            tags:
+                - api/admin/auth
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: '#/components/responses/RefreshAdmin_200_SuccessResponse'
+                                    - $ref: '#/components/responses/RefreshAdmin_200_FailResponse'
+                    headers:
+                        Set-Cookie:
+                            $ref: '#/components/headers/Refresh-Set-Cookie'
+                '500':
+                    description: '**Internal server error**'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/InternalServerError'
+    /api/admin/roles/rules:
+        get:
+            summary: 'Get all available rules in admin role system'
+            description: |
+                **Rule guard**
+                ```
+                ADMIN__ROLES__GET_RULE
+                ```
+            tags:
+                - api/admin/roles
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/GetAllRules_200_SuccessResponse'
+    /api/admin/roles:
+        get:
+            summary: 'Get all admin roles'
+            description: |
+                **Rule guard**
+                ```
+                ADMIN__ROLES__GET_ROLE
+                ```
+            parameters:
+                - in: query
+                  schema:
+                      type: integer
+                  description: 'Numeric ID of the role to get'
+                - $ref: '#/components/parameters/sort_by_page'
+                - $ref: '#/components/parameters/sort_by_pageSize'
+            tags:
+                - api/admin/roles
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/GetAllRoles_200_SuccessResponse'
+    /api/admin/roles/{id}: #TODO: remove this endpoint or update controller for this endpoint
+        get:
+            summary: 'Get role by id'
+            description: |
+                **Rule guard**
+                ```
+                ADMIN__ROLES__GET_ROLE
+                ```
+            tags:
+                - api/admin/roles
+            parameters:
+                - in: path
+                  name: id
+                  schema:
+                      type: integer
+                  required: true
+                  description: 'Numeric ID of the role to get'
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/GetRoleById_200_SuccessResponse'
+                '404':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/NotFound'
+    /api/admin/roles/set-role:
+        post:
+            summary: 'Set new role to exiting admin'
+            description: |
+                **Rule guard**
+                ```
+                ADMIN__ROLES__SET_ROLE
+                ```
+            tags:
+                - api/admin/roles
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/SetRoleInput'
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: '#/components/responses/SetRole_200_SuccessResponse'
+                                    - $ref: '#/components/responses/SetRole_200_FailResponse'
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/BadRequest'
+                '500':
+                    description: '**Internal server error**'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/InternalServerError'
+    /api/admin/roles/create-role:
+        post:
+            summary: 'Create new role with rules'
+            description: |
+                **Rule guard**
+                ```
+                ADMIN__ROLES__CREATE_ROLE
+                ```
+            tags:
+                - api/admin/roles
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreateRoleInput'
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: '#/components/responses/CreateRole_200_SuccessResponse'
+                                    - $ref: '#/components/responses/CreateRole_200_FailResponse'
+                                    - $ref: '#/components/responses/CreateRole_200_FailResponse_CannotFindRule'
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/BadRequest'
+                '500':
+                    description: '**Internal server error**'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/InternalServerError'
+    /api/admin/roles/update-rules:
+        post:
+            summary: 'Update exiting role with new rules'
+            description: |
+                **Rule guard**
+                ```
+                ADMIN__ROLES__UPDATE_RULES
+                ```
+            tags:
+                - api/admin/roles
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UpdateRulesInput'
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: '#/components/responses/UpdateRules_200_SuccessResponse'
+                                    - $ref: '#/components/responses/UpdateRules_200_FailResponse'
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/BadRequest'
+                '500':
+                    description: '**Internal server error**'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/InternalServerError'
+    /api/admin/tiers:
+        get:
+            summary: 'Get all available tiers'
+            description: |
+                **Rule guard**
+                ```
+                ADMIN__TIERS__GET_TIER
+                ```
+            tags:
+                - api/admin/tiers
+            parameters:
+                - $ref: '#/components/parameters/sort_by_page'
+                - $ref: '#/components/parameters/sort_by_pageSize'
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/GetAllTiers_200_SuccessResponse'
+    /api/admin/tiers/{id}:
+        get:
+            summary: 'Get tier by id'
+            description: |
+                **Rule guard**
+                ```
+                ADMIN__TIERS__GET_TIER
+                ```
+            parameters:
+                - in: path
+                  name: id
+                  schema:
+                      type: integer
+                  required: true
+                  description: 'Numeric ID of the tier to get'
+            tags:
+                - api/admin/tiers
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: '#/components/responses/GetTierById_200_SuccessResponse'
+                                    - $ref: '#/components/responses/GetTierById_200_FailResponse'
+    /api/admin/tiers/create-tier:
+        post:
+            summary: 'Create tier'
+            description: |
+                **Rule guard**
+                ```
+                ADMIN__TIERS__CREATE_TIER
+                ```
+            tags:
+                - api/admin/tiers
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreateTierInput'
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: '#/components/responses/CreateTier_200_SuccessResponse'
+                                    - $ref: '#/components/responses/CreateTier_200_FailResponse'
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/BadRequest'
+                '500':
+                    description: '**Internal server error**'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/InternalServerError'
+    /api/admin/tiers/archive-tier:
+        post:
+            summary: 'Archive tier'
+            description: |
+                **Rule guard**
+                ```
+                ADMIN__TIERS__ARCHIVE_TIER
+                ```
+            tags:
+                - api/admin/tiers
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ArchiveTierInput'
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: '#/components/responses/ArchiveTier_200_SuccessResponse'
+                                    - $ref: '#/components/responses/ArchiveTier_200_FailResponse'
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/BadRequest'
+                '500':
+                    description: '**Internal server error**'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/InternalServerError'
+    /api/admin/igo:
+        post:
+            summary: 'Create new IGO'
+            description: |
+                **Rule guard**
+                ```
+                ADMIN__IGO__CREATE_IGO
+                ```
+            parameters:
+                - in: query
+                  required: false
+                  name: locale
+                  schema:
+                      type: string
+                      enum: ['en', 'jp']
+                      default: 'en'
+                  description: Locale of created IGO
+                - in: query
+                  name: id
+                  required: false
+                  schema:
+                      type: number
+                  description: If provided - create new locale in existing IGO
+            tags:
+                - api/admin/igo
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreateIGOInput'
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: '#/components/responses/CreateIGO_200_SuccessResponse'
+                                    - $ref: '#/components/responses/CannotFindIGO'
+                                    - $ref: '#/components/responses/LocaleIsAlreadyExist'
+
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/BadRequest'
+                '403':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/ForbiddenServerError'
+                '500':
+                    description: '**Internal server error**'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/InternalServerError'
+        get:
+            summary: Returns IGOs list.
+            description: |
+                **Rule guard**
+                ```
+                ADMIN__IGO__GET_IGO
+                ```
+            tags:
+                - api/admin/igo
+            parameters:
+                - $ref: '#/components/parameters/filter_by_id'
+                - $ref: '#/components/parameters/filter_by_totalRaise'
+                - $ref: '#/components/parameters/sort_by_page'
+                - $ref: '#/components/parameters/sort_by_pageSize'
+                - $ref: '#/components/parameters/filter_by_created_date'
+                - in: query
+                  name: registrationStartDate
+                  schema:
+                      type: string
+                  description: Date string
+                - in: query
+                  name: registrationEndDate
+                  schema:
+                      type: string
+                  description: Date string
+                - in: query
+                  name: tokenSaleStartDate
+                  schema:
+                      type: string
+                  description: Date string
+                - in: query
+                  name: tokenSaleEndDate
+                  schema:
+                      type: string
+                  description: Date string
+                - in: query
+                  name: status
+                  schema:
+                      type: string
+                      enum: ['TO_BE_ANNOUNCED', 'WAITING', 'ACTIVE', 'FINISHED']
+                  description: Date string
+                - in: query
+                  name: sort
+                  schema:
+                      type: array
+                      items:
+                          oneOf:
+                              - type: string
+                                enum:
+                                    [
+                                        'name',
+                                        'id',
+                                        'created',
+                                        'totalRaise',
+                                        'tokenSaleStartDate',
+                                        'tokenSaleEndDate',
+                                        'registrationStartDate',
+                                        'registrationEndDate',
+                                    ]
+                              - type: string
+                                enum: ['asc', 'desc']
+                      minItems: 2
+                      maxItems: 2
+                  description: |
+                      #### Available sorts
+                      ```['name', 'id', 'created', 'totalRaise', 'tokenSaleStartDate', 'tokenSaleEndDate', 'registrationStartDate', 'registrationEndDate']```
+                      #### Available params
+                      ```['asc', 'desc']```
+                  example: ['id', 'desc']
+                - in: query
+                  required: false
+                  name: locale
+                  schema:
+                      type: string
+                      enum: ['en', 'jp']
+                      default: 'en'
+                  description: Locale of search IGO
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/Success_FindAllIGO'
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/BadRequest'
+                '403':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/ForbiddenServerError'
+                '500':
+                    description: '**Internal server error**'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/InternalServerError'
+    /api/admin/igo/{id}:
+        get:
+            summary: 'Get IGO by id'
+            description: |
+                **Rule guard**
+                ```
+                ADMIN__IGO__GET_IGO
+                ```
+            tags:
+                - api/admin/igo
+            parameters:
+                - in: path
+                  name: id
+                  schema:
+                      type: integer
+                  required: true
+                  description: 'Numeric ID of IGO'
+                - in: query
+                  required: false
+                  name: locale
+                  schema:
+                      type: string
+                      enum: ['en', 'jp']
+                      default: 'en'
+                  description: Locale of search IGO
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: '#/components/responses/GetIGOById_200_SuccessResponse'
+                                    - $ref: '#/components/responses/GetIGOById_200_FailResponse'
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/BadRequest'
+                '403':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/ForbiddenServerError'
+                '500':
+                    description: '**Internal server error**'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/InternalServerError'
+        put:
+            summary: 'Update IGO by id'
+            description: |
+                **Rule guard**
+                ```
+                ADMIN__IGO__UPDATE_IGO
+                ```
+                **Important!** after start registration admin can't update this fields:
+                **registrationStartDate**, **registrationEndDate**
+
+                **Important!** after start sales period admin can't update this fields:
+                **totalRaise**, **registrationStartDate**, **registrationEndDate**, **tokenSaleStartDate**, **tokenSaleEndDate**, **totalTokensForSale**, **walletAddress**, **tokenPrice**
+
+                **Important!** after start FCFS period admin can't update this fields:
+                **totalRaise**, **registrationStartDate**, **registrationEndDate**, **tokenSaleStartDate**, **tokenSaleEndDate**, **totalTokensForSale**, **walletAddress**, **tokenPrice**, **fcfsStartDate**, **fcfsEndDate**, **fcfsBaseAllocationPercentage**
+
+            tags:
+                - api/admin/igo
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UpdateIGOInput'
+            parameters:
+                - in: path
+                  name: id
+                  schema:
+                      type: integer
+                  required: true
+                  description: 'Numeric ID of IGO'
+                - in: query
+                  required: false
+                  name: locale
+                  schema:
+                      type: string
+                      enum: ['en', 'jp']
+                      default: 'en'
+                  description: Locale of update IGO
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: '#/components/responses/GetIGOById_200_SuccessResponse'
+                                    - $ref: '#/components/responses/GetIGOById_200_FailResponse'
+                                    - $ref: '#/components/responses/UpdateIGOById_200_Fail_CannotUpdateImportantFields'
+                                    - $ref: '#/components/responses/PayloadNotHaveAllIGODates'
+                                    - $ref: '#/components/responses/CannotFindLocale'
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/BadRequest'
+                '403':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/ForbiddenServerError'
+                '500':
+                    description: '**Internal server error**'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/InternalServerError'
+        delete:
+            summary: 'Delete IGO by id'
+            description: |
+                **Rule guard**
+                ```
+                ADMIN__IGO__DELETE_IGO
+                ```
+                **Important!** admin can delete **ONLY** not started IGO's
+
+            tags:
+                - api/admin/igo
+            parameters:
+                - in: path
+                  name: id
+                  schema:
+                      type: integer
+                  required: true
+                  description: 'Numeric ID of IGO'
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: '#/components/responses/GetIGOById_200_SuccessResponse'
+                                    - $ref: '#/components/responses/GetIGOById_200_FailResponse'
+                                    - $ref: '#/components/responses/DeleteIGO_200_CannotDeleteNotWaitingIGO'
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/BadRequest'
+                '403':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/ForbiddenServerError'
+                '500':
+                    description: '**Internal server error**'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/InternalServerError'
+    api/admin/feedback:
+        get:
+            summary: 'Get feedbacks list'
+            description: |
+                **Rule guard**
+                ```
+                ADMIN__FEEDBACK__GET_FEEDBACK
+                ```
+            tags:
+                - api/admin/feedback
+            parameters:
+                - $ref: '#/components/parameters/sort_by_page'
+                - $ref: '#/components/parameters/sort_by_pageSize'
+                - $ref: '#/components/parameters/filter_by_id'
+                - $ref: '#/components/parameters/filter_by_created_date'
+                - in: query
+                  name: email
+                  schema:
+                      type: string
+                      description: Email string
+                - in: query
+                  name: isRead
+                  schema:
+                      type: boolean
+                  description: Boolean string
+                  example: True | False | true | false
+                - in: query
+                  name: sort
+                  schema:
+                      type: array
+                      items:
+                          oneOf:
+                              - type: string
+                                enum: ['id', 'email', 'isRead', 'created']
+                              - type: string
+                                enum: ['asc', 'desc']
+                      minItems: 2
+                      maxItems: 2
+                  description: |
+                      #### Available sorts
+                      ```['id', 'email', 'isRead', 'created']```
+                      #### Available params
+                      ```['asc', 'desc']```
+                  example: ['id', 'desc']
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/FindAllFeedbacks_200_Success'
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/BadRequest'
+                '403':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/ForbiddenServerError'
+                '500':
+                    description: '**Internal server error**'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/InternalServerError'
+        delete:
+            summary: 'Delete many feedbacks'
+            description: |
+                **Rule guard**
+                ```
+                ADMIN__FEEDBACK__DELETE_FEEDBACK
+                ```
+            tags:
+                - api/admin/feedback
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/DeleteFeedbacks'
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: '#/components/responses/DeleteFeedback_200_Success'
+                                    - $ref: '#/components/responses/DeleteFeedback_200_Fail'
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/BadRequest'
+                '403':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/ForbiddenServerError'
+                '500':
+                    description: '**Internal server error**'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/InternalServerError'
+    api/admin/feedback/{id}:
+        get:
+            summary: 'Get feedback by id'
+            description: |
+                **Rule guard**
+                ```
+                ADMIN__FEEDBACK__GET_FEEDBACK
+                ```
+            tags:
+                - api/admin/feedback
+            parameters:
+                - in: path
+                  name: id
+                  schema:
+                      type: integer
+                  required: true
+                  description: 'Numeric ID of feedback'
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/Feedback_200_Success'
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/BadRequest'
+                '404':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/NotFound'
+                '403':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/ForbiddenServerError'
+                '500':
+                    description: '**Internal server error**'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/InternalServerError'
+        delete:
+            summary: 'Delete feedback by id'
+            description: |
+                **Rule guard**
+                ```
+                ADMIN__FEEDBACK__DELETE_FEEDBACK
+                ```
+            tags:
+                - api/admin/feedback
+            parameters:
+                - in: path
+                  name: id
+                  schema:
+                      type: integer
+                  required: true
+                  description: 'Numeric ID of feedback'
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/Feedback_200_Success'
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/BadRequest'
+                '404':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/NotFound'
+                '403':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/ForbiddenServerError'
+                '500':
+                    description: '**Internal server error**'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/InternalServerError'
+    api/admin/feedback/mark-read:
+        post:
+            summary: 'Set isRead value to feedback'
+            description: |
+                **Rule guard**
+                ```
+                ADMIN__FEEDBACK__MARK_FEEDBACK_READ
+                ```
+            tags:
+                - api/admin/feedback
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/MarkFeedbackReadInput'
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/Feedback_200_Success'
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/BadRequest'
+                '403':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/ForbiddenServerError'
+                '500':
+                    description: '**Internal server error**'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/InternalServerError'
+
+    api/feedback:
+        post:
+            summary: 'Create new feedback'
+            tags:
+                - api/feedback
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreateFeedbackInput'
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/Feedback_200_Success'
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/BadRequest'
+                '500':
+                    description: '**Internal server error**'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/InternalServerError'
+
+    api/admin/whitelists:
+        get:
+            summary: 'Get whitelists with tree'
+            description: |
+                **Rule guard**
+                ```
+                ADMIN__WHITELISTS__GET_WHITELIST
+                ```
+            tags:
+                - api/admin/whitelists
+            parameters:
+                - $ref: '#/components/parameters/filter_by_id'
+                - $ref: '#/components/parameters/filter_by_created_date'
+                - $ref: '#/components/parameters/sort_by_page'
+                - $ref: '#/components/parameters/sort_by_pageSize'
+                - in: query
+                  name: wallets
+                  schema:
+                      type: array
+                      items:
+                          type: string
+                  description: 'Searching addresses which must be contained in whitelist'
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/WhitelistsWithTree_200_Success'
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/BadRequest'
+                '403':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/ForbiddenServerError'
+                '500':
+                    description: '**Internal server error**'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/InternalServerError'
+        post:
+            summary: 'Create merkle tree and return merkle root'
+            description: |
+                **Rule guard**
+                ```
+                ADMIN__WHITELISTS__CREATE_WHITELIST
+                ```
+            tags:
+                - api/admin/whitelists
+            requestBody:
+                required: true
+                content:
+                    multipart/form-data:
+                        schema:
+                            type: object
+                            properties:
+                                bonusRate:
+                                    type: string
+                                    format: int32
+                                    description: 'Min: 1, max: 100'
+                                whitelist:
+                                    type: string
+                                    format: binary
+                                    description: File from FormData object
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/CreateWhitelist_200_Success'
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                anyOf:
+                                    - $ref: '#/components/responses/FileMustBeCsv'
+                                    - $ref: '#/components/responses/AllAddressMustBeValid'
+                                    - $ref: '#/components/responses/FileNotProvided'
+                                    - $ref: '#/components/responses/CannotParseCsv'
+                                    - $ref: '#/components/responses/BadRequest'
+                '403':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/ForbiddenServerError'
+                '500':
+                    description: '**Internal server error**'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/InternalServerError'
+    api/admin/whitelists/{merkleRoot}:
+        get:
+            summary: 'Get whitelist with tree by merkleRoot'
+            description: |
+                **Rule guard**
+                ```
+                ADMIN__WHITELISTS__GET_WHITELIST
+                ```
+            tags:
+                - api/admin/whitelists
+            parameters:
+                - in: path
+                  name: merkleRoot
+                  schema:
+                      type: string
+                  required: true
+                  description: 'Merkle root of tree'
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/WhitelistWithTree_200_Success'
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/BadRequest'
+                '403':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/ForbiddenServerError'
+                '404':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/NotFound'
+                '500':
+                    description: '**Internal server error**'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/InternalServerError'
+        delete:
+            summary: 'Delete whitelist by merkleRoot'
+            description: |
+                **Rule guard**
+                ```
+                ADMIN__WHITELISTS__DELETE_WHITELIST
+                ```
+            tags:
+                - api/admin/whitelists
+            parameters:
+                - in: path
+                  name: merkleRoot
+                  schema:
+                      type: string
+                  required: true
+                  description: 'Root of merkle tree'
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/Whitelist_200_Success'
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/BadRequest'
+                '403':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/ForbiddenServerError'
+                '404':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/NotFound'
+                '500':
+                    description: '**Internal server error**'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/InternalServerError'
+components:
+    schemas:
+        AuthCodeInput:
+            type: object
+            properties:
+                wallet:
+                    type: string
+                    description: Wallet address
+        AuthCodeAdminInput:
+            type: object
+            properties:
+                wallet:
+                    type: string
+                    description: Wallet address
+        SignInInput:
+            type: object
+            properties:
+                wallet:
+                    type: string
+                    description: Wallet address
+                code:
+                    type: string
+                    description: uuid code from /api/auth/code
+                signature:
+                    type: string
+                    description: "hex-like digest of message - I'm owner of wallet with (user wallet). Authorization code: (user code)"
+        SignInAdminInput:
+            type: object
+            properties:
+                wallet:
+                    type: string
+                    description: Wallet address
+                code:
+                    type: string
+                    description: uuid code from /api/admin/auth/code
+                signature:
+                    type: string
+                    description: "hex-like digest of message - I'm owner of wallet with (admin wallet). Authorization code: (admin auth code)"
+        CreateAdminInput:
+            type: object
+            properties:
+                wallet:
+                    type: string
+                    description: wallet address
+                roleId:
+                    type: number
+                    description: admin role id
+        User:
+            type: object
+            properties:
+                id:
+                    type: integer
+                wallet:
+                    type: string
+                created:
+                    type: string
+                    format: date-time
+                tierId:
+                    type: integer
+                kycVerification:
+                    $ref: '#/components/schemas/KycVerification'
+                tier:
+                    $ref: '#/components/schemas/Tier'
+        KycReviewStatus:
+            type: string
+            enum:
+                - incomplete
+                - waiting
+                - approved
+                - inreview
+                - rejected
+                - blocked
+        KycVerification:
+            type: object
+            nullable: true
+            properties:
+                id:
+                    type: integer
+                status:
+                    $ref: '#/components/schemas/KycReviewStatus'
+                userId:
+                    type: integer
+        Admin:
+            type: object
+            properties:
+                id:
+                    type: integer
+                wallet:
+                    type: string
+                created:
+                    type: string
+                    format: date-time
+                roleId:
+                    type: string
+                role:
+                    $ref: '#/components/schemas/Role'
+        Rules:
+            type:
+                - '"ADMIN__ROLES__GET_ROLE", '
+                - '"ADMIN__ROLES__GET_RULE", '
+                - '"ADMIN__ROLES__SET_ROLE", '
+                - '"ADMIN__ROLES__CREATE_ROLE", '
+                - '"ADMIN__ROLES__UPDATE_RULES", '
+                - '"ADMIN__CREATE_ADMIN", '
+                - '"ADMIN__GET_ADMIN", '
+                - '"ADMIN__DELETE_ADMIN", '
+                - '"ADMIN__TIERS__GET_TIER", '
+                - '"ADMIN__TIERS__CREATE_TIER", '
+                - '"ADMIN__TIERS__ARCHIVE_TIER", '
+                - '"ADMIN__IGO__GET_IGO", '
+                - '"ADMIN__IGO__CREATE_IGO", '
+                - '"ADMIN__IGO__UPDATE_IGO", '
+                - '"ADMIN__IGO__DELETE_IGO", '
+                - '"ADMIN__FEEDBACKS__GET_FEEDBACK", '
+                - '"ADMIN__FEEDBACK__MARK_FEEDBACK_READ", '
+                - '"ADMIN__FEEDBACK__DELETE_FEEDBACK", '
+                - '"ADMIN__WHITELISTS__GET_WHITELIST", '
+                - '"ADMIN__WHITELISTS__CREATE_WHITELIST", '
+                - '"ADMIN__WHITELISTS__DELETE_WHITELIST"'
+
+        ParticipationTypes:
+            type:
+                - '"LOTTERY", '
+                - '"GUARANTEED"'
+        TierStatus:
+            type:
+                - '"ACTIVE", '
+                - '"ARCHIVED"'
+        Role:
+            type: object
+            properties:
+                id:
+                    type: integer
+                name:
+                    type: string
+                rules:
+                    type: array
+                    items:
+                        type: string
+                        description: 'Any rules from **Rules** schema'
+        SetRoleInput:
+            type: object
+            properties:
+                adminId:
+                    type: number
+                roleId:
+                    type: number
+        CreateRoleInput:
+            type: object
+            properties:
+                name:
+                    type: string
+                rules:
+                    type: array
+                    items:
+                        type: string
+                        description: 'Any rules from **Rules** schema'
+        CreateTierInput:
+            type: object
+            properties:
+                stake:
+                    type: string
+                participationType:
+                    $ref: '#/components/schemas/ParticipationTypes'
+                allocation:
+                    type: number
+                lotteryWinPercentage:
+                    type: number
+                status:
+                    $ref: '#/components/schemas/TierStatus'
+        ArchiveTierInput:
+            type: object
+            properties:
+                id:
+                    type: number
+        UpdateRulesInput:
+            type: object
+            properties:
+                roleId:
+                    type: number
+                rules:
+                    type: array
+                    items:
+                        type: string
+                        description: 'Any rules from **Rules** schema'
+        CreateIGOInput:
+            type: object
+            properties:
+                name:
+                    type: string
+                developer:
+                    type: string
+                description:
+                    type: string
+                aboutProject:
+                    type: string
+                tokenPrice:
+                    type: number
+                walletAddress:
+                    type: string
+                projectNetwork:
+                    type: string
+                    enum: ['POLYGON', 'BSC', 'ETHEREUM']
+                tokenNetwork:
+                    type: string
+                    enum: ['POLYGON', 'BSC', 'ETHEREUM']
+                preview:
+                    type: string
+                    description: Base64 image string
+                additionalImages:
+                    type: array
+                    items:
+                        type: string
+                        description: Base64 image string
+                totalTokensForSale:
+                    type: number
+                tokenSymbol:
+                    type: string
+                totalRaise:
+                    type: number
+                registrationStartDate:
+                    type: string
+                    description: 'Optional'
+                registrationEndDate:
+                    type: string
+                    description: 'Optional'
+                fcfsStartDate:
+                    type: string
+                    description: 'Optional'
+                fcfsEndDate:
+                    type: string
+                    description: 'Optional'
+                fcfsBaseAllocationPercentage:
+                    type: number
+                    description: 'Optional'
+                tokenSaleStartDate:
+                    type: string
+                    description: 'Optional'
+                tokenSaleEndDate:
+                    type: string
+                    description: 'Optional'
+                distribution:
+                    type: string
+                    description: 'Optional'
+                vesting:
+                    type: string
+                    description: 'Optional'
+                totalSupply:
+                    type: string
+                    description: 'Optional'
+                links:
+                    type: array
+                    items:
+                        type: object
+                        properties:
+                            name:
+                                type: string
+                            url:
+                                type: string
+                                description: 'URI like string'
+                                example: 'https://discord.gg/'
+
+                partners:
+                    type: array
+                    items:
+                        type: object
+                        properties:
+                            title:
+                                type: string
+                            url:
+                                type: string
+                                description: 'URI like string'
+                                example: 'https://discord.gg/'
+                members:
+                    type: array
+                    items:
+                        type: object
+                        properties:
+                            position:
+                                type: string
+                            bio:
+                                type: string
+                            name:
+                                type: string
+                            url:
+                                type: string
+                                description: 'URI like string'
+                                example: 'https://discord.gg/'
+        UpdateIGOInput:
+            type: object
+            properties:
+                name:
+                    type: string
+                tokenSymbol:
+                    type: string
+                developer:
+                    type: string
+                description:
+                    type: string
+                aboutProject:
+                    type: string
+                preview:
+                    type: string
+                    description: Base64 image string
+                additionalImages:
+                    type: array
+                    items:
+                        type: string
+                        description: Base64 image string
+                tokenPrice:
+                    type: number
+                    description: "Can't update after start IGO. Raise error"
+                walletAddress:
+                    type: string
+                    description: "Can't update after start IGO. Raise error"
+                projectNetwork:
+                    type: string
+                    enum: ['POLYGON', 'BSC', 'ETHEREUM']
+                tokenNetwork:
+                    type: string
+                    enum: ['POLYGON', 'BSC', 'ETHEREUM']
+                totalTokensForSale:
+                    type: number
+                    description: "Can't update after start IGO. Raise error"
+                totalRaise:
+                    type: number
+                    description: "Can't update after start IGO. Raise error"
+                registrationStartDate:
+                    type: string
+                    description: "Can't update after start IGO. Raise error"
+                registrationEndDate:
+                    type: string
+                    description: "Can't update after start IGO. Raise error"
+                fcfsStartDate:
+                    type: string
+                    description: "Can't update after start FCFS. Raise error"
+                fcfsEndDate:
+                    type: string
+                    description: "Can't update after start FCFS. Raise error"
+                fcfsBaseAllocationPercentage:
+                    type: number
+                    description: "Can't update after start FCFS. Raise error"
+                tokenSaleStartDate:
+                    type: string
+                    description: "Can't update after start IGO. Raise error"
+                tokenSaleEndDate:
+                    type: string
+                    description: "Can't update after start IGO. Raise error"
+                distribution:
+                    type: string
+                vesting:
+                    type: string
+                totalSupply:
+                    type: string
+                links:
+                    type: array
+                    items:
+                        type: object
+                        properties:
+                            name:
+                                type: string
+                            url:
+                                type: string
+                                description: 'URI like string'
+                                example: 'https://discord.gg/'
+                partners:
+                    type: array
+                    items:
+                        type: object
+                        properties:
+                            title:
+                                type: string
+                            url:
+                                type: string
+                                description: 'URI like string'
+                                example: 'https://discord.gg/'
+                members:
+                    type: array
+                    items:
+                        type: object
+                        properties:
+                            position:
+                                type: string
+                            bio:
+                                type: string
+                            name:
+                                type: string
+                            url:
+                                type: string
+                                description: 'URI like string'
+                                example: 'https://discord.gg/'
+        IGO:
+            type: object
+            properties:
+                id:
+                    type: number
+                tokenSymbol:
+                    type: string
+                tokenPrice:
+                    type: number
+                    description: "Can't update after start SALES period. Raise error"
+                walletAddress:
+                    type: string
+                    description: "Can't update after start SALES period. Raise error"
+                projectNetwork:
+                    type: string
+                    enum: ['POLYGON', 'BSC', 'ETHEREUM']
+                tokenNetwork:
+                    type: string
+                    enum: ['POLYGON', 'BSC', 'ETHEREUM']
+                totalTokensForSale:
+                    type: number
+                    description: "Can't update after start SALES period. Raise error"
+                preview:
+                    $ref: '#/components/schemas/IGOImage'
+                additionalImages:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/IGOImage'
+                totalRaise:
+                    type: number
+                    description: "Can't update after start SALES period. Raise error"
+                registrationStartDate:
+                    type: string
+                    nullable: true
+                    description: "Can't update after start IGO. Raise error"
+                registrationEndDate:
+                    type: string
+                    nullable: true
+                    description: "Can't update after start IGO. Raise error"
+                fcfsStartDate:
+                    type: string
+                    nullable: true
+                    description: "Can't update after start FCFS. Raise error"
+                fcfsEndDate:
+                    type: string
+                    nullable: true
+                    description: "Can't update after start FCFS. Raise error"
+                fcfsBaseAllocationPercentage:
+                    type: number
+                    nullable: true
+                    description: "Can't update after start FCFS. Raise error"
+                tokenSaleStartDate:
+                    type: string
+                    nullable: true
+                    description: "Can't update after start SALES period. Raise error"
+                tokenSaleEndDate:
+                    type: string
+                    nullable: true
+                    description: "Can't update after start SALES period. Raise error"
+                status:
+                    $ref: '#/components/schemas/IGOStatus'
+                en:
+                    nullable: true
+                    $ref: '#/components/schemas/IGOLocale'
+                jp:
+                    nullable: true
+                    $ref: '#/components/schemas/IGOLocale'
+                links:
+                    type: array
+                    items:
+                        type: object
+                        properties:
+                            id:
+                                type: number
+                            igoId:
+                                type: number
+                            name:
+                                type: string
+                            url:
+                                type: string
+                                description: 'URI like string'
+                                example: 'https://discord.gg/'
+                partners:
+                    type: array
+                    items:
+                        type: object
+                        properties:
+                            id:
+                                type: number
+                            igoId:
+                                type: number
+                            title:
+                                type: string
+                            url:
+                                type: string
+                                description: 'URI like string'
+                                example: 'https://discord.gg/'
+        IGOStatus:
+            type:
+                - '"TO_BE_ANNOUNCED", '
+                - '"WAITING", '
+                - '"REGISTRATION_START", '
+                - '"REGISTRATION_END", '
+                - '"SALES_START", '
+                - '"SALES_END", '
+                - '"FCFS_START", '
+                - '"FCFS_END", '
+        IGOLocale:
+            type: object
+            properties:
+                name:
+                    type: string
+                developer:
+                    type: string
+                description:
+                    type: string
+                aboutProject:
+                    type: string
+                totalSupply:
+                    type: string
+                    nullable: true
+                distribution:
+                    type: string
+                    nullable: true
+                vesting:
+                    type: string
+                members:
+                    type: array
+                    items:
+                        type: object
+                        properties:
+                            position:
+                                type: string
+                            bio:
+                                type: string
+                            name:
+                                type: string
+                            url:
+                                type: string
+                                description: 'URI like string'
+                                example: 'https://discord.gg/'
+        IGOImage:
+            type: object
+            properties:
+                key:
+                    type: string
+                    description: Filename with ext
+                url:
+                    type: string
+        Feedback:
+            type: object
+            properties:
+                id:
+                    type: number
+                email:
+                    type: string
+                content:
+                    type: string
+                isRead:
+                    type: boolean
+                created:
+                    type: string
+                    format: date-time
+        CreateFeedbackInput:
+            type: object
+            properties:
+                email:
+                    type: string
+                content:
+                    type: string
+        DeleteFeedbacks:
+            type: object
+            properties:
+                ids:
+                    type: array
+                    items:
+                        type: number
+        MarkFeedbackReadInput:
+            type: object
+            properties:
+                id:
+                    type: number
+                isRead:
+                    type: boolean
+        Tier:
+            type: object
+            properties:
+                id:
+                    type: number
+                stake:
+                    type: string
+                participationType:
+                    $ref: '#/components/schemas/ParticipationTypes'
+                allocation:
+                    type: number
+                lotteryWinPercentage:
+                    type: number
+                status:
+                    $ref: '#/components/schemas/TierStatus'
+        WhitelistWithTree:
+            type: object
+            properties:
+                id:
+                    type: number
+                tree:
+                    type: object
+                    properties:
+                        merkleRoot:
+                            type: string
+                        claims:
+                            type: object
+                            description: 'Object look like Record<string, {index: number; bonus: string; proof: string[];}>'
+                bonusRate:
+                    type: number
+                created:
+                    type: datetime
+        Whitelist:
+            type: object
+            properties:
+                id:
+                    type: number
+                merkleRoot:
+                    type: string
+                bonusRate:
+                    type: number
+                created:
+                    type: datetime
+        IgoRegistration:
+            type: object
+            properties:
+                id:
+                    type: integer
+                igoId:
+                    type: integer
+                userId:
+                    type: integer
+                registeredTierId:
+                    type: integer
+                created:
+                    type: string
+                    format: datetime
+    responses:
+        BadRequest:
+            type: object
+            properties:
+                error:
+                    type: string
+                    enum: ['Bad request']
+                message:
+                    type: array
+                    items:
+                        type: string
+        InternalServerError:
+            type: object
+            properties:
+                error:
+                    type: string
+                errorUniqId:
+                    type: string
+                message:
+                    type: string
+                stack:
+                    type: string
+            required:
+                - error
+                - errorUniqId
+        ForbiddenServerError:
+            description: 'Returns if the admin does not own the role'
+            type: object
+            properties:
+                error:
+                    type: string
+                message:
+                    type: string
+        Forbidden_401:
+            description: 'Returns if accessToken not passed'
+            type: object
+            properties:
+                error:
+                    type: string
+                message:
+                    type: string
+        NotFound:
+            type: object
+            properties:
+                message:
+                    type: string
+                error:
+                    type: 'Not found'
+        AuthCodeResponse:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+                data:
+                    type: string
+        AuthCodeAdmin_200_Response:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+                data:
+                    type: string
+        SignInAdmin_200_SuccessResponse:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+                data:
+                    type: string
+                    description: JWT token
+        SignIn_200_SuccessResponse:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+                data:
+                    type: string
+                    description: JWT token
+        SignIn_200_FailResponse:
+            type: object
+            properties:
+                success:
+                    type: 'false'
+                data:
+                    type: object
+                    properties:
+                        error:
+                            type: string
+                            enum:
+                                [
+                                    'cannotFindAuthCode',
+                                    'authCodeExpired',
+                                    'signatureIsNotValid',
+                                    'cannotFindUser',
+                                ]
+        SignInAdmin_200_FailResponse:
+            type: object
+            properties:
+                success:
+                    type: 'false'
+                data:
+                    type: object
+                    properties:
+                        error:
+                            type: string
+                            enum:
+                                [
+                                    'cannotFindAuthCode',
+                                    'authCodeExpired',
+                                    'signatureIsNotValid',
+                                    'cannotFindAdmin',
+                                ]
+        Refresh_200_SuccessResponse:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+                data:
+                    type: object
+                    properties:
+                        accessToken:
+                            type: string
+                            description: JWT token
+        Refresh_200_FailResponse:
+            type: object
+            properties:
+                success:
+                    type: 'false'
+                data:
+                    type: object
+                    properties:
+                        error:
+                            type: string
+                            enum: ['cannotFindUser']
+        RefreshAdmin_200_SuccessResponse:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+                data:
+                    type: object
+                    properties:
+                        accessToken:
+                            type: string
+                            description: JWT token
+        RefreshAdmin_200_FailResponse:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+                data:
+                    type: object
+                    properties:
+                        error:
+                            type: string
+                            enum: ['cannotFindAdmin']
+        CreateAdmin_200_SuccessResponse:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+                data:
+                    $ref: '#/components/schemas/Admin'
+        CreateAdmin_200_FailResponse:
+            type: object
+            properties:
+                success:
+                    type: 'false'
+                data:
+                    type: object
+                    properties:
+                        error:
+                            type: string
+                            enum: ['walletIsNotValid', 'cannotFindRole', 'adminAlreadyExist']
+        GetAllRules_200_SuccessResponse:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+                data:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Rules'
+        GetAllTiers_200_SuccessResponse:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+                data:
+                    type: object
+                    properties:
+                        page:
+                            type: integer
+                        pageSize:
+                            type: integer
+                        count:
+                            type: integer
+                        result:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/Tier'
+        GetTierById_200_SuccessResponse:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+                data:
+                    $ref: '#/components/schemas/Tier'
+        GetTierById_200_FailResponse:
+            type: object
+            properties:
+                success:
+                    type: 'false'
+                data:
+                    type: object
+                    properties:
+                        error:
+                            type: string
+                            enum: ['cannotFindTier']
+        CreateTier_200_SuccessResponse:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+                data:
+                    $ref: '#/components/schemas/Tier'
+        CreateTier_200_FailResponse:
+            type: object
+            properties:
+                success:
+                    type: 'false'
+                data:
+                    type: object
+                    properties:
+                        error:
+                            type: string
+                            enum: ['tierWithThisStakeAlreadyExists']
+        ArchiveTier_200_SuccessResponse:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+                data:
+                    $ref: '#/components/schemas/Tier'
+        ArchiveTier_200_FailResponse:
+            type: object
+            properties:
+                success:
+                    type: 'false'
+                data:
+                    type: object
+                    properties:
+                        error:
+                            type: string
+                            enum: ['cannotFindTier']
+        GetAllRoles_200_SuccessResponse:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+                data:
+                    type: object
+                    properties:
+                        page:
+                            type: integer
+                        pageSize:
+                            type: integer
+                        count:
+                            type: integer
+                        result:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/Role'
+        GetRoleById_200_SuccessResponse:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+                data:
+                    $ref: '#/components/schemas/Role'
+        SetRole_200_SuccessResponse:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+                data:
+                    $ref: '#/components/schemas/Admin'
+        SetRole_200_FailResponse:
+            type: object
+            properties:
+                success:
+                    type: 'false'
+                data:
+                    type: object
+                    properties:
+                        error:
+                            type: string
+                            enum: ['cannotFindAdmin', 'cannotFindRole']
+        CreateRole_200_SuccessResponse:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+                data:
+                    $ref: '#/components/schemas/Role'
+        CreateRole_200_FailResponse:
+            type: object
+            properties:
+                success:
+                    type: 'false'
+                data:
+                    type: object
+                    properties:
+                        error:
+                            type: string
+                            enum: ['roleAlreadyExists']
+        CreateRole_200_FailResponse_CannotFindRule:
+            type: object
+            properties:
+                success:
+                    type: 'false'
+                data:
+                    type: object
+                    properties:
+                        error:
+                            type: 'cannotFindRule'
+                        payload:
+                            type: object
+                            properties:
+                                rule:
+                                    type: string
+                                    description: 'Rule that where not found'
+        UpdateRules_200_SuccessResponse:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+                data:
+                    $ref: '#/components/schemas/Role'
+        UpdateRules_200_FailResponse:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+                data:
+                    type: object
+                    properties:
+                        error:
+                            type: string
+                            enum: ['cannotFindRole', 'cannotFindRule']
+
+        StatusKycSuccess:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+                data:
+                    type: object
+                    properties:
+                        id:
+                            type: number
+                        status:
+                            type: string
+                            enum:
+                                [
+                                    'incomplete',
+                                    'waiting',
+                                    'approved',
+                                    'inreview',
+                                    'rejected',
+                                    'blocked',
+                                ]
+                        userId:
+                            type: number
+        StatusKyc_200_Fail:
+            type: object
+            properties:
+                success:
+                    type: 'false'
+                data:
+                    type: object
+                    properties:
+                        error:
+                            type: 'cannotFindKyc'
+        Success_FindAllIGO:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+                data:
+                    type: object
+                    properties:
+                        page:
+                            type: number
+                        pageSize:
+                            type: number
+                        count:
+                            type: number
+                        result:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/IGO'
+        RegisterIGOSuccess:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+                data:
+                    $ref: '#/components/schemas/IgoRegistration'
+        RegisterIGOFail:
+            type: object
+            properties:
+                success:
+                    type: 'false'
+                data:
+                    anyOf:
+                        - type: object
+                          properties:
+                              error:
+                                  type: 'cannotFindUser'
+                        - type: object
+                          properties:
+                              error:
+                                  type: 'cannotFindKyc'
+                        - type: object
+                          properties:
+                              error:
+                                  type: 'kycNotFoundInBlockpass'
+                        - type: object
+                          properties:
+                              error:
+                                  type: 'invalidResponseFromBlockpass'
+                        - type: object
+                          properties:
+                              error:
+                                  type: 'insufficientTierStakeValue'
+                        - type: object
+                          properties:
+                              error:
+                                  type: 'cannotFindIGO'
+                        - type: object
+                          properties:
+                              error:
+                                  type: 'invalidStatusForRegister'
+                        - type: object
+                          properties:
+                              error:
+                                  type: 'igoRegistrationAlreadyExists'
+
+        MeAdmin_200:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+                data:
+                    $ref: '#/components/schemas/Admin'
+        DeleteAdmin_200_Failure:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+                data:
+                    type: object
+                    properties:
+                        error:
+                            type: 'adminCannotDeleteSelf'
+        AllAdmin_200:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+                data:
+                    type: object
+                    properties:
+                        page:
+                            type: integer
+                        pageSize:
+                            type: integer
+                        count:
+                            type: integer
+                        result:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/Admin'
+        MeUser_200:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+                data:
+                    $ref: '#/components/schemas/User'
+        FindAllFeedbacks_200_Success:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+                data:
+                    type: object
+                    properties:
+                        page:
+                            type: number
+                        pageSize:
+                            type: number
+                        count:
+                            type: number
+                        result:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/Feedback'
+        Feedback_200_Success:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+                data:
+                    $ref: '#/components/schemas/Feedback'
+        DeleteFeedback_200_Success:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+        DeleteFeedback_200_Fail:
+            type: object
+            properties:
+                success:
+                    type: 'false'
+                data:
+                    type: object
+                    properties:
+                        error:
+                            type: string
+                            enum: ['feedbackNotFound']
+                        payload:
+                            properties:
+                                id:
+                                    type: number
+        GetIGOById_200_SuccessResponse:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+                data:
+                    $ref: '#/components/schemas/IGO'
+        GetIGOById_200_FailResponse:
+            type: object
+            properties:
+                success:
+                    type: 'false'
+                data:
+                    type: object
+                    properties:
+                        error:
+                            type: 'cannotFindIGO'
+
+        CreateIGO_200_SuccessResponse:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+                data:
+                    $ref: '#/components/schemas/IGO'
+
+        CannotFindIGO:
+            type: object
+            properties:
+                success:
+                    type: 'false'
+                data:
+                    type: object
+                    properties:
+                        error:
+                            type: 'cannotFindIGO'
+
+        CannotFindLocale:
+            type: object
+            properties:
+                success:
+                    type: 'false'
+                data:
+                    type: object
+                    properties:
+                        error:
+                            type: 'cannotFindLocale'
+
+        PayloadNotHaveAllIGODates:
+            description: 'Returned if all IGO dates not exist in create payload, but some provided'
+            type: object
+            properties:
+                success:
+                    type: 'false'
+                data:
+                    type: object
+                    properties:
+                        error:
+                            type: 'payloadNotHaveAllIGODates'
+
+        LocaleIsAlreadyExist:
+            type: object
+            properties:
+                success:
+                    type: 'false'
+                data:
+                    type: object
+                    properties:
+                        error:
+                            type: 'localeIsAlreadyExist'
+
+        UpdateIGOById_200_Fail_CannotUpdateImportantFields:
+            type: object
+            properties:
+                success:
+                    type: 'false'
+                data:
+                    type: object
+                    properties:
+                        error:
+                            type: 'cannotUpdateImportantFieldsStartedIGO'
+        DeleteIGO_200_CannotDeleteNotWaitingIGO:
+            type: object
+            properties:
+                success:
+                    type: 'false'
+                data:
+                    type: object
+                    properties:
+                        error:
+                            type: 'cannotDeleteNotWaitingIGO'
+        FileNotProvided:
+            type: object
+            properties:
+                error:
+                    type: 'fileNotProvided'
+        FileMustBeCsv:
+            type: object
+            properties:
+                error:
+                    type: 'fileMustBeCsv'
+        CannotParseCsv:
+            type: object
+            properties:
+                error:
+                    type: 'cannotParseCsv'
+        AllAddressMustBeValid:
+            type: object
+            properties:
+                error:
+                    type: 'allAddressMustBeValid'
+        CreateWhitelist_200_Success:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+                data:
+                    type: string
+        Whitelist_200_Success:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+                data:
+                    $ref: '#/components/schemas/Whitelist'
+        WhitelistWithTree_200_Success:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+                data:
+                    $ref: '#/components/schemas/WhitelistWithTree'
+        WhitelistsWithTree_200_Success:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+                data:
+                    type: object
+                    properties:
+                        page:
+                            type: number
+                        pageSize:
+                            type: number
+                        count:
+                            type: number
+                        result:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/WhitelistWithTree'
+
+    headers:
+        Refresh-Set-Cookie:
+            description: 'Return when success is **true**'
+            schema:
+                type: string
+                example: 'Refresh=*jwt_token*; HttpOnly; Path=/; Max-Age=1 day'
+        SignIn-Set-Cookie:
+            description: 'Return when success is **true**'
+            schema:
+                type: string
+                example: 'Refresh=*jwt_token*; HttpOnly; Path=/; Max-Age=1 day'
+
+    parameters:
+        filter_by_id:
+            in: query
+            name: id
+            schema:
+                type: object
+                properties:
+                    lte:
+                        type: number
+                    gte:
+                        type: number
+                    equals:
+                        type: number
+        filter_by_totalRaise:
+            in: query
+            name: totalRaise
+            schema:
+                type: object
+                properties:
+                    lte:
+                        type: number
+                    gte:
+                        type: number
+                    equals:
+                        type: number
+        filter_by_created_date:
+            in: query
+            name: created
+            schema:
+                type: object
+                properties:
+                    lte:
+                        type: string
+                    gte:
+                        type: string
+                    equals:
+                        type: string
+        sort_by_page:
+            in: query
+            name: page
+            schema:
+                type: number
+                minimum: 1
+                default: 1
+        sort_by_pageSize:
+            in: query
+            name: pageSize
+            schema:
+                type: number
+                minimum: 1
+                default: 50
