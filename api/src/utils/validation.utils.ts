@@ -1,4 +1,3 @@
-import { ethers } from 'ethers';
 import { UsePipes, ValidationPipe } from '@nestjs/common';
 import { plainToClass, Transform, Type } from 'class-transformer';
 import {
@@ -65,41 +64,6 @@ export function UseValidationPipe() {
     return UsePipes(new CustomValidationPipe());
 }
 
-@ValidatorConstraint({ async: true })
-export class IsHexLikeConstraint implements ValidatorConstraintInterface {
-    validate(str: string) {
-        return ethers.utils.isHexString(str);
-    }
-
-    defaultMessage(args: ValidationArguments) {
-        return `${args.property} - must be hex like string!`;
-    }
-}
-
-export function IsHex(validationOptions?: ValidationOptions) {
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    return function (object: object, propertyName: string) {
-        registerDecorator({
-            target: object.constructor,
-            propertyName: propertyName,
-            options: validationOptions,
-            constraints: [],
-            validator: IsHexLikeConstraint,
-        });
-    };
-}
-
-@ValidatorConstraint({ async: true })
-export class IsAddressConstraint implements ValidatorConstraintInterface {
-    validate(str: string) {
-        return ethers.utils.isAddress(str);
-    }
-
-    defaultMessage(args: ValidationArguments) {
-        return `${args.property} - must be valid address!`;
-    }
-}
-
 export const isSort = (accessKeys: Array<string>) => {
     const _class = class implements ValidatorConstraintInterface {
         validate(sort: [string, 'asc' | 'desc']) {
@@ -119,19 +83,6 @@ export const isSort = (accessKeys: Array<string>) => {
 
     return _class;
 };
-
-export function IsAddress(validationOptions?: ValidationOptions) {
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    return function (object: object, propertyName: string) {
-        registerDecorator({
-            target: object.constructor,
-            propertyName: propertyName,
-            options: validationOptions,
-            constraints: [],
-            validator: IsAddressConstraint,
-        });
-    };
-}
 
 @ValidatorConstraint({ async: true })
 export class IsBigIntStringConstraint implements ValidatorConstraintInterface {

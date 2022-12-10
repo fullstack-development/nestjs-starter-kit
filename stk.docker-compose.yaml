@@ -40,8 +40,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      s3server:
-        condition: service_healthy
     healthcheck:
       test: ["CMD", "node", "./local-launch/scripts/healthcheck.js", "http", "get", "host.docker.internal", "3000", "api/echo"]
       interval: 1s

@@ -1,6 +1,6 @@
 import { createParamDecorator, ExecutionContext, HttpStatus } from '@nestjs/common';
 import { IsEmail, IsNumber } from 'class-validator';
-import { IsAddress, validateSync } from '../utils/validation.utils';
+import { validateSync } from '../utils/validation.utils';
 import { BaseError, isError } from './errors.core';
 
 export type HeaderValue = string | number | Array<string>;

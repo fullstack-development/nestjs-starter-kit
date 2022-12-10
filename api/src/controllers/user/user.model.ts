@@ -4,7 +4,6 @@ import {
     CompareNumberQuery,
     CompareDateQuery,
     IsSafeInteger,
-    IsAddress,
 } from '../../utils/validation.utils';
 
 export class QueryParams {
@@ -53,9 +52,4 @@ export class QueryParams {
     })
     @IsSafeInteger()
     pageSize = 50;
-}
-
-export class PathParam {
-    @IsAddress()
-    wallet: string;
 }
