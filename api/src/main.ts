@@ -77,7 +77,7 @@ async function bootstrap() {
 
     enableCorsByEnv(app, configService);
 
-    const ENV = process.env['ENVIRONMENT'];
+    const ENV = configService.ENVIRONMENT;
     if (ENV === ENVIRONMENT.STAGE || ENV === ENVIRONMENT.LOCAL) {
         const swaggerDoc = load('src/swagger.yaml');
         app.use(
