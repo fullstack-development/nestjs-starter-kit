@@ -9,6 +9,6 @@
   ],
   "settings": {
     "conventionalCommits.scopes": [],
-    "typescript.tsdk": "e2e/node_modules/typescript/lib"
+    "typescript.tsdk": "api/node_modules/typescript/lib"
   }
 }
