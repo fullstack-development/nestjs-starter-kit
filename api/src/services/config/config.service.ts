@@ -28,7 +28,7 @@ export class ConfigServiceProvider implements ConfigDto {
         const devEnvPath = path.join(process.cwd(), `env/dev.env`);
         const env: Partial<ConfigDto> = isDev
             ? dotenv.parse(fs.readFileSync(devEnvPath))
-            : process.env;
+            : (process.env as Partial<ConfigDto>);
 
         const envValidation = validateSync(ConfigDto, env);
         if (envValidation.status === 'fail') {

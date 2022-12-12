@@ -43,7 +43,7 @@ export class DatabaseServiceProvider {
 }
 
 @Module({
-    imports: [ConfigService, Logger],
+    imports: [ConfigService],
     providers: [DatabaseServiceProvider],
     exports: [DatabaseServiceProvider],
 })
