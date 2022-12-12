@@ -58,22 +58,22 @@ describe('paginate', () => {
 
         const testCases = [
             {
-                payload: { where: { test: true, page: 1, pageSize: 50 } },
+                payload: { find: { where: { test: true, page: 1, pageSize: 50 } } },
                 options: { page: 1, pageSize: 50 },
                 expectedValue: { where: { test: true }, skip: 0, take: 50 },
             },
             {
-                payload: { where: { test: true } },
+                payload: { find: { where: { test: true } } },
                 options: { page: 1, pageSize: 5 },
                 expectedValue: { where: { test: true }, skip: 0, take: 5 },
             },
             {
-                payload: { where: { test: true, page: 100, pageSize: 5000 } },
+                payload: { find: { where: { test: true, page: 100, pageSize: 5000 } } },
                 options: { page: 2, pageSize: 5 },
                 expectedValue: { where: { test: true }, skip: 5, take: 5 },
             },
             {
-                payload: { where: { test: true }, orderBy: { test: true } },
+                payload: { find: { where: { test: true }, orderBy: { test: true } } },
                 options: { page: 10, pageSize: 50 },
                 expectedValue: {
                     where: { test: true },
@@ -86,8 +86,9 @@ describe('paginate', () => {
 
         for (const testCase of testCases) {
             findMany.mockClear();
-            await paginate(dao, testCase.payload, testCase.options);
+            await paginate(dao, testCase.options, testCase.payload);
             expect(findMany).toBeCalledWith(testCase.expectedValue);
+            expect(count).toBeCalledWith({});
         }
     });
 
@@ -97,11 +98,41 @@ describe('paginate', () => {
         findMany.mockResolvedValueOnce(data);
         const result = await paginate(
             { count, findMany },
-            { where: { test: true, page: 1, pageSize: 50 } },
             { page: 1, pageSize: 50 },
+            { find: { where: { test: true, page: 1, pageSize: 50 } } },
         );
 
         expect(findMany).toBeCalledWith({ where: { test: true }, skip: 0, take: 50 });
+        expect(count).toBeCalledWith({});
+        expect(result).toEqual({ page: 1, pageSize: 50, count: 3, result: data });
+    });
+
+    it('should success return records with count payload', async () => {
+        const data = [{ test: true }, { test: true }, { test: true }];
+        count.mockResolvedValueOnce(3);
+        findMany.mockResolvedValueOnce(data);
+        const result = await paginate(
+            { count, findMany },
+            { page: 1, pageSize: 50 },
+            {
+                find: { where: { test: true, page: 1, pageSize: 50 } },
+                count: { where: { test: true } },
+            },
+        );
+
+        expect(findMany).toBeCalledWith({ where: { test: true }, skip: 0, take: 50 });
+        expect(count).toBeCalledWith({ where: { test: true } });
+        expect(result).toEqual({ page: 1, pageSize: 50, count: 3, result: data });
+    });
+
+    it('should success return records without any payload', async () => {
+        const data = [{ test: true }, { test: true }, { test: true }];
+        count.mockResolvedValueOnce(3);
+        findMany.mockResolvedValueOnce(data);
+        const result = await paginate({ count, findMany }, { page: 1, pageSize: 50 });
+
+        expect(findMany).toBeCalledWith({ skip: 0, take: 50 });
+        expect(count).toBeCalledWith({});
         expect(result).toEqual({ page: 1, pageSize: 50, count: 3, result: data });
     });
 });

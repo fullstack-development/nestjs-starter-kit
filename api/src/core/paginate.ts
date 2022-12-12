@@ -1,5 +1,5 @@
 import { dissocPath, mergeRight, Path } from 'ramda';
-import { Awaited, FirstArgument } from '../utils/typescript.utils';
+import { FirstArgument } from '../utils/typescript.utils';
 
 type PaginateOptions = {
     page: number;
@@ -25,28 +25,29 @@ export const paginate = async <
         findMany: (...args: Array<unknown>) => U;
         count: (...args: Array<unknown>) => Promise<number>;
     },
-    P extends FirstArgument<T['findMany']>,
+    P extends { find?: FirstArgument<T['findMany']>; count?: FirstArgument<T['count']> },
     U = ReturnType<T['findMany']>,
 >(
     dao: T,
-    payload: P,
     { page, pageSize }: PaginateOptions,
+    payload = { count: {}, find: {} } as P,
 ) => {
+    const findPayload = payload.find || {};
+    const countPayload = payload.count || {};
     const payloadWithPaginate = mergeRight(
-        omitPath(['where'], ['page', 'pageSize'], payload as Record<string, unknown>),
+        omitPath(['where'], ['page', 'pageSize'], findPayload as Record<string, unknown>),
         {
             skip: (page - 1) * pageSize,
             take: pageSize,
         },
     );
 
-    const result = (await dao.findMany(payloadWithPaginate)) as Awaited<U>;
-    // //TODO: need upgrade ts version for fix this
+    const result = await dao.findMany(payloadWithPaginate);
 
     return {
         page,
         pageSize,
-        count: await dao.count(),
+        count: await dao.count(countPayload),
         result,
     };
 };
