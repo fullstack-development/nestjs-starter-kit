@@ -5,12 +5,15 @@ import { User } from '../../core/controller.core';
 import { AuthService, AuthServiceProvider } from '../../services/auth/auth.service';
 import { UseValidationPipe } from '../../utils/validation.utils';
 import { ConfirmEmailInput, SignInInput, SignUpInput } from './auth.model';
-import { JwtUserRefreshGuard } from '../../services/auth/guards/jwt-user-refresh.guard'
+import { JwtUserRefreshGuard } from '../../services/auth/guards/jwt-user-refresh.guard';
 import { UserType } from '../../services/token/token.model';
 
 @Controller('api/auth')
 export class AuthControllerProvider {
-    constructor(private authService: AuthServiceProvider, private tokenService: TokenServiceProvider) {}
+    constructor(
+        private authService: AuthServiceProvider,
+        private tokenService: TokenServiceProvider,
+    ) {}
 
     @Post('sign-up')
     @UseValidationPipe()

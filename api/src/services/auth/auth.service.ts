@@ -1,8 +1,6 @@
 import { TokenService, TokenServiceProvider } from './../token/token.service';
 import { JwtRefreshTokenStrategy } from './strategies/jwt-refresh.strategy';
-import { sha256 } from '../../utils/crypt.utils';
 import { Injectable, Module } from '@nestjs/common';
-import { JwtModule, JwtService } from '@nestjs/jwt';
 import { isError } from '../../core/errors.core';
 import {
     EmailConfirmsRepository,

@@ -72,8 +72,7 @@ describe('UserController', () => {
                 JwtRefreshTokenStrategy,
             ],
             controllers: [UserControllerProvider],
-        })
-            .compile();
+        }).compile();
 
         db = module.get(DatabaseServiceProvider);
         userService = module.get(UserServiceProvider);

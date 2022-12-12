@@ -6,9 +6,7 @@ import { UserService, UserServiceProvider } from '../../services/user/user.servi
 
 @Controller('api/user')
 export class UserControllerProvider {
-    constructor(
-        private users: UserServiceProvider,
-    ) {}
+    constructor(private users: UserServiceProvider) {}
 
     @Get('me')
     @UseGuards(JwtUserGuard)

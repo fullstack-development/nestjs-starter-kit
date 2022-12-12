@@ -16,7 +16,6 @@ import {
     CannotFindEmailConfirm,
     CannotFindUser,
 } from '../../../repositories/repositoryErrors.model';
-import { date } from '../../../utils';
 import { TokenServiceProvider } from '../../token/token.service';
 import { EmailConfirm } from '@prisma/client';
 import { getConfirmEmailStub } from '../../../__mocks__/confirmEmail.stub';

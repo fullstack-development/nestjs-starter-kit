@@ -1,10 +1,6 @@
 import { Transform, plainToClass, Type } from 'class-transformer';
 import { IsOptional, ValidateNested } from 'class-validator';
-import {
-    CompareNumberQuery,
-    CompareDateQuery,
-    IsSafeInteger,
-} from '../../utils/validation.utils';
+import { CompareNumberQuery, CompareDateQuery, IsSafeInteger } from '../../utils/validation.utils';
 
 export class QueryParams {
     @IsOptional()

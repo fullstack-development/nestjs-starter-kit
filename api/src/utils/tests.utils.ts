@@ -17,10 +17,9 @@ export const mockRepository = <T extends PrismaRepositoryLike>(): MockRepository
 };
 
 export type MockDB<K extends keyof DatabaseServiceProvider['Prisma'] = never> = {
-    Prisma: DeepMocked<DatabaseServiceProvider['Prisma']> &
-        {
-            [key in K]: DeepMocked<DatabaseServiceProvider['Prisma'][K]>;
-        };
+    Prisma: DeepMocked<DatabaseServiceProvider['Prisma']> & {
+        [key in K]: DeepMocked<DatabaseServiceProvider['Prisma'][K]>;
+    };
 };
 
 export const mockDb = <K extends keyof DatabaseServiceProvider['Prisma']>(keys?: Array<K>) => {

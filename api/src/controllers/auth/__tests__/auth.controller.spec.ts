@@ -26,7 +26,6 @@ describe('AuthController', () => {
         Prisma: DeepMocked<DatabaseServiceProvider['Prisma']>;
     };
     let authService: DeepMocked<AuthServiceProvider>;
-    let tokenService: DeepMocked<TokenServiceProvider>;
 
     beforeAll(async () => {
         const dbMock = createMock<DeepMocked<DatabaseServiceProvider['Prisma']>>();
@@ -69,7 +68,7 @@ describe('AuthController', () => {
                 },
                 {
                     provide: TokenServiceProvider,
-                    useValue: createMock<TokenServiceProvider>()
+                    useValue: createMock<TokenServiceProvider>(),
                 },
                 JwtStrategy,
                 JwtRefreshTokenStrategy,
@@ -81,10 +80,7 @@ describe('AuthController', () => {
 
         appWrap.app = module.createNestApplication();
         appWrap.app.useGlobalInterceptors(
-            new HttpInterceptor(
-                createMock<ModuleRef>(),
-                db as unknown as DatabaseServiceProvider,
-            ),
+            new HttpInterceptor(createMock<ModuleRef>(), db as unknown as DatabaseServiceProvider),
         );
         appWrap.app.use(cookieParser());
         await appWrap.app.init();
@@ -151,7 +147,11 @@ describe('AuthController', () => {
         });
 
         it('should return valid response', async () => {
-            authService.signIn.mockResolvedValueOnce({ accessToken: '1', refreshCookie: '2', refreshToken: '2' });
+            authService.signIn.mockResolvedValueOnce({
+                accessToken: '1',
+                refreshCookie: '2',
+                refreshToken: '2',
+            });
             const response = await request(appWrap.app.getHttpServer())
                 .post('/api/auth/sign-in')
                 .set('Content-Type', 'application/x-www-form-urlencoded')
