@@ -5,7 +5,7 @@
     "scripts": {
         "postinstall": "yarn prisma:generate",
         "test": "jest",
-        "test:local": "bash run.local.sh --ganache docker",
+        "test:local": "bash run.local.sh",
         "prisma:prepare": "cp -rf $INIT_CWD/../schema.prisma $INIT_CWD/src/schema.prisma",
         "prisma:generate": "yarn prisma:prepare && npx prisma generate --schema=\"./src/schema.prisma\""
     },
