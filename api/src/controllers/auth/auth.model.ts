@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MaxLength, MinLength } from 'class-validator';
+import { IsEmail, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 
 export class SignUpInput {
     @IsEmail()
@@ -21,6 +21,6 @@ export class SignInInput {
 }
 
 export class ConfirmEmailInput {
-    @IsString() //TODO: replace validate string for UUID
+    @IsUUID('4')
     confirmUuid: string;
 }

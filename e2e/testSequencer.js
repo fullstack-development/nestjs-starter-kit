@@ -5,6 +5,7 @@ class CustomSequencer extends Sequencer {
     sort(tests) {
         const order = [
             'auth.controller.spec.ts',
+            'user.controller.spec.ts'
         ];
 
         let orderedTests = [];
