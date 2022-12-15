@@ -19,6 +19,7 @@ import { getUserStub } from '../../../__mocks__/user.stub';
 import { DatabaseServiceProvider } from '../../../services/database/database.service';
 import { ModuleRef } from '@nestjs/core';
 import { TokenServiceProvider } from '../../../services/token/token.service';
+import { v4 } from 'uuid';
 
 describe('AuthController', () => {
     const appWrap = {} as AppWrap;
@@ -187,12 +188,13 @@ describe('AuthController', () => {
                 refreshCookie: '2',
                 refreshToken: '2',
             });
+            const confirmUuid = v4();
             const response = await request(appWrap.app.getHttpServer())
                 .post('/api/auth/confirm-email')
                 .set('Content-Type', 'application/x-www-form-urlencoded')
-                .send({ confirmUuid: '123' });
+                .send({ confirmUuid });
 
-            expect(authService.confirmEmail).toBeCalledWith('123');
+            expect(authService.confirmEmail).toBeCalledWith(confirmUuid);
             expect(response.statusCode).toEqual(200);
             expect(response.body).toEqual({
                 success: true,
