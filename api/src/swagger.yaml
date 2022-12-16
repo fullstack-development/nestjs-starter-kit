@@ -1,0 +1,142 @@
+openapi: 3.0.3
+info:
+    title: Starter kit API
+    description: Provided Starter kit API endpoints.
+    version: 1.0.0
+
+paths:
+    /api/user/me:
+        get:
+            summary: 'Return current user by accessToken'
+            tags:
+                - api/user
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/MeUser_200'
+                '500':
+                    description: '**Internal server error**'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/responses/InternalServerError'
+components:
+    schemas:
+        User:
+            type: object
+            properties:
+                id:
+                    type: integer
+                email:
+                    type: string
+                created:
+                    type: string
+                    format: date-time
+    responses:
+        BadRequest:
+            type: object
+            properties:
+                error:
+                    type: string
+                    enum: ['Bad request']
+                message:
+                    type: array
+                    items:
+                        type: string
+        InternalServerError:
+            type: object
+            properties:
+                error:
+                    type: string
+                errorUniqId:
+                    type: string
+                message:
+                    type: string
+                stack:
+                    type: string
+            required:
+                - error
+                - errorUniqId
+        ForbiddenServerError:
+            description: 'Returns if the admin does not own the role'
+            type: object
+            properties:
+                error:
+                    type: string
+                message:
+                    type: string
+        Forbidden_401:
+            description: 'Returns if accessToken not passed'
+            type: object
+            properties:
+                error:
+                    type: string
+                message:
+                    type: string
+        NotFound:
+            type: object
+            properties:
+                message:
+                    type: string
+                error:
+                    type: 'Not found'
+        MeUser_200:
+            type: object
+            properties:
+                success:
+                    type: 'true'
+                data:
+                    $ref: '#/components/schemas/User'
+    headers:
+        Refresh-Set-Cookie:
+            description: 'Return when success is **true**'
+            schema:
+                type: string
+                example: 'Refresh=*jwt_token*; HttpOnly; Path=/; Max-Age=1 day'
+        SignIn-Set-Cookie:
+            description: 'Return when success is **true**'
+            schema:
+                type: string
+                example: 'Refresh=*jwt_token*; HttpOnly; Path=/; Max-Age=1 day'
+
+    parameters:
+        filter_by_id:
+            in: query
+            name: id
+            schema:
+                type: object
+                properties:
+                    lte:
+                        type: number
+                    gte:
+                        type: number
+                    equals:
+                        type: number
+        filter_by_created_date:
+            in: query
+            name: created
+            schema:
+                type: object
+                properties:
+                    lte:
+                        type: string
+                    gte:
+                        type: string
+                    equals:
+                        type: string
+        sort_by_page:
+            in: query
+            name: page
+            schema:
+                type: number
+                minimum: 1
+                default: 1
+        sort_by_pageSize:
+            in: query
+            name: pageSize
+            schema:
+                type: number
+                minimum: 1
+                default: 50
