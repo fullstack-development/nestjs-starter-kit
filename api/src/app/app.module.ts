@@ -1,3 +1,4 @@
+import { AppController } from './../controllers/app.controller';
 import { Module, Scope } from '@nestjs/common';
 import { AuthController } from '../controllers/auth/auth.controller';
 import { UserController } from '../controllers/user/user.controller';
@@ -18,6 +19,7 @@ import { DatabaseService } from '../services/database/database.service';
         }),
         AuthController,
         UserController,
+        AppController,
     ],
     providers: [
         {

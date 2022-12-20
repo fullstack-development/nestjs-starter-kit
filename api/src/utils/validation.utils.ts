@@ -35,7 +35,7 @@ export function validate<C>(
     options?: ValidatorOptions,
 ): Promise<ValidationSuccess<C> | ValidationFail> {
     const value = plainToClass(SchemeClass, data);
-    return classValidate(value, options).then((errors) =>
+    return classValidate(value as Record<string, unknown>, options).then((errors) =>
         errors.length > 0 ? { errors, status: 'fail' } : { value, status: 'success' },
     );
 }
@@ -46,7 +46,7 @@ export function validateSync<C>(
     options?: ValidatorOptions,
 ): ValidationSuccess<C> | ValidationFail {
     const value = plainToClass(SchemeClass, data);
-    const errors = classValidateSync(value, options);
+    const errors = classValidateSync(value as Record<string, unknown>, options);
     return errors.length > 0 ? { errors, status: 'fail' } : { value, status: 'success' };
 }
 

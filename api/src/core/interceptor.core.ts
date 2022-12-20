@@ -10,7 +10,7 @@ import {
     OnModuleInit,
 } from '@nestjs/common';
 import { RequestContext } from '@medibloc/nestjs-request-context';
-import { from, Observable } from 'rxjs';
+import { from, lastValueFrom, Observable } from 'rxjs';
 import { catchError, map, mergeMap } from 'rxjs/operators';
 import { ControllerResponse } from './controller.core';
 import { TransactionsContext } from '../utils/transactions.utils';
@@ -47,9 +47,8 @@ export class HttpInterceptor implements NestInterceptor, OnModuleInit {
             this.db.Prisma.$transaction(
                 async (prisma) => {
                     await ctx.transactions.init(prisma);
-                    return next
-                        .handle()
-                        .pipe(
+                    return lastValueFrom(
+                        next.handle().pipe(
                             mergeMap(async (data) => {
                                 if (data instanceof ControllerResponse) {
                                     return data;
@@ -75,8 +74,8 @@ export class HttpInterceptor implements NestInterceptor, OnModuleInit {
                                         'or a BaseError<string>',
                                 );
                             }),
-                        )
-                        .toPromise();
+                        ),
+                    );
                 },
                 { maxWait: 20000, timeout: 50000 },
             ),
@@ -142,7 +141,7 @@ export class HttpInterceptor implements NestInterceptor, OnModuleInit {
                 if (process.env['TEST'] !== 'true') {
                     response.send(
                         `${R.omit(['stack'], body)}\nStack: ${
-                            process.env['FULL_PRODUCTION_MODE'] !== 'true' ? body?.stack : ''
+                            process.env['ENVIRONMENT'] !== 'prod' ? body?.stack : ''
                         }`,
                     );
                 } else {

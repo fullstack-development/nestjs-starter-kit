@@ -11,8 +11,9 @@
         "outDir": "./dist",
         "baseUrl": "./",
         "incremental": true,
-        "strictNullChecks": true
+        "strictNullChecks": true,
+        "skipLibCheck": true
     },
-    "include": ["*.ts", "./src/**/*.ts", "./api-tests/**/*.ts"],
+    "include": ["*.ts", "./src/**/*.ts"],
     "exclude": ["**/migrations/**", "**/dist/**", "**/node_modules/**"]
 }

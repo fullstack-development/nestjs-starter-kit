@@ -4,7 +4,7 @@ import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app/app.module';
 import { ConfigServiceProvider } from './services/config/config.service';
 import { serve, setup } from 'swagger-ui-express';
-import { load } from 'yamljs';
+import * as Yaml from 'yamljs';
 import { DatabaseServiceProvider } from './services/database/database.service';
 import { ENVIRONMENT } from './services/config/config.model';
 import { INestApplication } from '@nestjs/common';
@@ -79,7 +79,7 @@ async function bootstrap() {
 
     const ENV = configService.ENVIRONMENT;
     if (ENV === ENVIRONMENT.STAGE || ENV === ENVIRONMENT.LOCAL) {
-        const swaggerDoc = load('src/swagger.yaml');
+        const swaggerDoc = Yaml.load('src/swagger.yaml');
         app.use(
             '/swagger',
             serve,
