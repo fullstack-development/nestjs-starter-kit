@@ -69,14 +69,14 @@ export const getRequestUser = (data: unknown, ctx: ExecutionContext) => {
 };
 export const User = createParamDecorator(getRequestUser);
 
-export function mapResponse<T, EI extends BaseError<unknown>, EO>(data: T | EI) {
+export function mapResponse<T, EI, EO>(data: T | BaseError<EI>) {
     return async (
-        onData: (data: Exclude<T, EI>) => ControllerResponse | Promise<ControllerResponse>,
-        onError?: (e: EI) => BaseError<EO> | Promise<BaseError<EO>>,
+        onData: (data: T) => ControllerResponse | Promise<ControllerResponse>,
+        onError?: (e: BaseError<EI>) => BaseError<EO> | Promise<BaseError<EO>>,
     ) =>
         isError(data)
             ? onError
                 ? Promise.resolve(onError(data))
                 : Promise.resolve(data)
-            : Promise.resolve(onData(data as Exclude<T, EI>));
+            : Promise.resolve(onData(data));
 }
