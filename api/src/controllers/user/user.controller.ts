@@ -13,7 +13,7 @@ export class UserControllerProvider {
     async me(@User() { id }: RequestUser) {
         return mapResponse(await this.users.findUser({ id }))((user) => {
             return ControllerResponse.Success({
-                body: R.omit(['refreshToken'], user),
+                body: R.omit(['refreshToken', 'emailConfirm', 'hash'], user),
             });
         });
     }

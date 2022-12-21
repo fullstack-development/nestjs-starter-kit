@@ -117,7 +117,7 @@ describe('UserController', () => {
 
             expect(response.statusCode).toEqual(200);
             expect(omit(['created'], response.body.data)).toEqual(
-                omit(['refreshToken', 'created'], user),
+                omit(['refreshToken', 'created', 'emailConfirm', 'hash'], user),
             );
         });
     });
