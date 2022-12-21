@@ -40,7 +40,7 @@ export class BaseError<E> {
     }
 }
 
-export function isError<T, E>(value: T | BaseError<E>): value is BaseError<E> {
+export function isError<T, E, BE extends BaseError<E>>(value: T | BE): value is BE {
     return value instanceof BaseError;
 }
 
