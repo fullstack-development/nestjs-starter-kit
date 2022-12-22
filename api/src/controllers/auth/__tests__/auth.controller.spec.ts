@@ -1,35 +1,35 @@
-import * as cookieParser from 'cookie-parser';
-import * as request from 'supertest';
-import { AuthControllerProvider } from '../auth.controller';
-import { MailServiceProvider } from '../../../services/mail/mail.service';
-import { AuthServiceProvider } from '../../../services/auth/auth.service';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { RequestContextModule } from '@medibloc/nestjs-request-context';
+import { ModuleRef } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
+import * as cookieParser from 'cookie-parser';
+import * as request from 'supertest';
+import { v4 } from 'uuid';
+import { ConfigProvider } from '../../../core/config/config.core';
+import { DatabaseProvider } from '../../../core/database/database.core';
 import { HttpInterceptor } from '../../../core/interceptor.core';
+import { AuthServiceProvider } from '../../../services/auth/auth.service';
+import { JwtRefreshTokenStrategy } from '../../../services/auth/strategies/jwt-refresh.strategy';
 import { JwtStrategy } from '../../../services/auth/strategies/jwt.strategy';
-import { ConfigServiceProvider } from '../../../services/config/config.service';
+import { MailServiceProvider } from '../../../services/mail/mail.service';
+import { TokenServiceProvider } from '../../../services/token/token.service';
 import { UserServiceProvider } from '../../../services/user/user.service';
+import { AppWrap } from '../../../utils/tests.utils';
 import { ConfigServiceFake } from '../../../__mocks__/ConfigServiceFake';
 import { TransactionsContextFake } from '../../../__mocks__/TransactionsContextFake';
-import { AppWrap } from '../../../utils/tests.utils';
-import { JwtRefreshTokenStrategy } from '../../../services/auth/strategies/jwt-refresh.strategy';
 import { getUserStub } from '../../../__mocks__/user.stub';
-import { DatabaseServiceProvider } from '../../../services/database/database.service';
-import { ModuleRef } from '@nestjs/core';
-import { TokenServiceProvider } from '../../../services/token/token.service';
-import { v4 } from 'uuid';
+import { AuthControllerProvider } from '../auth.controller';
 
 describe('AuthController', () => {
     const appWrap = {} as AppWrap;
     let db: {
-        Prisma: DeepMocked<DatabaseServiceProvider['Prisma']>;
+        Prisma: DeepMocked<DatabaseProvider['Prisma']>;
     };
     let authService: DeepMocked<AuthServiceProvider>;
 
     beforeAll(async () => {
-        const dbMock = createMock<DeepMocked<DatabaseServiceProvider['Prisma']>>();
+        const dbMock = createMock<DeepMocked<DatabaseProvider['Prisma']>>();
         const configService = new ConfigServiceFake();
         const module = await Test.createTestingModule({
             imports: [
@@ -44,11 +44,11 @@ describe('AuthController', () => {
             ],
             providers: [
                 {
-                    provide: ConfigServiceProvider,
+                    provide: ConfigProvider,
                     useClass: ConfigServiceFake,
                 },
                 {
-                    provide: DatabaseServiceProvider,
+                    provide: DatabaseProvider,
                     useValue: {
                         get Prisma() {
                             return dbMock;
@@ -76,12 +76,12 @@ describe('AuthController', () => {
             ],
             controllers: [AuthControllerProvider],
         }).compile();
-        db = module.get(DatabaseServiceProvider);
+        db = module.get(DatabaseProvider);
         authService = module.get(AuthServiceProvider);
 
         appWrap.app = module.createNestApplication();
         appWrap.app.useGlobalInterceptors(
-            new HttpInterceptor(createMock<ModuleRef>(), db as unknown as DatabaseServiceProvider),
+            new HttpInterceptor(createMock<ModuleRef>(), db as unknown as DatabaseProvider),
         );
         appWrap.app.use(cookieParser());
         await appWrap.app.init();

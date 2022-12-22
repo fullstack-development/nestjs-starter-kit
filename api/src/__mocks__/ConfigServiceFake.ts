@@ -1,4 +1,4 @@
-import { ConfigDto, ENVIRONMENT } from '../services/config/config.model';
+import { ConfigDto, ENVIRONMENT } from '../core/config/config.model';
 
 export class ConfigServiceFake implements ConfigDto {
     IS_DEV: boolean;

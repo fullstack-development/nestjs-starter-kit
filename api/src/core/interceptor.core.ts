@@ -1,5 +1,4 @@
-import * as R from 'ramda';
-import { Response } from 'express';
+import { RequestContext } from '@medibloc/nestjs-request-context';
 import {
     CallHandler,
     ExecutionContext,
@@ -9,25 +8,26 @@ import {
     NestInterceptor,
     OnModuleInit,
 } from '@nestjs/common';
-import { RequestContext } from '@medibloc/nestjs-request-context';
+import { ModuleRef } from '@nestjs/core';
+import { Response } from 'express';
+import * as R from 'ramda';
 import { from, lastValueFrom, Observable } from 'rxjs';
 import { catchError, map, mergeMap } from 'rxjs/operators';
 import { ControllerResponse } from './controller.core';
-import { TransactionsContext } from '../utils/transactions.utils';
-import { DatabaseServiceProvider } from '../services/database/database.service';
-import { BaseError, isBaseErrorString, isError } from './errors.core';
+import { DatabaseProvider } from './database/database.core';
 import {
     ErrorHandleMiddlewareCore,
     ErrorHandleMiddlewareProvider,
 } from './errorHandleMiddleware.core';
-import { ModuleRef } from '@nestjs/core';
+import { BaseError, isBaseErrorString, isError } from './errors.core';
+import { TransactionsContext } from './transactions.core';
 
 @Injectable()
 export class HttpInterceptor implements NestInterceptor, OnModuleInit {
     private errorHandleMiddleware: ErrorHandleMiddlewareProvider | null = null;
     private logger = new Logger(HttpInterceptor.name);
 
-    constructor(private moduleRef: ModuleRef, private db: DatabaseServiceProvider) {}
+    constructor(private moduleRef: ModuleRef, private db: DatabaseProvider) {}
 
     async onModuleInit() {
         this.errorHandleMiddleware = await this.moduleRef.resolve(ErrorHandleMiddlewareCore);

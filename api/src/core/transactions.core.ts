@@ -1,14 +1,5 @@
 import { RequestContext } from '@medibloc/nestjs-request-context';
-import { Prisma } from '@prisma/client';
-
-export class TransactionsContext extends RequestContext {
-    transactions: Transactions;
-
-    constructor() {
-        super();
-        this.transactions = new Transactions();
-    }
-}
+import { Prisma } from '@modules/repository';
 
 export class Transactions {
     private prisma: Prisma.TransactionClient;
@@ -19,5 +10,14 @@ export class Transactions {
 
     async init(prisma: Prisma.TransactionClient) {
         this.prisma = prisma;
+    }
+}
+
+export class TransactionsContext extends RequestContext {
+    transactions: Transactions;
+
+    constructor() {
+        super();
+        this.transactions = new Transactions();
     }
 }

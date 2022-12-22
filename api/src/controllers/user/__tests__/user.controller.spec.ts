@@ -1,26 +1,27 @@
-import { UserControllerProvider } from './../user.controller';
-import * as request from 'supertest';
-import * as cookieParser from 'cookie-parser';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { RequestContextModule } from '@medibloc/nestjs-request-context';
+import { Repositories } from '@modules/repository';
 import { ModuleRef } from '@nestjs/core';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
-import { UserServiceProvider } from '../../../services/user/user.service';
-import { getUserStub } from '../../../__mocks__/user.stub';
+import * as cookieParser from 'cookie-parser';
+import { omit } from 'ramda';
+import * as request from 'supertest';
+import { ConfigProvider } from '../../../core/config/config.core';
+import { DatabaseProvider } from '../../../core/database/database.core';
 import { HttpInterceptor } from '../../../core/interceptor.core';
-import { ConfigServiceProvider } from '../../../services/config/config.service';
-import { DatabaseServiceProvider } from '../../../services/database/database.service';
-import { AppWrap, MockDB, mockDb } from '../../../utils/tests.utils';
-import { ConfigServiceFake } from '../../../__mocks__/ConfigServiceFake';
-import { TransactionsContextFake } from '../../../__mocks__/TransactionsContextFake';
 import { JwtRefreshTokenStrategy } from '../../../services/auth/strategies/jwt-refresh.strategy';
 import { JwtStrategy } from '../../../services/auth/strategies/jwt.strategy';
-import { omit } from 'ramda';
+import { UserServiceProvider } from '../../../services/user/user.service';
+import { AppWrap, DatabasePrismaMock, mockDatabasePrisma } from '../../../utils/tests.utils';
+import { ConfigServiceFake } from '../../../__mocks__/ConfigServiceFake';
+import { TransactionsContextFake } from '../../../__mocks__/TransactionsContextFake';
+import { getUserStub } from '../../../__mocks__/user.stub';
+import { UserControllerProvider } from './../user.controller';
 
 describe('UserController', () => {
     const appWrap = {} as AppWrap;
-    let db: MockDB<'user'>;
+    let db: { Prisma: DatabasePrismaMock<Repositories.User> };
     let userService: DeepMocked<UserServiceProvider>;
     let config: ConfigServiceFake;
     let jwtService: DeepMocked<JwtService>;
@@ -53,7 +54,7 @@ describe('UserController', () => {
             ],
             providers: [
                 {
-                    provide: ConfigServiceProvider,
+                    provide: ConfigProvider,
                     useClass: ConfigServiceFake,
                 },
                 {
@@ -61,8 +62,8 @@ describe('UserController', () => {
                     useValue: createMock<JwtService>(),
                 },
                 {
-                    provide: DatabaseServiceProvider,
-                    useValue: mockDb(['user']),
+                    provide: DatabaseProvider,
+                    useValue: { Prisma: mockDatabasePrisma(Repositories.User) },
                 },
                 {
                     provide: UserServiceProvider,
@@ -74,16 +75,16 @@ describe('UserController', () => {
             controllers: [UserControllerProvider],
         }).compile();
 
-        db = module.get(DatabaseServiceProvider);
+        db = module.get(DatabaseProvider);
         userService = module.get(UserServiceProvider);
-        config = module.get(ConfigServiceProvider);
+        config = module.get(ConfigProvider);
         jwtService = module.get(JwtService);
 
         user = getUserStub();
 
         appWrap.app = module.createNestApplication();
         appWrap.app.useGlobalInterceptors(
-            new HttpInterceptor(createMock<ModuleRef>(), db as unknown as DatabaseServiceProvider),
+            new HttpInterceptor(createMock<ModuleRef>(), db as unknown as DatabaseProvider),
         );
         appWrap.app.use(cookieParser());
         await appWrap.app.init();

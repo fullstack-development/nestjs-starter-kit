@@ -1,4 +1,4 @@
-import { omitPath, paginate } from '../paginate';
+import { omitPath, paginate } from '../paginate.core';
 
 describe('omitPath', () => {
     it('should success omit path', () => {

@@ -14,7 +14,7 @@ module.exports = {
     rules: {
         'max-len': [
             'error',
-            100,
+            110,
             {
                 ignorePattern: '^import\\s.+\\sfrom\\s.+;$',
                 ignoreUrls: true,
@@ -45,5 +45,6 @@ module.exports = {
                 hoist: 'all',
             },
         ],
+        '@typescript-eslint/no-namespace': 'off',
     },
 };

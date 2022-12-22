@@ -1,4 +1,4 @@
-import { EmailConfirm, RefreshToken, User } from '@prisma/client';
+import { EmailConfirm, RefreshToken, User } from '@modules/repository';
 
 export function getUserStub(): User & {
     refreshToken: RefreshToken | null;

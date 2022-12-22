@@ -2,23 +2,22 @@
     "compilerOptions": {
         "module": "commonjs",
         "declaration": true,
+        "declarationMap": true,
         "removeComments": true,
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "allowSyntheticDefaultImports": true,
-        "target": "es2019",
+        "target": "ES2022",
         "sourceMap": true,
         "outDir": "./dist",
         "baseUrl": "./",
         "incremental": true,
         "strictNullChecks": true,
         "skipLibCheck": true,
-        "allowJs": true,
-        "paths": {
-            "@modules/repository": ["../modules/repository/index.ts"]
-        }
+        "composite": true,
+        "allowJs": true
     },
     "include": ["*.ts", "./src/**/*.ts"],
-    "exclude": ["**/migrations/**", "**/dist/**", "**/node_modules/**"],
-    "references": [{ "path": "../modules/repository" }]
+    "exclude": ["**/migrations/**", "**/node_modules/**"],
+    "references": []
 }

@@ -1,5 +1,5 @@
-import * as R from 'ramda';
 import { Controller, Get, Module, UseGuards } from '@nestjs/common';
+import * as R from 'ramda';
 import { ControllerResponse, mapResponse, RequestUser, User } from '../../core/controller.core';
 import { JwtUserGuard } from '../../services/auth/guards/jwt-user.guard';
 import { UserService, UserServiceProvider } from '../../services/user/user.service';

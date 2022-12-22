@@ -1,17 +1,17 @@
-import * as R from 'ramda';
-import { ExtractJwt, Strategy } from 'passport-jwt';
-import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
+import { PassportStrategy } from '@nestjs/passport';
+import { ExtractJwt, Strategy } from 'passport-jwt';
+import * as R from 'ramda';
+import { ConfigProvider } from '../../../core/config/config.core';
+import { DatabaseProvider } from '../../../core/database/database.core';
 import { TokenPayload } from '../auth.model';
-import { ConfigServiceProvider } from '../../config/config.service';
-import { DatabaseServiceProvider } from '../../database/database.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-user') {
-    constructor(private db: DatabaseServiceProvider, private configService: ConfigServiceProvider) {
+    constructor(private db: DatabaseProvider, private config: ConfigProvider) {
         super({
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-            secretOrKey: configService.JWT_SECRET,
+            secretOrKey: config.JWT_SECRET,
         });
     }
 

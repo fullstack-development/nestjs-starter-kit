@@ -5,8 +5,8 @@
     "author": "",
     "private": true,
     "license": "UNLICENSED",
+    "main": "./src/main.ts",
     "scripts": {
-        "postinstall": "yarn prisma:generate",
         "prebuild": "rimraf dist",
         "build": "nest build",
         "format": "prettier --write \"src/**/*.ts\"",
@@ -15,14 +15,7 @@
         "start:prod": "cross-env NODE_ENV=production node dist/main",
         "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
         "test": "cross-env TEST=true jest",
-        "test:coverage": "cross-env TEST=true jest --coverage",
-        "prisma:prepare": "cross-env cp -rf $INIT_CWD/../schema.prisma $INIT_CWD/src/schema.prisma",
-        "prisma:generate": "yarn prisma:prepare && npx prisma generate --schema=\"./src/schema.prisma\"",
-        "prisma:watch": "npx nodemon --ext prisma --exec yarn prisma:generate",
-        "prisma:migrate:create": "npx prisma migrate dev --schema=\"./src/schema.prisma\" --create-only --name",
-        "prisma:migrate:dev": "npx prisma migrate dev --schema=\"./src/schema.prisma\"",
-        "prisma:migrate:deploy": "npx prisma migrate deploy --schema=\"./src/schema.prisma\"",
-        "prisma:migrate:reset": "npx prisma migrate reset"
+        "test:coverage": "cross-env TEST=true jest --coverage"
     },
     "dependencies": {
         "@medibloc/nestjs-request-context": "^1.0.0",
@@ -32,7 +25,6 @@
         "@nestjs/passport": "^9.0.0",
         "@nestjs/platform-express": "^9.0.0",
         "@nestjs/schedule": "^2.1.0",
-        "@prisma/client": "3.14.0",
         "body-parser": "^1.19.0",
         "class-transformer": "^0.3.1",
         "class-validator": "^0.12.2",
@@ -43,7 +35,6 @@
         "express": "^4.17.2",
         "node-fetch": "^2.6.7",
         "passport": "^0.4.1",
-        "prisma": "3.14.0",
         "passport-jwt": "^4.0.0",
         "ramda": "^0.27.1",
         "reflect-metadata": "^0.1.13",
@@ -77,6 +68,7 @@
         "eslint-plugin-prettier": "^4.0.0",
         "jest": "28.1.3",
         "prettier": "^2.3.2",
+        "prettier-plugin-organize-imports": "^3.2.1",
         "source-map-support": "^0.5.20",
         "supertest": "^6.1.3",
         "ts-jest": "28.0.8",
@@ -93,7 +85,9 @@
         ],
         "moduleDirectories": [
             "<rootDir>/node_modules",
-            "<rootDir>/src"
+            "<rootDir>/src",
+            "<rootDir>/../modules/repository",
+            "<rootDir>/../modules/repository/node_modules"
         ],
         "modulePathIgnorePatterns": [
             "<rootDir>/dist/",
@@ -112,6 +106,9 @@
         "testEnvironment": "node",
         "setupFiles": [
             "./jest-setup-file.ts"
-        ]
+        ],
+        "moduleNameMapper": {
+            "@modules/repository": "<rootDir>/../modules/repository"
+        }
     }
 }

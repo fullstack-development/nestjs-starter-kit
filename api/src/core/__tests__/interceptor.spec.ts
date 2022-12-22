@@ -1,16 +1,16 @@
-import { BaseError } from '../errors.core';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import { DatabaseServiceProvider } from '../../services/database/database.service';
-import { HttpInterceptor } from '../interceptor.core';
-import { ModuleRef } from '@nestjs/core';
-import { Controller, Get } from '@nestjs/common';
-import { ErrorHandleMiddlewareProvider } from '../errorHandleMiddleware.core';
-import { AppWrap } from '../../utils/tests.utils';
-import { Test } from '@nestjs/testing';
 import { RequestContextModule } from '@medibloc/nestjs-request-context';
-import { TransactionsContextFake } from '../../__mocks__/TransactionsContextFake';
+import { Controller, Get } from '@nestjs/common';
+import { ModuleRef } from '@nestjs/core';
+import { Test } from '@nestjs/testing';
 import * as request from 'supertest';
+import { AppWrap } from '../../utils/tests.utils';
+import { TransactionsContextFake } from '../../__mocks__/TransactionsContextFake';
 import { ControllerResponse } from '../controller.core';
+import { DatabaseProvider } from '../database/database.core';
+import { ErrorHandleMiddlewareProvider } from '../errorHandleMiddleware.core';
+import { BaseError } from '../errors.core';
+import { HttpInterceptor } from '../interceptor.core';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const testResponse = createMock<{ response: () => any }>();
@@ -29,11 +29,11 @@ describe('Interceptor', () => {
     let interceptor: HttpInterceptor;
     let moduleRef: DeepMocked<ModuleRef>;
     let db: {
-        Prisma: DeepMocked<DatabaseServiceProvider['Prisma']>;
+        Prisma: DeepMocked<DatabaseProvider['Prisma']>;
     };
 
     beforeAll(async () => {
-        const dbMock = createMock<DeepMocked<DatabaseServiceProvider['Prisma']>>();
+        const dbMock = createMock<DeepMocked<DatabaseProvider['Prisma']>>();
         const module = await Test.createTestingModule({
             imports: [
                 RequestContextModule.forRoot({
@@ -43,7 +43,7 @@ describe('Interceptor', () => {
             ],
             providers: [
                 {
-                    provide: DatabaseServiceProvider,
+                    provide: DatabaseProvider,
                     useValue: {
                         get Prisma() {
                             return dbMock;
@@ -56,9 +56,9 @@ describe('Interceptor', () => {
 
         moduleRef = createMock<ModuleRef>();
 
-        db = module.get(DatabaseServiceProvider);
+        db = module.get(DatabaseProvider);
 
-        interceptor = new HttpInterceptor(moduleRef, db as unknown as DatabaseServiceProvider);
+        interceptor = new HttpInterceptor(moduleRef, db as unknown as DatabaseProvider);
         appWrap.app = module.createNestApplication();
         appWrap.app.useGlobalInterceptors(interceptor);
         await appWrap.app.init();

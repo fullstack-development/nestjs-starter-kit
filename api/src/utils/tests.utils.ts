@@ -1,43 +1,52 @@
-import * as request from 'supertest';
+import { createMock, DeepMocked } from '@golevelup/ts-jest';
+import { Repositories } from '@modules/repository';
 import { INestApplication, Type } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import * as request from 'supertest';
+import { DatabaseProvider } from '../core/database/database.core';
 import { JwtUserGuard } from '../services/auth/guards/jwt-user.guard';
 import { getUserStub } from '../__mocks__/user.stub';
-import { JwtService } from '@nestjs/jwt';
-import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import { DatabaseServiceProvider } from '../services/database/database.service';
 
-type PrismaRepositoryLike = { Dao: unknown };
-
-export type MockRepository<T extends PrismaRepositoryLike> = { Dao: DeepMocked<T['Dao']> };
-
-export const mockRepository = <T extends PrismaRepositoryLike>(): MockRepository<T> => {
-    return {
-        Dao: createMock<T>(),
-    };
+export type DatabaseRepositoriesMock = {
+    [key in Repositories]: DeepMocked<DatabaseProvider[key]>;
 };
 
-export type MockDB<K extends keyof DatabaseServiceProvider['Prisma'] = never> = {
-    Prisma: DeepMocked<DatabaseServiceProvider['Prisma']> & {
-        [key in K]: DeepMocked<DatabaseServiceProvider['Prisma'][K]>;
-    };
-};
-
-export const mockDb = <K extends keyof DatabaseServiceProvider['Prisma']>(keys?: Array<K>) => {
-    const db = {
-        Prisma: createMock<DatabaseServiceProvider['Prisma']>(),
-    };
-    if (keys) {
-        for (const k of keys) {
-            Object.defineProperty(db.Prisma, k, {
-                value: createMock<DatabaseServiceProvider['Prisma'][K]>(),
-            });
-        }
+export function mockDatabaseRepositories() {
+    const db = {};
+    for (const repositoryName of Object.values(Repositories)) {
+        Object.defineProperty(db, repositoryName, {
+            value: createMock(),
+        });
     }
-    return db as MockDB<K>;
+    return db as unknown as DatabaseRepositoriesMock;
+}
+
+export type DatabasePrismaMock<K extends Repositories> = DeepMocked<DatabaseProvider['Prisma']> & {
+    [key in K]: DeepMocked<DatabaseProvider['Prisma'][key]>;
 };
+
+export function mockDatabasePrisma<K extends Repositories>(key: K): DatabasePrismaMock<K>;
+export function mockDatabasePrisma<K1 extends Repositories, K2 extends Repositories>(
+    k1: K1,
+    k2: K2,
+): DatabasePrismaMock<K1> & DatabasePrismaMock<K2>;
+export function mockDatabasePrisma<
+    K1 extends Repositories,
+    K2 extends Repositories,
+    K3 extends Repositories,
+>(k1: K1, k2: K2, k3: K3): DatabasePrismaMock<K1> & DatabasePrismaMock<K2> & DatabasePrismaMock<K3>;
+export function mockDatabasePrisma<K extends Repositories>(...keys: Array<K>) {
+    const Prisma = createMock();
+    for (const k of keys) {
+        Object.defineProperty(Prisma, k, {
+            value: createMock(),
+        });
+    }
+    return Prisma;
+}
 
 interface DgGet {
-    get get(): MockDB<'user'>;
+    get get(): { Prisma: DatabasePrismaMock<Repositories.User> };
 }
 
 interface JwtServiceGet {

@@ -1,15 +1,15 @@
-import './patchBigInt';
+import { INestApplication } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import * as cookieParser from 'cookie-parser';
-import { AppModule } from './app/app.module';
-import { ConfigServiceProvider } from './services/config/config.service';
 import { serve, setup } from 'swagger-ui-express';
 import * as Yaml from 'yamljs';
-import { DatabaseServiceProvider } from './services/database/database.service';
-import { ENVIRONMENT } from './services/config/config.model';
-import { INestApplication } from '@nestjs/common';
+import { AppModule } from './app/app.module';
+import { ConfigProvider } from './core/config/config.core';
+import { ENVIRONMENT } from './core/config/config.model';
+import { DatabaseProvider } from './core/database/database.core';
+import './patchBigInt';
 
-const enableCorsByEnv = (app: INestApplication, config: ConfigServiceProvider) => {
+const enableCorsByEnv = (app: INestApplication, config: ConfigProvider) => {
     const baseCorsOptions = {
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
         preflightContinue: false,
@@ -70,10 +70,10 @@ async function bootstrap() {
     const app = await NestFactory.create(AppModule);
     app.use(cookieParser());
 
-    const db = app.get(DatabaseServiceProvider);
-    await db.init();
+    const db = app.get(DatabaseProvider);
+    await db.initialize();
 
-    const configService = app.get(ConfigServiceProvider);
+    const configService = app.get(ConfigProvider);
 
     enableCorsByEnv(app, configService);
 

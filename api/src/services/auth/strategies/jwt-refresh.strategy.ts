@@ -1,25 +1,25 @@
-import * as R from 'ramda';
-import { ExtractJwt, Strategy } from 'passport-jwt';
-import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
+import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
+import { ExtractJwt, Strategy } from 'passport-jwt';
+import * as R from 'ramda';
+import { ConfigProvider } from '../../../core/config/config.core';
+import { DatabaseProvider } from '../../../core/database/database.core';
 import { sha256 } from '../../../utils/crypt.utils';
-import { ConfigServiceProvider } from '../../config/config.service';
 import { TokenPayload } from '../auth.model';
-import { DatabaseServiceProvider } from '../../database/database.service';
 
 @Injectable()
 export class JwtRefreshTokenStrategy extends PassportStrategy(Strategy, 'jwt-user-refresh') {
     constructor(
-        private readonly db: DatabaseServiceProvider,
+        private readonly db: DatabaseProvider,
 
-        private readonly configService: ConfigServiceProvider,
+        private readonly config: ConfigProvider,
     ) {
         super({
             jwtFromRequest: ExtractJwt.fromExtractors([
                 (request: Request) => request?.cookies?.Refresh,
             ]),
-            secretOrKey: configService.JWT_REFRESH_TOKEN_SECRET,
+            secretOrKey: config.JWT_REFRESH_TOKEN_SECRET,
             passReqToCallback: true,
         });
     }

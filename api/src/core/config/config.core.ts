@@ -1,13 +1,13 @@
-import * as path from 'path';
+import { Injectable, Module } from '@nestjs/common';
 import * as dotenv from 'dotenv';
 import * as fs from 'fs';
-import { Injectable, Module } from '@nestjs/common';
-import { ConfigDto, ENVIRONMENT } from './config.model';
+import * as path from 'path';
 import { validateSync } from '../../utils/validation.utils';
-import { ValidationError } from '../../core/errors.core';
+import { ValidationError } from '../errors.core';
+import { ConfigDto, ENVIRONMENT } from './config.model';
 
 @Injectable()
-export class ConfigServiceProvider implements ConfigDto {
+export class ConfigProvider implements ConfigDto {
     readonly IS_TEST: boolean;
     readonly IS_DEV: boolean;
     readonly DB_ADDRESS: string;
@@ -62,7 +62,7 @@ export class ConfigServiceProvider implements ConfigDto {
 }
 
 @Module({
-    providers: [ConfigServiceProvider],
-    exports: [ConfigServiceProvider],
+    providers: [ConfigProvider],
+    exports: [ConfigProvider],
 })
-export class ConfigService {}
+export class Config {}

@@ -1,18 +1,18 @@
-import { mockRepository, MockRepository } from './../../../utils/tests.utils';
+import { User } from '@modules/repository';
 import { Test } from '@nestjs/testing';
-import { User } from '@prisma/client';
-import { UserPayload } from './../../auth/auth.model';
-import { UserServiceProvider } from './../user.service';
+import { DatabaseProvider } from '../../../core/database/database.core';
+import { CannotFindUser } from '../../../core/database/database.model';
 import { isError } from '../../../core/errors.core';
-import { UsersRepositoryProvider } from '../../../repositories/users/users.repository';
+import { DatabaseRepositoriesMock, mockDatabaseRepositories } from '../../../utils/tests.utils';
 import { getUserStub } from '../../../__mocks__/user.stub';
 import { EmailOrPasswordIncorrect, UserAlreadyExist } from '../user.model';
-import { CannotFindUser } from '../../../repositories/repositoryErrors.model';
+import { UserPayload } from './../../auth/auth.model';
+import { UserServiceProvider } from './../user.service';
 
 describe('UserService', () => {
     let userService: UserServiceProvider;
 
-    let usersRepository: MockRepository<UsersRepositoryProvider>;
+    let db: DatabaseRepositoriesMock;
     let user: User;
 
     beforeEach(async () => {
@@ -20,25 +20,25 @@ describe('UserService', () => {
             providers: [
                 UserServiceProvider,
                 {
-                    provide: UsersRepositoryProvider,
-                    useValue: mockRepository<UsersRepositoryProvider>(),
+                    provide: DatabaseProvider,
+                    useValue: mockDatabaseRepositories(),
                 },
             ],
         }).compile();
 
         userService = module.get(UserServiceProvider);
-        usersRepository = module.get(UsersRepositoryProvider);
+        db = module.get(DatabaseProvider);
         user = getUserStub();
     });
 
     it('should be defined service and repository', () => {
         expect(userService).toBeDefined();
-        expect(usersRepository).toBeDefined();
+        expect(db).toBeDefined();
     });
 
     describe('create user', () => {
         it('should return userAlreadyExist error', async () => {
-            usersRepository.Dao.findFirst.mockResolvedValueOnce(user);
+            db.user.findFirst.mockResolvedValueOnce(user);
             const createPayload: UserPayload = { email: user.email, password: 'test password' };
 
             const userResult = await userService.createUser(createPayload);
@@ -48,8 +48,8 @@ describe('UserService', () => {
         });
 
         it('should return created user', async () => {
-            usersRepository.Dao.findFirst.mockResolvedValueOnce(null);
-            usersRepository.Dao.create.mockResolvedValueOnce(user);
+            db.user.findFirst.mockResolvedValueOnce(null);
+            db.user.create.mockResolvedValueOnce(user);
             const createPayload: UserPayload = { email: user.email, password: 'test password' };
 
             const userResult = await userService.createUser(createPayload);
@@ -62,7 +62,7 @@ describe('UserService', () => {
     describe('findVerifiedUser', () => {
         describe('should return EmailOrPasswordIncorrect error', () => {
             it('on user is null', async () => {
-                usersRepository.Dao.findFirst.mockResolvedValueOnce(null);
+                db.user.findFirst.mockResolvedValueOnce(null);
 
                 const result = await userService.findVerifiedUser({
                     email: 'test@axample.com',
@@ -74,7 +74,7 @@ describe('UserService', () => {
             });
 
             it('on hash not valid', async () => {
-                usersRepository.Dao.findFirst.mockResolvedValueOnce(user);
+                db.user.findFirst.mockResolvedValueOnce(user);
 
                 const result = await userService.findVerifiedUser({
                     email: 'test@axample.com',
@@ -87,7 +87,7 @@ describe('UserService', () => {
         });
 
         it('should return user on success', async () => {
-            usersRepository.Dao.findFirst.mockResolvedValueOnce(user);
+            db.user.findFirst.mockResolvedValueOnce(user);
 
             const result = await userService.findVerifiedUser({
                 email: 'test@axample.com',
@@ -101,7 +101,7 @@ describe('UserService', () => {
 
     describe('confirmEmail', () => {
         it('should return CannotFindUser error', async () => {
-            usersRepository.Dao.findFirst.mockResolvedValueOnce(null);
+            db.user.findFirst.mockResolvedValueOnce(null);
 
             const result = await userService.confirmEmail({ id: user.id });
 
@@ -110,8 +110,8 @@ describe('UserService', () => {
         });
 
         it('should undefined true on success', async () => {
-            usersRepository.Dao.findFirst.mockResolvedValueOnce(user);
-            usersRepository.Dao.update.mockResolvedValueOnce({ ...user, emailConfirmed: true });
+            db.user.findFirst.mockResolvedValueOnce(user);
+            db.user.update.mockResolvedValueOnce({ ...user, emailConfirmed: true });
 
             const result = await userService.confirmEmail({ id: user.id });
 
@@ -122,7 +122,7 @@ describe('UserService', () => {
 
     describe('findUser', () => {
         it('should return CannotFindUser error', async () => {
-            usersRepository.Dao.findFirst.mockResolvedValueOnce(null);
+            db.user.findFirst.mockResolvedValueOnce(null);
 
             const result = await userService.findUser({ id: user.id });
 
@@ -131,7 +131,7 @@ describe('UserService', () => {
         });
 
         it('should return user on success', async () => {
-            usersRepository.Dao.findFirst.mockResolvedValueOnce(user);
+            db.user.findFirst.mockResolvedValueOnce(user);
 
             const result = await userService.findUser({ id: user.id });
 

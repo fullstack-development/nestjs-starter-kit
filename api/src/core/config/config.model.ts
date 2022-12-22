@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsString, IsInt, IsEnum } from 'class-validator';
+import { IsEnum, IsInt, IsString } from 'class-validator';
 
 export enum ENVIRONMENT {
     LOCAL = 'local',

@@ -1,24 +1,21 @@
+import { User } from '@modules/repository';
 import { Injectable, Module } from '@nestjs/common';
-import { User } from '@prisma/client';
-import { CannotFindUser } from '../../repositories/repositoryErrors.model';
-import {
-    UsersRepository,
-    UsersRepositoryProvider,
-} from '../../repositories/users/users.repository';
+import { Database, DatabaseProvider } from '../../core/database/database.core';
+import { CannotFindUser } from '../../core/database/database.model';
 import { date } from '../../utils';
 import { sha256 } from '../../utils/crypt.utils';
-import { EmailOrPasswordIncorrect, UserPayload, UserAlreadyExist } from './user.model';
+import { EmailOrPasswordIncorrect, UserAlreadyExist, UserPayload } from './user.model';
 
 @Injectable()
 export class UserServiceProvider {
-    constructor(private users: UsersRepositoryProvider) {}
+    constructor(private readonly db: DatabaseProvider) {}
 
     async createUser({ email, password }: UserPayload) {
-        if ((await this.users.Dao.findFirst({ where: { email } })) !== null) {
+        if ((await this.db.user.findFirst({ where: { email } })) !== null) {
             return new UserAlreadyExist();
         }
 
-        return await this.users.Dao.create({
+        return await this.db.user.create({
             data: {
                 email,
                 hash: sha256(password),
@@ -29,7 +26,7 @@ export class UserServiceProvider {
     }
 
     async findVerifiedUser({ email, password }: UserPayload) {
-        const user = await this.users.Dao.findFirst({ where: { email } });
+        const user = await this.db.user.findFirst({ where: { email } });
         if (user === null || user.hash !== sha256(password)) {
             return new EmailOrPasswordIncorrect();
         }
@@ -38,12 +35,12 @@ export class UserServiceProvider {
     }
 
     async confirmEmail(where: Partial<User>) {
-        const user = await this.users.Dao.findFirst({ where });
+        const user = await this.db.user.findFirst({ where });
         if (user === null) {
             return new CannotFindUser();
         }
 
-        await this.users.Dao.update({
+        await this.db.user.update({
             where,
             data: {
                 emailConfirmed: true,
@@ -52,7 +49,7 @@ export class UserServiceProvider {
     }
 
     async findUser(where: { id: number } | { email: string }) {
-        const user = await this.users.Dao.findFirst({
+        const user = await this.db.user.findFirst({
             where,
             include: { refreshToken: true, emailConfirm: true },
         });
@@ -62,7 +59,7 @@ export class UserServiceProvider {
 }
 
 @Module({
-    imports: [UsersRepository],
+    imports: [Database],
     providers: [UserServiceProvider],
     exports: [UserServiceProvider],
 })
