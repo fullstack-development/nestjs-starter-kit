@@ -1,7 +1,7 @@
 import { RequestContext } from '@medibloc/nestjs-request-context';
 import { Prisma, PrismaClient, Repositories } from '@modules/repository';
 import { Injectable, Logger, Module } from '@nestjs/common';
-import { ConfigProvider } from '../config/config.core';
+import { Config, ConfigProvider } from '../config/config.core';
 import { TransactionsContext } from '../transactions.core';
 
 type RepositoryGetters = {
@@ -60,6 +60,7 @@ export class DatabaseProvider implements RepositoryGetters {
 }
 
 @Module({
+    imports: [Config],
     providers: [DatabaseProvider],
     exports: [DatabaseProvider],
 })
