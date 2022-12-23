@@ -1,13 +1,12 @@
 {
-    "name": "stk-e2e-tests",
-    "version": "1.0.0",
+    "name": "nestjs-starter-kit-e2e",
+    "version": "3.0.0",
     "description": "",
     "scripts": {
-        "postinstall": "yarn prisma:generate",
+        "format": "prettier --write \"src/**/*.ts\"",
+        "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
         "test": "jest",
-        "test:local": "bash run.local.sh",
-        "prisma:prepare": "cp -rf $INIT_CWD/../schema.prisma $INIT_CWD/src/schema.prisma",
-        "prisma:generate": "yarn prisma:prepare && npx prisma generate --schema=\"./src/schema.prisma\""
+        "test:local": "bash run.local.sh"
     },
     "keywords": [],
     "author": "",
@@ -15,7 +14,10 @@
     "dependencies": {
         "@golevelup/ts-jest": "^0.3.3",
         "@jest/test-sequencer": "^29.2.1",
-        "@prisma/client": "^3.14.0",
+        "@types/cookie": "^0.5.1",
+        "@types/pg": "^8.6.5",
+        "@types/ramda": "^0.28.18",
+        "@types/uuid": "^8.3.4",
         "@types/cookie-parser": "^1.4.3",
         "@types/jest": "^29.0.3",
         "@types/node": "^18.7.18",
@@ -35,7 +37,7 @@
         "node-fetch": "^2.6.7",
         "pactum": "^3.2.2",
         "prettier": "^2.7.1",
-        "prisma": "^3.14.0",
+        "prettier-plugin-organize-imports": "^3.2.1",
         "ramda": "^0.28.0",
         "reflect-metadata": "^0.1.13",
         "ts-jest": "^29.0.1",
@@ -67,12 +69,9 @@
             "./jest-setup-file.ts"
         ],
         "testSequencer": "./testSequencer.js",
-        "testTimeout": 60000
-    },
-    "devDependencies": {
-        "@types/cookie": "^0.5.1",
-        "@types/pg": "^8.6.5",
-        "@types/ramda": "^0.28.18",
-        "@types/uuid": "^8.3.4"
+        "testTimeout": 60000,
+        "moduleNameMapper": {
+            "@modules/repository": "<rootDir>/../modules/repository"
+        }
     }
 }

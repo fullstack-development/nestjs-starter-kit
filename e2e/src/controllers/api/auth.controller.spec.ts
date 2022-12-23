@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@modules/repository';
 import { isJWT } from 'class-validator';
 import { v4 } from 'uuid';
 import { confirmEmail, refresh, signIn, signUp } from './endpoints/auth.controller.endpoints';

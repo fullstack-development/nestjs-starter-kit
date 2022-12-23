@@ -1,11 +1,6 @@
-import { User as UserApi } from '@prisma/client';
+import { User as UserApi } from '@modules/repository';
 import { Transform } from 'class-transformer';
-import {
-    IsBoolean,
-    IsDate,
-    IsEmail,
-    IsNumber,
-} from 'class-validator';
+import { IsBoolean, IsDate, IsEmail, IsNumber } from 'class-validator';
 
 export class UserJson implements Omit<UserApi, 'hash'> {
     @IsNumber()
