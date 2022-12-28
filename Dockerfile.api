@@ -1,26 +1,46 @@
-FROM node:14-alpine as deps
+# REPOSITORY DEPENDENCIES
+FROM node:18.12-alpine as repository_deps
 RUN apk add --no-cache libc6-compat
+
+WORKDIR /app
+COPY ./modules/repository ./
+
+RUN yarn install --frozen-lockfile
+RUN yarn prisma:generate
+# ------------
+
+# API DEPENDENCIES
+FROM node:18.12-alpine as api_deps
+RUN apk add --no-cache libc6-compat
+
 WORKDIR /app
 COPY ./api/yarn.lock ./api/package.json ./
-COPY ./schema.prisma ./src/schema.prisma
-RUN yarn install --ignore-scripts --frozen-lockfile --silent
-RUN npx prisma generate --schema="./src/schema.prisma"
 
-FROM node:14-alpine as builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY ./api .
-COPY ./schema.prisma ./src/schema.prisma
-RUN yarn build
+RUN yarn install --frozen-lockfile
+# ------------
 
-FROM node:14-alpine as runner
+# BUILD API
+FROM node:18.12-alpine as api
 WORKDIR /app
+
+COPY --from=api_deps /app/node_modules ./api/node_modules
+COPY --from=repository_deps /app ./modules/repository
+
+COPY ./api ./api
+
+RUN cd ./api && yarn build
+# ------------
+
+FROM node:18.12-alpine as main
+
+WORKDIR /app
+
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nestjs -u 1001
 
-COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
-COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=nestjs:nodejs /app/src/swagger.yaml ./src/swagger.yaml
+COPY --from=api --chown=nestjs:nodejs /app/api/dist ./dist
+COPY --from=api --chown=nestjs:nodejs /app/api/node_modules ./node_modules
+COPY --from=api --chown=nestjs:nodejs /app/api/src/swagger.yaml ./src/swagger.yaml
 
 ENV DB_ADDRESS=$DB_ADDRESS
 ENV DB_USER=$DB_USER
@@ -38,4 +58,4 @@ USER nestjs
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "ENVIRONMENT=$ENVIRONMENT DB_ADDRESS=$DB_ADDRESS DB_USER=$DB_USER DB_PASSWORD=$DB_PASSWORD DB_NAME=$DB_NAME DB_PORT=$DB_PORT JWT_SECRET=$JWT_SECRET JWT_EXPIRES_IN=$JWT_EXPIRES_IN PORT_API=$PORT_API JWT_REFRESH_TOKEN_SECRET=$JWT_REFRESH_TOKEN_SECRET JWT_REFRESH_TOKEN_EXPIRATION_TIME=$JWT_REFRESH_TOKEN_EXPIRATION_TIME NODE_ENV=production node dist/src/main"]
+CMD ["sh", "-c", "ENVIRONMENT=$ENVIRONMENT DB_ADDRESS=$DB_ADDRESS DB_USER=$DB_USER DB_PASSWORD=$DB_PASSWORD DB_NAME=$DB_NAME DB_PORT=$DB_PORT JWT_SECRET=$JWT_SECRET JWT_EXPIRES_IN=$JWT_EXPIRES_IN PORT_API=$PORT_API JWT_REFRESH_TOKEN_SECRET=$JWT_REFRESH_TOKEN_SECRET JWT_REFRESH_TOKEN_EXPIRATION_TIME=$JWT_REFRESH_TOKEN_EXPIRATION_TIME NODE_ENV=production node dist/main"]

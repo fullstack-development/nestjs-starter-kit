@@ -15,10 +15,15 @@ fs.copyFileSync(
 
 const enginesList = {
     win32: 'node_modules/@prisma/engines/query_engine-windows.dll.node',
+    linux: 'node_modules/@prisma/engines/libquery_engine-linux-musl-openssl-3.0.x.so.node',
 };
 
-const engine = enginesList[process.platform];
-if (engine) {
-    const file = path.resolve(root, `../modules/repository/${engine}`);
-    fs.copyFileSync(file, path.resolve(dist, path.basename(file)));
+const platform = process.platform;
+const engine = enginesList[platform];
+
+if (!engine) {
+    throw `Cannot find engine for '${platform}'`;
 }
+
+const engineFile = path.resolve(root, `../modules/repository/${engine}`);
+fs.copyFileSync(engineFile, path.resolve(dist, path.basename(engineFile)));

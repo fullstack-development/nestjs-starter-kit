@@ -54,7 +54,9 @@
         ],
         "moduleDirectories": [
             "<rootDir>/node_modules",
-            "<rootDir>/src"
+            "<rootDir>/src",
+            "<rootDir>/../modules/repository",
+            "<rootDir>/../modules/repository/node_modules"
         ],
         "testRegex": ".*\\.spec\\.ts$",
         "transform": {

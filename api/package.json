@@ -7,12 +7,12 @@
     "license": "UNLICENSED",
     "main": "./src/main.ts",
     "scripts": {
-        "prepare": "node buildPrepare.js",
-        "build": "rimraf dist && yarn prepare && nest build --webpack --webpackPath webpack.references.config.js",
+        "buildPrepare": "node buildPrepare.js",
+        "build": "rimraf dist && yarn buildPrepare && nest build --webpack --webpackPath webpack.references.config.js",
         "format": "prettier --write \"src/**/*.ts\"",
-        "start:dev": "yarn prepare && cross-env NODE_ENV=development nest start --webpack --webpackPath webpack.references.config.js --watch",
-        "start:debug": "yarn prepare && cross-env NODE_ENV=development nest start --webpack --webpackPath webpack.references.config.js --debug --watch",
-        "start:prod": "yarn prepare && cross-env NODE_ENV=production node dist/main",
+        "start:dev": "yarn buildPrepare && cross-env NODE_ENV=development nest start --webpack --webpackPath webpack.references.config.js --watch",
+        "start:debug": "yarn buildPrepare && cross-env NODE_ENV=development nest start --webpack --webpackPath webpack.references.config.js --debug --watch",
+        "start:prod": "yarn buildPrepare && cross-env NODE_ENV=production node dist/main",
         "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
         "test": "cross-env TEST=true jest",
         "test:coverage": "cross-env TEST=true jest --coverage"

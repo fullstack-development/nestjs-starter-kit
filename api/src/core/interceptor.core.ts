@@ -70,8 +70,8 @@ export class HttpInterceptor implements NestInterceptor, OnModuleInit {
                                 }
 
                                 throw new Error(
-                                    'Each endpoint return must be an instance of a ControllerResponse ' +
-                                        'or a BaseError<string>',
+                                    'Each endpoint return must be an instance of a ' +
+                                        'ControllerResponse or a BaseError<string>',
                                 );
                             }),
                         ),

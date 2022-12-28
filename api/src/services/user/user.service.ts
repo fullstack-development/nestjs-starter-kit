@@ -11,6 +11,7 @@ export class UserServiceProvider {
     constructor(private readonly db: DatabaseProvider) {}
 
     async createUser({ email, password }: UserPayload) {
+        console.log(this.db.user);
         if ((await this.db.user.findFirst({ where: { email } })) !== null) {
             return new UserAlreadyExist();
         }

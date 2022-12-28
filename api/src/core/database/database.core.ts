@@ -8,24 +8,22 @@ type RepositoryGetters = {
     readonly [key in Repositories]: Prisma.TransactionClient[key];
 };
 
-function Repository<R extends Repositories>(name: R) {
-    return function (target: unknown, propertyKey: string) {
-        Object.defineProperty(target, propertyKey, {
-            get: () => RequestContext.get<TransactionsContext>().transactions.Prisma[name],
-        });
-    };
-}
+const repository = <R extends Repositories>(name: R) =>
+    RequestContext.get<TransactionsContext>().transactions.Prisma[name];
 
 @Injectable()
 export class DatabaseProvider implements RepositoryGetters {
-    @Repository(Repositories.User)
-    readonly user: Prisma.TransactionClient['user'];
+    get user() {
+        return repository(Repositories.User);
+    }
 
-    @Repository(Repositories.RefreshToken)
-    readonly refreshToken: Prisma.TransactionClient['refreshToken'];
+    get refreshToken() {
+        return repository(Repositories.RefreshToken);
+    }
 
-    @Repository(Repositories.EmailConfirm)
-    readonly emailConfirm: Prisma.TransactionClient['emailConfirm'];
+    get emailConfirm() {
+        return repository(Repositories.EmailConfirm);
+    }
 
     private readonly prisma = new PrismaClient();
     private readonly logger = new Logger(DatabaseProvider.name);
