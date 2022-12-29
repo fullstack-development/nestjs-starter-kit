@@ -15,12 +15,12 @@
         "@golevelup/ts-jest": "^0.3.3",
         "@jest/test-sequencer": "^29.2.1",
         "@types/cookie": "^0.5.1",
-        "@types/pg": "^8.6.5",
-        "@types/ramda": "^0.28.18",
-        "@types/uuid": "^8.3.4",
         "@types/cookie-parser": "^1.4.3",
         "@types/jest": "^29.0.3",
         "@types/node": "^18.7.18",
+        "@types/pg": "^8.6.5",
+        "@types/ramda": "^0.28.18",
+        "@types/uuid": "^8.3.4",
         "@typescript-eslint/eslint-plugin": "^5.37.0",
         "@typescript-eslint/parser": "^5.37.0",
         "body-parser": "^1.20.1",
@@ -36,6 +36,7 @@
         "jest": "^29.0.3",
         "node-fetch": "^2.6.7",
         "pactum": "^3.2.2",
+        "pg": "^8.8.0",
         "prettier": "^2.7.1",
         "prettier-plugin-organize-imports": "^3.2.1",
         "ramda": "^0.28.0",
@@ -55,8 +56,8 @@
         "moduleDirectories": [
             "<rootDir>/node_modules",
             "<rootDir>/src",
-            "<rootDir>/../modules/repository",
-            "<rootDir>/../modules/repository/node_modules"
+            "<rootDir>/../libs/repository",
+            "<rootDir>/../libs/repository/node_modules"
         ],
         "testRegex": ".*\\.spec\\.ts$",
         "transform": {
@@ -73,7 +74,7 @@
         "testSequencer": "./testSequencer.js",
         "testTimeout": 60000,
         "moduleNameMapper": {
-            "@modules/repository": "<rootDir>/../modules/repository"
+            "@lib/repository": "<rootDir>/../libs/repository"
         }
     }
 }

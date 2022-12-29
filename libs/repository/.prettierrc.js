@@ -8,6 +8,7 @@ module.exports = {
     trailingComma: 'all',
     useTabs: false,
     endOfLine: 'lf',
+    organizeImportsSkipDestructiveCodeActions: true,
     overrides: [
         {
             files: '*.json',

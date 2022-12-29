@@ -86,8 +86,8 @@
         "moduleDirectories": [
             "<rootDir>/node_modules",
             "<rootDir>/src",
-            "<rootDir>/../modules/repository",
-            "<rootDir>/../modules/repository/node_modules"
+            "<rootDir>/../libs/repository",
+            "<rootDir>/../libs/repository/node_modules"
         ],
         "modulePathIgnorePatterns": [
             "<rootDir>/dist/",
@@ -108,7 +108,7 @@
             "./jest-setup-file.ts"
         ],
         "moduleNameMapper": {
-            "@modules/repository": "<rootDir>/../modules/repository"
+            "@lib/repository": "<rootDir>/../libs/repository"
         }
     }
 }

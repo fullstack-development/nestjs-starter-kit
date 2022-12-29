@@ -9,7 +9,7 @@ if (!fs.existsSync(dist)) {
 }
 
 fs.copyFileSync(
-    path.resolve(root, '../modules/repository/schema.prisma'),
+    path.resolve(root, '../libs/repository/schema.prisma'),
     path.resolve(dist, 'schema.prisma'),
 );
 
@@ -25,5 +25,5 @@ if (!engine) {
     throw `Cannot find engine for '${platform}'`;
 }
 
-const engineFile = path.resolve(root, `../modules/repository/${engine}`);
+const engineFile = path.resolve(root, `../libs/repository/${engine}`);
 fs.copyFileSync(engineFile, path.resolve(dist, path.basename(engineFile)));

@@ -1,6 +1,7 @@
 module.exports = function (options, webpack) {
     return {
         ...options,
+        devtool: 'source-map',
         module: {
             ...options.module,
             rules: [

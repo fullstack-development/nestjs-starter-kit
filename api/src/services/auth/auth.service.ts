@@ -1,4 +1,4 @@
-import { User } from '@modules/repository';
+import { User } from '@lib/repository';
 import { Injectable, Module } from '@nestjs/common';
 import { Config, ConfigProvider } from '../../core/config/config.core';
 import { Database, DatabaseProvider } from '../../core/database/database.core';

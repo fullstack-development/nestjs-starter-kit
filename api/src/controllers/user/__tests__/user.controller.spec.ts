@@ -1,6 +1,6 @@
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
+import { Repositories } from '@lib/repository';
 import { RequestContextModule } from '@medibloc/nestjs-request-context';
-import { Repositories } from '@modules/repository';
 import { ModuleRef } from '@nestjs/core';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
@@ -13,7 +13,11 @@ import { HttpInterceptor } from '../../../core/interceptor.core';
 import { JwtRefreshTokenStrategy } from '../../../services/auth/strategies/jwt-refresh.strategy';
 import { JwtStrategy } from '../../../services/auth/strategies/jwt.strategy';
 import { UserServiceProvider } from '../../../services/user/user.service';
-import { AppWrap, DatabasePrismaMock, mockDatabasePrisma } from '../../../utils/tests.utils';
+import {
+    AppWrap,
+    DatabaseUnsafeRepositoryMock,
+    mockDatabaseUnsafeRepository,
+} from '../../../utils/tests.utils';
 import { ConfigServiceFake } from '../../../__mocks__/ConfigServiceFake';
 import { TransactionsContextFake } from '../../../__mocks__/TransactionsContextFake';
 import { getUserStub } from '../../../__mocks__/user.stub';
@@ -21,7 +25,7 @@ import { UserControllerProvider } from './../user.controller';
 
 describe('UserController', () => {
     const appWrap = {} as AppWrap;
-    let db: { Prisma: DatabasePrismaMock<Repositories.User> };
+    let db: { UnsafeRepository: DatabaseUnsafeRepositoryMock<Repositories.User> };
     let userService: DeepMocked<UserServiceProvider>;
     let config: ConfigServiceFake;
     let jwtService: DeepMocked<JwtService>;
@@ -29,7 +33,7 @@ describe('UserController', () => {
     let user: ReturnType<typeof getUserStub>;
 
     const getAuthToken = () => {
-        db.Prisma.user.findFirst.mockResolvedValueOnce(user);
+        db.UnsafeRepository.user.findFirst.mockResolvedValueOnce(user);
         return jwtService.sign(
             { email: user.email },
             {
@@ -63,7 +67,7 @@ describe('UserController', () => {
                 },
                 {
                     provide: DatabaseProvider,
-                    useValue: { Prisma: mockDatabasePrisma(Repositories.User) },
+                    useValue: { UnsafeRepository: mockDatabaseUnsafeRepository(Repositories.User) },
                 },
                 {
                     provide: UserServiceProvider,
@@ -90,7 +94,7 @@ describe('UserController', () => {
         await appWrap.app.init();
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        db.Prisma.$transaction.mockImplementation((cb: (arg: any) => any) => cb({}));
+        db.UnsafeRepository.$transaction.mockImplementation((cb: (arg: any) => any) => cb({}));
     });
 
     afterAll(async () => {

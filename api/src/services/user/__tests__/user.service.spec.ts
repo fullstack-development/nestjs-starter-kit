@@ -1,4 +1,4 @@
-import { User } from '@modules/repository';
+import { User } from '@lib/repository';
 import { Test } from '@nestjs/testing';
 import { DatabaseProvider } from '../../../core/database/database.core';
 import { CannotFindUser } from '../../../core/database/database.model';

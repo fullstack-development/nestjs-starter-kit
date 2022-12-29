@@ -1,4 +1,4 @@
-import { EmailConfirm } from '@modules/repository';
+import { EmailConfirm } from '@lib/repository';
 
 export function getConfirmEmailStub(): EmailConfirm {
     return {

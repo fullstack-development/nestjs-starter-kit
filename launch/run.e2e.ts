@@ -4,7 +4,7 @@ import { exec } from './scripts/utils/child_process.utils';
 import { std } from './scripts/utils/std.utils';
 
 async function run() {
-    const projectName = 'stk_e2e_compose';
+    const projectName = 'stk_e2e';
     const composeYaml = path.resolve(__dirname, '../stk.docker-compose.yaml');
     const { error: envError, parsed: env } = dotenv.config({
         path: path.resolve(__dirname, '.e2e.env'),
@@ -25,11 +25,11 @@ async function run() {
     std.info('\nBuild prisma');
     await exec('yarn', ['install', '--frozen-lockfile'], {
         stdio: 'inherit',
-        cwd: path.resolve(__dirname, '../modules/repository'),
+        cwd: path.resolve(__dirname, '../libs/repository'),
     });
     await exec('yarn', ['prisma:generate'], {
         stdio: 'inherit',
-        cwd: path.resolve(__dirname, '../modules/repository'),
+        cwd: path.resolve(__dirname, '../libs/repository'),
     });
     // #endregion
 
@@ -52,7 +52,7 @@ async function run() {
     std.info('\nDeploy prisma migrations');
     await exec('yarn', ['prisma:migrate:deploy'], {
         stdio: 'inherit',
-        cwd: path.resolve(__dirname, '../modules/repository'),
+        cwd: path.resolve(__dirname, '../libs/repository'),
     });
     // #endregion
 

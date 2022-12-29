@@ -1,4 +1,4 @@
-import { User as UserApi } from '@modules/repository';
+import { User as UserApi } from '@lib/repository';
 import { Transform } from 'class-transformer';
 import { IsBoolean, IsDate, IsEmail, IsNumber } from 'class-validator';
 

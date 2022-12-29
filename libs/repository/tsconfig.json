@@ -1,7 +1,8 @@
 {
     "compilerOptions": {
-        "module": "commonjs",
         "declaration": true,
+        "outDir": "../../dist/libs/repository",
+        "module": "commonjs",
         "declarationMap": true,
         "removeComments": true,
         "emitDecoratorMetadata": true,
@@ -9,7 +10,6 @@
         "allowSyntheticDefaultImports": true,
         "target": "ES2022",
         "sourceMap": true,
-        "outDir": "./dist",
         "baseUrl": "./",
         "incremental": true,
         "strictNullChecks": true,
@@ -17,7 +17,6 @@
         "composite": true,
         "allowJs": true
     },
-    "include": ["*.ts", "./src/**/*.ts"],
-    "exclude": ["**/migrations/**", "**/node_modules/**"],
-    "references": []
+    "include": ["src/**/*", "src/index.ts"],
+    "exclude": ["node_modules", "dist", "**/*spec.ts"]
 }

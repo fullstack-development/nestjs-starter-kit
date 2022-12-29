@@ -10,12 +10,13 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-stkdb}
       LC_ALL: ${LC_ALL:-C.UTF-8}
     ports:
-      - "5432:5432"
+      - "${DB_PORT:-5439}:${DB_PORT:-5439}"
+    command: -p "${DB_PORT:-5439}"
     healthcheck:
       test:
         [
           "CMD-SHELL",
-          "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"
+          "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER} -p $${DB_PORT:-5439}"
         ]
       interval: 1s
       timeout: 2s
@@ -29,7 +30,7 @@ services:
       dockerfile: Dockerfile.api
     environment:
       PORT_API: ${PORT_API:-3000}
-      DB_PORT: ${DB_PORT:-5432}
+      DB_PORT: ${DB_PORT:-5439}
       DB_ADDRESS: ${DB_ADDRESS:-host.docker.internal}
       DB_PASSWORD: ${DB_PASSWORD:-1234}
       DB_USER: ${DB_USER:-admin}

@@ -44,7 +44,7 @@ export class HttpInterceptor implements NestInterceptor, OnModuleInit {
         const ctx = RequestContext.get<TransactionsContext>();
 
         return from(
-            this.db.Prisma.$transaction(
+            this.db.UnsafeRepository.$transaction(
                 async (prisma) => {
                     await ctx.transactions.init(prisma);
                     return lastValueFrom(

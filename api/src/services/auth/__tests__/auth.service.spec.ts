@@ -1,5 +1,5 @@
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import { EmailConfirm } from '@modules/repository';
+import { EmailConfirm } from '@lib/repository';
 import { Test } from '@nestjs/testing';
 import { ConfigProvider } from '../../../core/config/config.core';
 import { DatabaseProvider } from '../../../core/database/database.core';

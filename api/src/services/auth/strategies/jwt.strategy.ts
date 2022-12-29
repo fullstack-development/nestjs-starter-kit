@@ -16,6 +16,9 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-user') {
     }
 
     async validate({ email }: TokenPayload) {
-        return R.pick(['id', 'email'], await this.db.Prisma.user.findFirst({ where: { email } }));
+        return R.pick(
+            ['id', 'email'],
+            await this.db.UnsafeRepository.user.findFirst({ where: { email } }),
+        );
     }
 }

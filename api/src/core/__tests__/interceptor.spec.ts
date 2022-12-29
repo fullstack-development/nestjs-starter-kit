@@ -29,11 +29,11 @@ describe('Interceptor', () => {
     let interceptor: HttpInterceptor;
     let moduleRef: DeepMocked<ModuleRef>;
     let db: {
-        Prisma: DeepMocked<DatabaseProvider['Prisma']>;
+        UnsafeRepository: DeepMocked<DatabaseProvider['UnsafeRepository']>;
     };
 
     beforeAll(async () => {
-        const dbMock = createMock<DeepMocked<DatabaseProvider['Prisma']>>();
+        const dbMock = createMock<DeepMocked<DatabaseProvider['UnsafeRepository']>>();
         const module = await Test.createTestingModule({
             imports: [
                 RequestContextModule.forRoot({
@@ -45,7 +45,7 @@ describe('Interceptor', () => {
                 {
                     provide: DatabaseProvider,
                     useValue: {
-                        get Prisma() {
+                        get UnsafeRepository() {
                             return dbMock;
                         },
                     },
@@ -64,7 +64,7 @@ describe('Interceptor', () => {
         await appWrap.app.init();
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        db.Prisma.$transaction.mockImplementation((cb: (arg: any) => any) => cb({}));
+        db.UnsafeRepository.$transaction.mockImplementation((cb: (arg: any) => any) => cb({}));
     });
 
     afterEach(() => {

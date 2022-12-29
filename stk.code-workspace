@@ -8,8 +8,8 @@
       "path": "api"
     },
     {
-      "path": "modules/repository",
-      "name": "modules/repository"
+      "path": "libs/repository",
+      "name": "libs/repository"
     },
     {
       "path": "e2e"
@@ -25,7 +25,8 @@
       "api": true,
       "e2e": true,
       "launch": true,
-      "modules": true
+      "modules": true,
+      "libs": true
     }
   }
 }

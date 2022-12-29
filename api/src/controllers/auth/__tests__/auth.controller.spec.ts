@@ -24,12 +24,12 @@ import { AuthControllerProvider } from '../auth.controller';
 describe('AuthController', () => {
     const appWrap = {} as AppWrap;
     let db: {
-        Prisma: DeepMocked<DatabaseProvider['Prisma']>;
+        UnsafeRepository: DeepMocked<DatabaseProvider['UnsafeRepository']>;
     };
     let authService: DeepMocked<AuthServiceProvider>;
 
     beforeAll(async () => {
-        const dbMock = createMock<DeepMocked<DatabaseProvider['Prisma']>>();
+        const dbMock = createMock<DeepMocked<DatabaseProvider['UnsafeRepository']>>();
         const configService = new ConfigServiceFake();
         const module = await Test.createTestingModule({
             imports: [
@@ -50,7 +50,7 @@ describe('AuthController', () => {
                 {
                     provide: DatabaseProvider,
                     useValue: {
-                        get Prisma() {
+                        get UnsafeRepository() {
                             return dbMock;
                         },
                     },
@@ -87,7 +87,7 @@ describe('AuthController', () => {
         await appWrap.app.init();
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        db.Prisma.$transaction.mockImplementation((cb: (arg: any) => any) => cb({}));
+        db.UnsafeRepository.$transaction.mockImplementation((cb: (arg: any) => any) => cb({}));
     });
 
     afterAll(async () => {

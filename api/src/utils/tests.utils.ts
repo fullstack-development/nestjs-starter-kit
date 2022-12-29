@@ -1,5 +1,5 @@
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import { Repositories } from '@modules/repository';
+import { Repositories } from '@lib/repository';
 import { INestApplication, Type } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as request from 'supertest';
@@ -21,21 +21,31 @@ export function mockDatabaseRepositories() {
     return db as unknown as DatabaseRepositoriesMock;
 }
 
-export type DatabasePrismaMock<K extends Repositories> = DeepMocked<DatabaseProvider['Prisma']> & {
-    [key in K]: DeepMocked<DatabaseProvider['Prisma'][key]>;
+export type DatabaseUnsafeRepositoryMock<K extends Repositories> = DeepMocked<
+    DatabaseProvider['UnsafeRepository']
+> & {
+    [key in K]: DeepMocked<DatabaseProvider['UnsafeRepository'][key]>;
 };
 
-export function mockDatabasePrisma<K extends Repositories>(key: K): DatabasePrismaMock<K>;
-export function mockDatabasePrisma<K1 extends Repositories, K2 extends Repositories>(
+export function mockDatabaseUnsafeRepository<K extends Repositories>(
+    key: K,
+): DatabaseUnsafeRepositoryMock<K>;
+export function mockDatabaseUnsafeRepository<K1 extends Repositories, K2 extends Repositories>(
     k1: K1,
     k2: K2,
-): DatabasePrismaMock<K1> & DatabasePrismaMock<K2>;
-export function mockDatabasePrisma<
+): DatabaseUnsafeRepositoryMock<K1> & DatabaseUnsafeRepositoryMock<K2>;
+export function mockDatabaseUnsafeRepository<
     K1 extends Repositories,
     K2 extends Repositories,
     K3 extends Repositories,
->(k1: K1, k2: K2, k3: K3): DatabasePrismaMock<K1> & DatabasePrismaMock<K2> & DatabasePrismaMock<K3>;
-export function mockDatabasePrisma<K extends Repositories>(...keys: Array<K>) {
+>(
+    k1: K1,
+    k2: K2,
+    k3: K3,
+): DatabaseUnsafeRepositoryMock<K1> &
+    DatabaseUnsafeRepositoryMock<K2> &
+    DatabaseUnsafeRepositoryMock<K3>;
+export function mockDatabaseUnsafeRepository<K extends Repositories>(...keys: Array<K>) {
     const Prisma = createMock();
     for (const k of keys) {
         Object.defineProperty(Prisma, k, {
@@ -46,7 +56,7 @@ export function mockDatabasePrisma<K extends Repositories>(...keys: Array<K>) {
 }
 
 interface DgGet {
-    get get(): { Prisma: DatabasePrismaMock<Repositories.User> };
+    get get(): { Prisma: DatabaseUnsafeRepositoryMock<Repositories.User> };
 }
 
 interface JwtServiceGet {

@@ -1,3 +1,4 @@
+import { RepositoryLibrary } from '@lib/repository';
 import { RequestContextModule } from '@medibloc/nestjs-request-context';
 import { Module, Scope } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
@@ -12,6 +13,7 @@ import { AppController } from './../controllers/app.controller';
 @Module({
     imports: [
         Config,
+        RepositoryLibrary,
         Database,
         RequestContextModule.forRoot({
             contextClass: TransactionsContext,

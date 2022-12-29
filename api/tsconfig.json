@@ -15,10 +15,10 @@
         "skipLibCheck": true,
         "allowJs": true,
         "paths": {
-            "@modules/repository": ["../modules/repository/index.ts"]
+            "@lib/repository": ["../libs/repository/src/index.ts"]
         }
     },
     "include": ["*.ts", "./src/**/*.ts"],
     "exclude": ["**/migrations/**", "**/dist/**", "**/node_modules/**"],
-    "references": [{ "path": "../modules/repository" }]
+    "references": [{ "path": "../libs/repository" }]
 }

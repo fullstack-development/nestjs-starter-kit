@@ -1,7 +1,11 @@
+import {
+    Prisma,
+    Repositories,
+    RepositoryLibrary,
+    RepositoryLibraryProvider,
+} from '@lib/repository';
 import { RequestContext } from '@medibloc/nestjs-request-context';
-import { Prisma, PrismaClient, Repositories } from '@modules/repository';
-import { Injectable, Logger, Module } from '@nestjs/common';
-import { Config, ConfigProvider } from '../config/config.core';
+import { Injectable, Module } from '@nestjs/common';
 import { TransactionsContext } from '../transactions.core';
 
 type RepositoryGetters = {
@@ -9,10 +13,12 @@ type RepositoryGetters = {
 };
 
 const repository = <R extends Repositories>(name: R) =>
-    RequestContext.get<TransactionsContext>().transactions.Prisma[name];
+    RequestContext.get<TransactionsContext>().transactions.Client[name];
 
 @Injectable()
 export class DatabaseProvider implements RepositoryGetters {
+    constructor(private repository: RepositoryLibraryProvider) {}
+
     get user() {
         return repository(Repositories.User);
     }
@@ -25,40 +31,16 @@ export class DatabaseProvider implements RepositoryGetters {
         return repository(Repositories.EmailConfirm);
     }
 
-    private readonly prisma = new PrismaClient();
-    private readonly logger = new Logger(DatabaseProvider.name);
-
-    private isInitialized = false;
-
     /**
      * !!! NO DB TRANSACTION INSTANCE !!!
      */
-    public get Prisma() {
-        return this.prisma;
-    }
-
-    constructor(
-        // import the config to make sure it is initialized first
-        private cfg: ConfigProvider,
-    ) {}
-
-    async initialize() {
-        if (this.isInitialized) return;
-
-        try {
-            await this.prisma.$connect();
-            this.logger.log('Successfully connected to database');
-            this.isInitialized = true;
-        } catch (e) {
-            const err = `Database connection error: ${e.message}`;
-            this.logger.error(err);
-            throw new Error(err);
-        }
+    get UnsafeRepository() {
+        return this.repository.Prisma;
     }
 }
 
 @Module({
-    imports: [Config],
+    imports: [RepositoryLibrary],
     providers: [DatabaseProvider],
     exports: [DatabaseProvider],
 })

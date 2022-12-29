@@ -25,7 +25,7 @@ export class JwtRefreshTokenStrategy extends PassportStrategy(Strategy, 'jwt-use
     }
 
     async validate(request: Request, { email }: TokenPayload) {
-        const user = await this.db.Prisma.user.findFirst({
+        const user = await this.db.UnsafeRepository.user.findFirst({
             where: { email },
             include: { refreshToken: true },
         });

@@ -3,7 +3,7 @@ FROM node:18.12-alpine as repository_deps
 RUN apk add --no-cache libc6-compat
 
 WORKDIR /app
-COPY ./modules/repository ./
+COPY ./libs/repository ./
 
 RUN yarn install --frozen-lockfile
 RUN yarn prisma:generate
@@ -24,7 +24,7 @@ FROM node:18.12-alpine as api
 WORKDIR /app
 
 COPY --from=api_deps /app/node_modules ./api/node_modules
-COPY --from=repository_deps /app ./modules/repository
+COPY --from=repository_deps /app ./libs/repository
 
 COPY ./api ./api
 

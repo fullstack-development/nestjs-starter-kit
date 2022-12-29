@@ -1,4 +1,4 @@
-import { User } from '@modules/repository';
+import { User } from '@lib/repository';
 import { Injectable, Module } from '@nestjs/common';
 import { Database, DatabaseProvider } from '../../core/database/database.core';
 import { CannotFindUser } from '../../core/database/database.model';
@@ -11,7 +11,6 @@ export class UserServiceProvider {
     constructor(private readonly db: DatabaseProvider) {}
 
     async createUser({ email, password }: UserPayload) {
-        console.log(this.db.user);
         if ((await this.db.user.findFirst({ where: { email } })) !== null) {
             return new UserAlreadyExist();
         }

@@ -1,4 +1,4 @@
-import { RefreshToken, User } from '@modules/repository';
+import { RefreshToken, User } from '@lib/repository';
 import { Injectable, Module } from '@nestjs/common';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { Config, ConfigProvider } from '../../core/config/config.core';

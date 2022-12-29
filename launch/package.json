@@ -4,7 +4,7 @@
     "description": "",
     "main": ".prettierrc.js",
     "scripts": {
-        "test": "npx ts-node run.e2e.ts"
+        "test:e2e": "npx ts-node run.e2e.ts"
     },
     "keywords": [],
     "author": "",

@@ -6,7 +6,6 @@ import * as Yaml from 'yamljs';
 import { AppModule } from './app/app.module';
 import { ConfigProvider } from './core/config/config.core';
 import { ENVIRONMENT } from './core/config/config.model';
-import { DatabaseProvider } from './core/database/database.core';
 import './patchBigInt';
 
 const enableCorsByEnv = (app: INestApplication, config: ConfigProvider) => {
@@ -69,9 +68,6 @@ const enableCorsByEnv = (app: INestApplication, config: ConfigProvider) => {
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
     app.use(cookieParser());
-
-    const db = app.get(DatabaseProvider);
-    await db.initialize();
 
     const configService = app.get(ConfigProvider);
 

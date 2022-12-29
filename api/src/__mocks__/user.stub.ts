@@ -1,4 +1,4 @@
-import { EmailConfirm, RefreshToken, User } from '@modules/repository';
+import { EmailConfirm, RefreshToken, User } from '@lib/repository';
 
 export function getUserStub(): User & {
     refreshToken: RefreshToken | null;
