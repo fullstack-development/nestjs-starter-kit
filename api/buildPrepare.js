@@ -1,9 +1,9 @@
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
 
 const root = path.resolve(__dirname);
 const dist = path.resolve(__dirname, 'dist');
+const enginesDir = path.resolve(__dirname, '../libs/repository/node_modules/@prisma/engines');
 
 if (!fs.existsSync(dist)) {
     fs.mkdirSync(dist);
@@ -14,19 +14,13 @@ fs.copyFileSync(
     path.resolve(dist, 'schema.prisma'),
 );
 
-const enginesList = {
-    win32: 'node_modules/@prisma/engines/query_engine-windows.dll.node',
-    ubuntu: 'node_modules/@prisma/engines/libquery_engine-debian-openssl-3.0.x.so.node',
-    linux: 'node_modules/@prisma/engines/libquery_engine-linux-musl-openssl-3.0.x.so.node',
-};
-
 let engine = getEngine();
 if (!engine) {
     throw `Cannot find engine for '${process.platform}'`;
 }
 
-const engineFile = path.resolve(root, `../libs/repository/${engine}`);
-fs.copyFileSync(engineFile, path.resolve(dist, path.basename(engineFile)));
+const engineFile = path.resolve(enginesDir, engine);
+fs.copyFileSync(engineFile, path.resolve(dist, engine));
 
 function getEngine() {
     const libConfigFile = path.resolve(__dirname, '.prisma-lib');
@@ -35,16 +29,25 @@ function getEngine() {
         return JSON.parse(fs.readFileSync(libConfigFile)).lib;
     }
 
-    const platform = process.platform;
-    let engine = enginesList[platform];
-    if (platform === 'linux') {
-        const lsb = execSync('lsb_release -a | grep Description').toString();
-        if (new RegExp(/.*ubuntu.*/gi).test(lsb)) {
-            engine = enginesList.ubuntu;
-        }
+    const files = fs.readdirSync(enginesDir);
+    const findEngine = (regexp) =>
+        files.find(
+            (f) => !fs.statSync(path.resolve(enginesDir, f)).isDirectory() && regexp.test(f),
+        );
+
+    let engine = null;
+    switch (process.platform) {
+        case 'linux':
+            engine = findEngine(new RegExp(/.*\.so\.node$/gi));
+            break;
+        case 'win32':
+            engine = findEngine(new RegExp(/.*\.dll\.node$/gi));
+            break;
     }
 
-    fs.writeFileSync(libConfigFile, JSON.stringify({ lib: engine }));
+    if (engine !== null) {
+        fs.writeFileSync(libConfigFile, JSON.stringify({ lib: engine }));
+    }
 
     return engine;
 }
