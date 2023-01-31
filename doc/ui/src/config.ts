@@ -26,7 +26,7 @@ export type DocGenerated = {
     sourceMap: { [key: string]: { kind: string; name: string; body: string } };
     methods: Array<DocMethod>;
     libs: {
-        repository: { [name: string]: { class: Record<string, string>; id: string } };
+        repository: { [name: string]: { body: string; id: string } };
     };
 };
 

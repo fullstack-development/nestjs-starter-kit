@@ -43,7 +43,7 @@ export function generateRepository() {
         const objectString = result[0]
             .replace(/ *(.*): *(.*) *\s/g, '"$1": "$2",')
             .replace('",}', '"}');
-        records[type.getName()] = { class: JSON.parse(objectString), id: v4() };
+        records[type.getName()] = { body: result[0], id: v4() };
     }
 
     if (Object.keys(records).length !== typeAliases.length) {

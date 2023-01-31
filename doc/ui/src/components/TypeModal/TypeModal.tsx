@@ -24,8 +24,8 @@ const TypeModalComponent: React.FC = () => {
         const libRepositoryTypeRes = location.hash.match(libsRepositoryTypeRegexp());
         if (libRepositoryTypeRes) {
             const name = libRepositoryTypeRes[1];
-            const body = config.DOC_GENERATED.libs.repository[name].class;
-            // setContent({ data: renderType(parseTypeWithSourceMap(body)), name });
+            const { body } = config.DOC_GENERATED.libs.repository[name];
+            setContent({ data: renderType(parseTypeWithSourceMap(body)), name });
             return;
         }
 
