@@ -16,7 +16,7 @@ export const CardWrapper = styled.div`
 
 export const Item = styled.div`
     ${Sidebar} & {
-        color: white;
+        color: #333;
         text-decoration: none;
         width: 100%;
         height: 32px;

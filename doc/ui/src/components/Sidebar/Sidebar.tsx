@@ -37,14 +37,16 @@ const SidebarComponent = memo<SidebarProps>(({ items }) => {
                 <Sidebar>
                     {items.map((i) => (
                         <>
-                            <Item key={i.hash}>
-                                <HashLink to={`/#${i.hash}`}>{i.title}</HashLink>
-                            </Item>
+                            <HashLink key={i.hash} to={`/#${i.hash}`}>
+                                <Item>{i.title}</Item>
+                            </HashLink>
                             {i.items &&
                                 i.items.map((i) => (
-                                    <Item key={i.hash} style={{ paddingLeft: 36 }}>
-                                        <HashLink to={`/#${i.hash}`}>{i.title}</HashLink>
-                                    </Item>
+                                    <HashLink to={`/#${i.hash}`}>
+                                        <Item key={i.hash} style={{ paddingLeft: 36 }}>
+                                            {i.title}
+                                        </Item>
+                                    </HashLink>
                                 ))}
                         </>
                     ))}
