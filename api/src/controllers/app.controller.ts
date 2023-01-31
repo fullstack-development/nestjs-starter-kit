@@ -4,16 +4,27 @@ import { ControllerResponse } from './../core/controller.core';
 @Controller('api')
 export class AppControllerProvider {
     @Get('echo')
-    echo(@Query() query: unknown, @Body() body: unknown) {
-        return ControllerResponse.Success({
-            headers: {
-                'Content-Type': 'application/json',
+    async echo(
+        @Query() query: unknown,
+        @Body() body: unknown,
+    ): Promise<
+        ControllerResponse<
+            {
+                query: unknown;
+                body: unknown;
             },
-            body: {
+            'Content-Type'
+        >
+    > {
+        return new ControllerResponse(
+            {
                 query: query && typeof query === 'object' ? JSON.stringify(query) : query,
                 body: body && typeof body === 'object' ? JSON.stringify(body) : body,
             },
-        });
+            {
+                'Content-Type': 'application/json',
+            },
+        );
     }
 }
 

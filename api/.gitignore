@@ -34,5 +34,3 @@ coverage
 src/schema.prisma
 env/dev.env
 env/dev.docker.env
-
-.prisma-lib

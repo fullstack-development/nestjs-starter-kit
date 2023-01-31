@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "declaration": true,
-        "outDir": "../../api/dist/libs/repository",
+        "outDir": "../../dist/libs/repository",
         "module": "commonjs",
         "declarationMap": true,
         "removeComments": true,
@@ -17,6 +17,6 @@
         "composite": true,
         "allowJs": true
     },
-    "include": ["src/**/*", "src/index.ts"],
+    "include": ["src/**/*", "src/index.ts", "generator1.ts"],
     "exclude": ["node_modules", "dist", "**/*spec.ts"]
 }

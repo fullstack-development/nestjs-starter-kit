@@ -121,7 +121,7 @@ describe('UserController', () => {
                 .send();
 
             expect(response.statusCode).toEqual(200);
-            expect(omit(['created'], response.body.data)).toEqual(
+            expect(omit(['created'], response.body)).toEqual(
                 omit(['refreshToken', 'created', 'emailConfirm', 'hash'], user),
             );
         });

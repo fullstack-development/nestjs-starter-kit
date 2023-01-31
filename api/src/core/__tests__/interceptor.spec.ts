@@ -6,10 +6,9 @@ import { Test } from '@nestjs/testing';
 import * as request from 'supertest';
 import { AppWrap } from '../../utils/tests.utils';
 import { TransactionsContextFake } from '../../__mocks__/TransactionsContextFake';
-import { ControllerResponse } from '../controller.core';
 import { DatabaseProvider } from '../database/database.core';
 import { ErrorHandleMiddlewareProvider } from '../errorHandleMiddleware.core';
-import { BaseError } from '../errors.core';
+import { BaseError, UnprocessableEntityError } from '../errors.core';
 import { HttpInterceptor } from '../interceptor.core';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -74,13 +73,12 @@ describe('Interceptor', () => {
 
     describe('intercept', () => {
         it('should return error on BaseError check', async () => {
-            testResponse.response.mockReturnValueOnce(new BaseError(1));
+            testResponse.response.mockReturnValueOnce(new BaseError(1, 500));
             const response = await request(appWrap.app.getHttpServer()).get('/test/request').send();
 
             expect(response.status).toEqual(500);
             expect(response.body).toEqual({
                 error: 'Error',
-                errorUniqId: '',
                 message: 'The type of the BaseError error property must be "string"',
             });
         });
@@ -92,7 +90,6 @@ describe('Interceptor', () => {
             expect(response.status).toEqual(500);
             expect(response.body).toEqual({
                 error: 'Error',
-                errorUniqId: '',
                 message:
                     'Each endpoint return must be an instance of a ControllerResponse ' +
                     'or a BaseError<string>',
@@ -100,54 +97,40 @@ describe('Interceptor', () => {
         });
 
         it('should return ControllerResponse.Fail', async () => {
-            testResponse.response.mockReturnValueOnce(
-                ControllerResponse.Fail({ error: 'Test ControllerResponse Error' }),
-            );
+            testResponse.response.mockReturnValueOnce(new UnprocessableEntityError('testError'));
             const response = await request(appWrap.app.getHttpServer()).get('/test/request').send();
 
-            expect(response.status).toEqual(200);
+            expect(response.status).toEqual(422);
             expect(response.body).toEqual({
-                success: false,
-                data: {
-                    error: 'Test ControllerResponse Error',
-                },
+                error: 'testError',
             });
 
-            testResponse.response.mockReturnValueOnce(
-                new BaseError('Test Base Error', { userErrorOnly: true }),
-            );
+            testResponse.response.mockReturnValueOnce(new BaseError('Test Base Error', 422));
             const response2 = await request(appWrap.app.getHttpServer())
                 .get('/test/request')
                 .send();
 
-            expect(response2.status).toEqual(200);
+            expect(response2.status).toEqual(422);
             expect(response2.body).toEqual({
-                success: false,
-                data: {
-                    error: 'Test Base Error',
-                },
+                error: 'Test Base Error',
             });
         });
 
         it('should return a 500 error if userErrorOnly === false | undefined', async () => {
-            testResponse.response.mockReturnValueOnce(new BaseError('Test Base Error'));
+            testResponse.response.mockReturnValueOnce(new BaseError('Test Base Error', 500));
             const response = await request(appWrap.app.getHttpServer()).get('/test/request').send();
             expect(response.status).toEqual(500);
             expect(response.body).toEqual({
                 error: 'Test Base Error',
-                errorUniqId: '',
             });
 
-            testResponse.response.mockReturnValueOnce(
-                new BaseError('Test Base Error', { userErrorOnly: false }),
-            );
+            testResponse.response.mockReturnValueOnce(new BaseError('Test Base Error', 500));
             const response2 = await request(appWrap.app.getHttpServer())
                 .get('/test/request')
                 .send();
             expect(response2.status).toEqual(500);
             expect(response2.body).toEqual({
                 error: 'Test Base Error',
-                errorUniqId: '',
             });
         });
 
@@ -170,7 +153,6 @@ describe('Interceptor', () => {
             expect(response.body).toEqual({
                 error: 'Unknown error',
                 message: 'Test error',
-                errorUniqId: '',
             });
 
             testResponse.response.mockImplementationOnce(() => {
@@ -183,7 +165,6 @@ describe('Interceptor', () => {
             expect(response2.body).toEqual({
                 error: 'Unknown error',
                 message: JSON.stringify({ error: 'Test error', message: ['msg1', 'msg2'] }),
-                errorUniqId: '',
             });
         });
     });

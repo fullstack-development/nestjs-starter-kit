@@ -9,7 +9,7 @@
     "scripts": {
         "buildPrepare": "node buildPrepare.js",
         "build": "rimraf dist && yarn buildPrepare && nest build --webpack --webpackPath webpack.references.config.js",
-        "format": "prettier --write \"src/**/*.ts\"",
+        "format": "prettier --end-of-line lf --write \"src/**/*.ts\"",
         "start:dev": "yarn buildPrepare && cross-env NODE_ENV=development nest start --webpack --webpackPath webpack.references.config.js --watch",
         "start:debug": "yarn buildPrepare && cross-env NODE_ENV=development nest start --webpack --webpackPath webpack.references.config.js --debug --watch",
         "start:prod": "yarn buildPrepare && cross-env NODE_ENV=production node dist/main",
@@ -41,6 +41,7 @@
         "rimraf": "^3.0.2",
         "rxjs": "^7.2.0",
         "swagger-ui-express": "^4.5.0",
+        "ts-morph": "^17.0.1",
         "uuid": "^8.3.2",
         "yamljs": "^0.3.0"
     },

@@ -45,5 +45,6 @@ module.exports = {
                 hoist: 'all',
             },
         ],
+        '@typescript-eslint/no-namespace': ['off'],
     },
 };
