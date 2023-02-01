@@ -19,10 +19,11 @@
         "@nestjs/core": "^9.2.1",
         "@nestjs/testing": "^9.2.1",
         "@prisma/client": "^4.8.0",
-        "prisma": "^4.8.0"
+        "prisma": "^4.8.0",
+        "rxjs": "^7.2.0"
     },
     "devDependencies": {
-        "@nestjs/cli": "^9.1.7",
+        "@nestjs/cli": "^9.1.9",
         "@nestjs/schematics": "^9.0.4",
         "@types/node": "^18.11.18",
         "@typescript-eslint/eslint-plugin": "^5.47.1",

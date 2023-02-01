@@ -11,7 +11,7 @@ import {
 import { ModuleRef } from '@nestjs/core';
 import { Response } from 'express';
 import * as R from 'ramda';
-import { from, lastValueFrom, Observable } from 'rxjs';
+import { from, lastValueFrom } from 'rxjs';
 import { catchError, map, mergeMap } from 'rxjs/operators';
 import { ControllerResponse } from './controller.core';
 import { DatabaseProvider } from './database/database.core';
@@ -36,10 +36,7 @@ export class HttpInterceptor implements NestInterceptor, OnModuleInit {
         }
     }
 
-    async intercept(
-        context: ExecutionContext,
-        next: CallHandler<unknown>,
-    ): Promise<Observable<unknown>> {
+    async intercept(context: ExecutionContext, next: CallHandler<unknown>) {
         const response: Response = context.switchToHttp().getResponse();
         const ctx = RequestContext.get<TransactionsContext>();
 
@@ -56,13 +53,7 @@ export class HttpInterceptor implements NestInterceptor, OnModuleInit {
 
                                 if (isError(data)) {
                                     if (isBaseErrorString(data)) {
-                                        if (data.userErrorOnly) {
-                                            return ControllerResponse.Fail({
-                                                error: data.error,
-                                            });
-                                        } else {
-                                            throw data;
-                                        }
+                                        throw data;
                                     }
                                     throw new Error(
                                         'The type of the BaseError error property must be "string"',
@@ -81,21 +72,28 @@ export class HttpInterceptor implements NestInterceptor, OnModuleInit {
             ),
         ).pipe(
             map((data) => {
-                response.status(data.status);
+                response.status(200);
                 if (data.headers) {
                     Object.entries(data.headers).forEach(([key, value]) =>
                         response.setHeader(key, value),
                     );
                 }
-                return R.omit(['status', 'headers'], {
-                    ...R.omit(['body'], data),
-                    data: data.body,
-                });
+                return R.omit(['headers'], data.body);
             }),
             catchError(async (error: BaseError<string> | Error | unknown) => {
                 if (process.env['TEST'] !== 'true') {
-                    if ((isHttpError(error) && error.status >= 500) || !isHttpError(error)) {
-                        this.logger.error(`${error}`);
+                    if (
+                        (isHttpError(error) && error.status >= 500) ||
+                        (isError(error) && error.kind >= 500)
+                    ) {
+                        const errorText = (() => {
+                            try {
+                                return JSON.stringify(error);
+                            } catch {
+                                return `${error}`;
+                            }
+                        })();
+                        this.logger.error(errorText);
                     }
                 }
 
@@ -107,12 +105,11 @@ export class HttpInterceptor implements NestInterceptor, OnModuleInit {
 
                 const body: {
                     error: string;
-                    errorUniqId: string;
+                    errorUniqId?: string;
                     message?: string;
                     stack?: string;
                 } = {
                     error: '',
-                    errorUniqId: '',
                 };
 
                 if (isError(error)) {
@@ -131,22 +128,19 @@ export class HttpInterceptor implements NestInterceptor, OnModuleInit {
                     body.message = `${error}`;
                 }
 
+                if (isError(error)) {
+                    response.status(error.kind);
+                } else {
+                    response.status(HttpStatus.INTERNAL_SERVER_ERROR);
+                }
+
                 if (this.errorHandleMiddleware) {
                     body.errorUniqId = (
                         await this.errorHandleMiddleware.handleError(error)
                     ).errorUniqId;
                 }
 
-                response.status(HttpStatus.INTERNAL_SERVER_ERROR);
-                if (process.env['TEST'] !== 'true') {
-                    response.send(
-                        `${R.omit(['stack'], body)}\nStack: ${
-                            process.env['ENVIRONMENT'] !== 'prod' ? body?.stack : ''
-                        }`,
-                    );
-                } else {
-                    response.send(R.omit(['stack'], body));
-                }
+                response.send(makeResponse(body));
             }),
         );
     }
@@ -172,4 +166,17 @@ function isHttpError(error: unknown): error is {
         !Array.isArray(error) &&
         typeof error['status'] === 'number'
     );
+}
+
+function makeResponse(body: {
+    error: string;
+    errorUniqId?: string | undefined;
+    message?: string | undefined;
+    stack?: string | undefined;
+}) {
+    if (process.env['TEST'] === 'true' || process.env['ENVIRONMENT'] === 'prod') {
+        return R.omit(['stack'], body);
+    }
+
+    return body;
 }

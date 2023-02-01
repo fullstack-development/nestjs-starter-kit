@@ -1,4 +1,4 @@
-import { BaseError } from '../../core/errors.core';
+import { BaseError, ConflictError, UnprocessableEntityError } from '../../core/errors.core';
 
 export type TokenPayload = {
     email: string;
@@ -9,25 +9,20 @@ export type UserPayload = {
     password: string;
 };
 
-export class SignatureIsNotValid extends BaseError<'signatureIsNotValid'> {
+export class EmailNotConfirmed extends UnprocessableEntityError<'emailNotConfirmed'> {
     constructor() {
-        super('signatureIsNotValid', { userErrorOnly: true });
+        super('emailNotConfirmed');
     }
 }
 
-export class EmailNotConfirmed extends BaseError<'emailNotConfirmed'> {
+export class EmailAlreadyConfirmed extends ConflictError<'emailAlreadyConfirmed'> {
     constructor() {
-        super('emailNotConfirmed', { userErrorOnly: true });
+        super('emailAlreadyConfirmed');
     }
 }
 
-export class EmailAlreadyConfirmed extends BaseError<'emailAlreadyConfirmed'> {
-    constructor() {
-        super('emailAlreadyConfirmed', { userErrorOnly: true });
-    }
-}
-
-export class CannotSendEmailConfirmation extends BaseError<'cannotSendEmailConfirmation'> {
+// eslint-disable-next-line max-len
+export class CannotSendEmailConfirmation extends UnprocessableEntityError<'cannotSendEmailConfirmation'> {
     constructor(payload: { sourceError: BaseError<string> }) {
         super('cannotSendEmailConfirmation', { payload });
     }

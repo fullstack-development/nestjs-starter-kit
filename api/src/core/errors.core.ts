@@ -15,28 +15,48 @@ export class ValidationError {
     }
 }
 
+type ErrorKind = 409 | 422 | 500;
+
+type ErrorOptions = {
+    payload?: Record<string, unknown>;
+    message?: string;
+};
+
 export class BaseError<E> {
     error: E;
-    userErrorOnly?: boolean;
+    kind: ErrorKind;
+    saveErrorToDatabase: boolean;
     message?: string;
     payload?: Record<string, unknown>;
     stackTrace?: string;
 
-    constructor(
-        error: E,
-        options?: {
-            userErrorOnly?: boolean;
-            payload?: Record<string, unknown>;
-            message?: string;
-        },
-    ) {
+    constructor(error: E, kind: ErrorKind, options?: ErrorOptions) {
         this.error = error;
+        this.kind = kind;
         this.payload = options?.payload;
         this.message = options?.message;
-        this.userErrorOnly = options?.userErrorOnly;
-        if (Boolean(options?.userErrorOnly)) {
+        this.saveErrorToDatabase = kind === 500;
+        if (Boolean(this.saveErrorToDatabase)) {
             this.stackTrace = new Error().stack;
         }
+    }
+}
+
+export class ConflictError<E> extends BaseError<E> {
+    constructor(error: E, options?: ErrorOptions) {
+        super(error, 409, options);
+    }
+}
+
+export class UnprocessableEntityError<E> extends BaseError<E> {
+    constructor(error: E, options?: ErrorOptions) {
+        super(error, 422, options);
+    }
+}
+
+export class InternalServerError<E> extends BaseError<E> {
+    constructor(error: E, options?: ErrorOptions) {
+        super(error, 500, options);
     }
 }
 

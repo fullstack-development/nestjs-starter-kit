@@ -1,18 +1,18 @@
-import { BaseError } from '../../core/errors.core';
+import { ConflictError, UnprocessableEntityError } from '../../core/errors.core';
 
 export type UserPayload = {
     email: string;
     password: string;
 };
 
-export class UserAlreadyExist extends BaseError<'userAlreadyExist'> {
+export class UserAlreadyExist extends ConflictError<'userAlreadyExist'> {
     constructor() {
-        super('userAlreadyExist', { userErrorOnly: true });
+        super('userAlreadyExist');
     }
 }
 
-export class EmailOrPasswordIncorrect extends BaseError<'emailOrPasswordIncorrect'> {
+export class EmailOrPasswordIncorrect extends UnprocessableEntityError<'emailOrPasswordIncorrect'> {
     constructor() {
-        super('emailOrPasswordIncorrect', { userErrorOnly: true });
+        super('emailOrPasswordIncorrect');
     }
 }

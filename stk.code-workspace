@@ -25,7 +25,6 @@
       "api": true,
       "e2e": true,
       "launch": true,
-      "modules": true,
       "libs": true
     }
   }

@@ -1,49 +1,17 @@
-import { createParamDecorator, ExecutionContext, HttpStatus } from '@nestjs/common';
+import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import { IsEmail, IsNumber } from 'class-validator';
 import { validateSync } from '../utils/validation.utils';
 import { BaseError, isError } from './errors.core';
 
 export type HeaderValue = string | number | Array<string>;
 
-type ControllerResponseOptions = {
-    body?: unknown;
+export class ControllerResponse<T, H extends string> {
+    body?: T;
     headers?: Record<string, HeaderValue>;
-};
 
-type ControllerResponseErrorOptions = {
-    error: string;
-    headers?: Record<string, HeaderValue>;
-};
-
-export class ControllerResponse {
-    status: HttpStatus;
-    success?: boolean;
-    headers?: Record<string, HeaderValue>;
-    body?: unknown;
-
-    public static Success(options?: ControllerResponseOptions) {
-        const response = new ControllerResponse();
-        response.success = true;
-        response.status = HttpStatus.OK;
-        response.body = options?.body;
-        response.headers = options?.headers;
-        return response;
-    }
-
-    public static Fail(options: ControllerResponseErrorOptions) {
-        const response = new ControllerResponse();
-        response.success = false;
-        response.status = HttpStatus.OK;
-        response.body = { error: options.error };
-        response.headers = options.headers;
-        return response;
-    }
-
-    public static Error(status: HttpStatus, body?: unknown) {
-        const response = new ControllerResponse();
-        response.status = status;
-        response.body = body;
-        return response;
+    constructor(body?: T, headers?: Record<H, HeaderValue>) {
+        this.body = body;
+        this.headers = headers;
     }
 }
 
@@ -69,14 +37,9 @@ export const getRequestUser = (data: unknown, ctx: ExecutionContext) => {
 };
 export const User = createParamDecorator(getRequestUser);
 
-export function mapResponse<T, EI, EO>(data: T | BaseError<EI>) {
-    return async (
-        onData: (data: T) => ControllerResponse | Promise<ControllerResponse>,
-        onError?: (e: BaseError<EI>) => BaseError<EO> | Promise<BaseError<EO>>,
-    ) =>
-        isError(data)
-            ? onError
-                ? Promise.resolve(onError(data))
-                : Promise.resolve(data)
-            : Promise.resolve(onData(data));
+export function mapResponse<T, E, R, H extends string>(
+    data: T | BaseError<E>,
+    onData: (data: T) => ControllerResponse<R, H> | Promise<ControllerResponse<R, H>>,
+) {
+    return isError(data) ? Promise.resolve(data) : Promise.resolve(onData(data));
 }

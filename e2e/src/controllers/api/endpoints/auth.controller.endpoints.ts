@@ -3,7 +3,6 @@ import { IsJWT, isJWT, validate } from 'class-validator';
 import * as cookieParser from 'cookie';
 import Spec from 'pactum/src/models/Spec';
 import { getSpec, postSpec } from '../../../pactum';
-import { IsTrue } from '../../../utils/validation.utils';
 
 type SignInput = {
     email: string;
@@ -36,12 +35,9 @@ const signUp = postSpec.api<SignInput, true>(
             .expectStatus(200)
             .toss();
 
-        const body = plainToClass(SignUpResponse, response.json);
+        expect(response.json).toEqual({});
 
-        const errors = await validate(body);
-        expect(errors.length).toEqual(0);
-
-        return body.success;
+        return true;
     },
 );
 
@@ -72,23 +68,19 @@ async function extractAuthData(response: any) {
     const refreshToken = (cookieParser.parse(response.headers['set-cookie'][0]) || {})['Refresh'];
     expect(isJWT(refreshToken)).toEqual(true);
 
-    const bodyErrors = await validate(plainToClass(AuthBody, response.json));
+    const body = plainToClass(AuthBody, response.json);
+    const bodyErrors = await validate(body);
     expect(bodyErrors.length).toEqual(0);
 
     return {
-        accessToken: response.json.data as string,
+        accessToken: body.token,
         refreshToken: refreshToken,
     };
 }
 
 class AuthBody {
     @IsJWT()
-    data: string;
-}
-
-class SignUpResponse {
-    @IsTrue()
-    success: true;
+    token: string;
 }
 
 export { signIn, refresh, confirmEmail, signUp };

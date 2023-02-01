@@ -124,7 +124,7 @@ describe('AuthController', () => {
                 password: '123456789',
             });
             expect(response.statusCode).toEqual(200);
-            expect(response.body).toEqual({ success: true });
+            expect(response.body).toEqual({});
         });
     });
 
@@ -163,10 +163,7 @@ describe('AuthController', () => {
                 password: '123456789',
             });
             expect(response.statusCode).toEqual(200);
-            expect(response.body).toEqual({
-                success: true,
-                data: '1',
-            });
+            expect(response.body).toEqual({ token: '1' });
             expect(response.headers['set-cookie']).toEqual(['2']);
         });
     });
@@ -196,10 +193,7 @@ describe('AuthController', () => {
 
             expect(authService.confirmEmail).toBeCalledWith(confirmUuid);
             expect(response.statusCode).toEqual(200);
-            expect(response.body).toEqual({
-                success: true,
-                data: '1',
-            });
+            expect(response.body).toEqual({ token: '1' });
             expect(response.headers['set-cookie']).toEqual(['2']);
         });
     });

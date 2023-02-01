@@ -1,19 +1,19 @@
-import { BaseError } from '../errors.core';
+import { UnprocessableEntityError } from '../errors.core';
 
-export class CannotFindEmailConfirm extends BaseError<'cannotFindEmailConfirm'> {
+export class CannotFindEmailConfirm extends UnprocessableEntityError<'cannotFindEmailConfirm'> {
     constructor(payload?: Record<string, unknown>) {
-        super('cannotFindEmailConfirm', { userErrorOnly: true, payload });
+        super('cannotFindEmailConfirm', { payload });
     }
 }
 
-export class CannotFindUser extends BaseError<'cannotFindUser'> {
+export class CannotFindUser extends UnprocessableEntityError<'cannotFindUser'> {
     constructor(payload?: Record<string, unknown>) {
-        super('cannotFindUser', { userErrorOnly: true, payload });
+        super('cannotFindUser', { payload });
     }
 }
 
-export class CannotFindRefreshToken extends BaseError<'cannotFindRefreshToken'> {
+export class CannotFindRefreshToken extends UnprocessableEntityError<'cannotFindRefreshToken'> {
     constructor(payload?: Record<string, unknown>) {
-        super('cannotFindRefreshToken', { userErrorOnly: true, payload });
+        super('cannotFindRefreshToken', { payload });
     }
 }

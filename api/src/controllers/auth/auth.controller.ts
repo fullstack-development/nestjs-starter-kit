@@ -5,7 +5,15 @@ import { JwtUserRefreshGuard } from '../../services/auth/guards/jwt-user-refresh
 import { UserType } from '../../services/token/token.model';
 import { UseValidationPipe } from '../../utils/validation.utils';
 import { TokenService, TokenServiceProvider } from './../../services/token/token.service';
-import { ConfirmEmailInput, SignInInput, SignUpInput } from './auth.model';
+import {
+    ConfirmEmailInput,
+    ConfirmEmailResponse,
+    HandleRefreshTokenResponse,
+    SignInInput,
+    SignInResponse,
+    SignUpInput,
+    SignUpResponse,
+} from './auth.model';
 
 @Controller('api/auth')
 export class AuthControllerProvider {
@@ -16,42 +24,40 @@ export class AuthControllerProvider {
 
     @Post('sign-up')
     @UseValidationPipe()
-    async signUp(@Body() body: SignUpInput) {
-        return mapResponse(await this.authService.signUp(body))(() => ControllerResponse.Success());
+    async signUp(@Body() body: SignUpInput): Promise<SignUpResponse> {
+        return mapResponse(
+            await this.authService.signUp(body),
+            () => new ControllerResponse<never, never>(),
+        );
     }
 
     @Post('sign-in')
     @UseValidationPipe()
-    async signIn(@Body() body: SignInInput) {
-        return mapResponse(await this.authService.signIn(body))(({ accessToken, refreshCookie }) =>
-            ControllerResponse.Success({
-                body: accessToken,
-                headers: { 'Set-Cookie': refreshCookie },
-            }),
+    async signIn(@Body() body: SignInInput): Promise<SignInResponse> {
+        return mapResponse(
+            await this.authService.signIn(body),
+            ({ accessToken, refreshCookie }) =>
+                new ControllerResponse({ token: accessToken }, { 'Set-Cookie': refreshCookie }),
         );
     }
 
     @Post('confirm-email')
     @UseValidationPipe()
-    async confirmEmail(@Body() { confirmUuid }: ConfirmEmailInput) {
-        return mapResponse(await this.authService.confirmEmail(confirmUuid))(
+    async confirmEmail(@Body() { confirmUuid }: ConfirmEmailInput): Promise<ConfirmEmailResponse> {
+        return mapResponse(
+            await this.authService.confirmEmail(confirmUuid),
             ({ accessToken, refreshCookie }) =>
-                ControllerResponse.Success({
-                    body: accessToken,
-                    headers: { 'Set-Cookie': refreshCookie },
-                }),
+                new ControllerResponse({ token: accessToken }, { 'Set-Cookie': refreshCookie }),
         );
     }
 
     @Get('refresh')
     @UseGuards(JwtUserRefreshGuard)
-    async handleRefreshToken(@User() user: RequestUser) {
-        return mapResponse(await this.tokenService.generate(user.id, UserType.USER, user.email))(
+    async handleRefreshToken(@User() user: RequestUser): Promise<HandleRefreshTokenResponse> {
+        return mapResponse(
+            await this.tokenService.generate(user.id, UserType.USER, user.email),
             ({ accessToken, refreshCookie }) =>
-                ControllerResponse.Success({
-                    body: accessToken,
-                    headers: { 'Set-Cookie': refreshCookie },
-                }),
+                new ControllerResponse({ token: accessToken }, { 'Set-Cookie': refreshCookie }),
         );
     }
 }

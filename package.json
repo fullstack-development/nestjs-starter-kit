@@ -6,9 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "prepare": "husky install",
-    "test:e2e": "",
-    "test:e2e:local": ""
+    "prepare": "husky install"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.1.2",
