@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "declaration": true,
-        "outDir": "../../dist/libs/repository",
+        "outDir": "../../api/dist/libs/repository",
         "module": "commonjs",
         "declarationMap": true,
         "removeComments": true,

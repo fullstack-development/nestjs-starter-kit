@@ -3,6 +3,7 @@ const path = require('path');
 
 const root = path.resolve(__dirname);
 const dist = path.resolve(__dirname, 'dist');
+const enginesDir = path.resolve(__dirname, '../libs/repository/node_modules/@prisma/engines');
 
 if (!fs.existsSync(dist)) {
     fs.mkdirSync(dist);
@@ -13,17 +14,40 @@ fs.copyFileSync(
     path.resolve(dist, 'schema.prisma'),
 );
 
-const enginesList = {
-    win32: 'node_modules/@prisma/engines/query_engine-windows.dll.node',
-    linux: 'node_modules/@prisma/engines/libquery_engine-linux-musl-openssl-3.0.x.so.node',
-};
-
-const platform = process.platform;
-const engine = enginesList[platform];
-
+let engine = getEngine();
 if (!engine) {
-    throw `Cannot find engine for '${platform}'`;
+    throw `Cannot find engine for '${process.platform}'`;
 }
 
-const engineFile = path.resolve(root, `../libs/repository/${engine}`);
-fs.copyFileSync(engineFile, path.resolve(dist, path.basename(engineFile)));
+const engineFile = path.resolve(enginesDir, engine);
+fs.copyFileSync(engineFile, path.resolve(dist, engine));
+
+function getEngine() {
+    const libConfigFile = path.resolve(__dirname, '.prisma-lib');
+
+    if (fs.existsSync(libConfigFile)) {
+        return JSON.parse(fs.readFileSync(libConfigFile)).lib;
+    }
+
+    const files = fs.readdirSync(enginesDir);
+    const findEngine = (regexp) =>
+        files.find(
+            (f) => !fs.statSync(path.resolve(enginesDir, f)).isDirectory() && regexp.test(f),
+        );
+
+    let engine = null;
+    switch (process.platform) {
+        case 'linux':
+            engine = findEngine(new RegExp(/.*\.so\.node$/gi));
+            break;
+        case 'win32':
+            engine = findEngine(new RegExp(/.*\.dll\.node$/gi));
+            break;
+    }
+
+    if (engine !== null) {
+        fs.writeFileSync(libConfigFile, JSON.stringify({ lib: engine }));
+    }
+
+    return engine;
+}
