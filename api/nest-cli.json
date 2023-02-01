@@ -1,5 +1,16 @@
 {
     "collection": "@nestjs/schematics",
-    "sourceRoot": "src",
-    "$schema": "https://json.schemastore.org/nest-cli"
+    "sourceRoot": "./src",
+    "$schema": "https://json.schemastore.org/nest-cli",
+    "projects": {
+        "repository": {
+            "type": "library",
+            "root": "../libs/repository",
+            "entryFile": "index",
+            "sourceRoot": "../libs/repository/src",
+            "compilerOptions": {
+                "tsConfigPath": "../libs/repository/tsconfig.api.json"
+            }
+        }
+    }
 }

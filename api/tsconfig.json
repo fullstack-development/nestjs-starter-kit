@@ -6,14 +6,19 @@
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "allowSyntheticDefaultImports": true,
-        "target": "es2019",
+        "target": "ES2022",
         "sourceMap": true,
         "outDir": "./dist",
         "baseUrl": "./",
         "incremental": true,
         "strictNullChecks": true,
-        "skipLibCheck": true
+        "skipLibCheck": true,
+        "allowJs": true,
+        "paths": {
+            "@lib/repository": ["../libs/repository/src/index.ts"]
+        }
     },
     "include": ["*.ts", "./src/**/*.ts"],
-    "exclude": ["**/migrations/**", "**/dist/**", "**/node_modules/**"]
+    "exclude": ["**/migrations/**", "**/dist/**", "**/node_modules/**"],
+    "references": [{ "path": "../libs/repository" }]
 }

@@ -1,4 +1,4 @@
-import { EmailConfirm } from '@prisma/client';
+import { EmailConfirm } from '@lib/repository';
 
 export function getConfirmEmailStub(): EmailConfirm {
     return {

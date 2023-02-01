@@ -1,5 +1,5 @@
-import { ControllerResponse } from './../core/controller.core';
 import { Body, Controller, Get, Module, Query } from '@nestjs/common';
+import { ControllerResponse } from './../core/controller.core';
 
 @Controller('api')
 export class AppControllerProvider {

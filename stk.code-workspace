@@ -1,14 +1,32 @@
 {
   "folders": [
     {
+      "path": ".",
+      "name": "."
+    },
+    {
       "path": "api"
+    },
+    {
+      "path": "libs/repository",
+      "name": "libs/repository"
     },
     {
       "path": "e2e"
     },
+    {
+      "path": "launch"
+    }
   ],
   "settings": {
     "conventionalCommits.scopes": [],
-    "typescript.tsdk": "api/node_modules/typescript/lib"
+    "typescript.tsdk": "api/node_modules/typescript/lib",
+    "files.exclude": {
+      "api": true,
+      "e2e": true,
+      "launch": true,
+      "modules": true,
+      "libs": true
+    }
   }
 }

@@ -1,4 +1,4 @@
-import { BaseError } from '../core/errors.core';
+import { BaseError } from '../errors.core';
 
 export class CannotFindEmailConfirm extends BaseError<'cannotFindEmailConfirm'> {
     constructor(payload?: Record<string, unknown>) {

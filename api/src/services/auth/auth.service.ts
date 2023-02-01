@@ -1,18 +1,13 @@
-import { TokenService, TokenServiceProvider } from './../token/token.service';
-import { JwtRefreshTokenStrategy } from './strategies/jwt-refresh.strategy';
+import { User } from '@lib/repository';
 import { Injectable, Module } from '@nestjs/common';
+import { Config, ConfigProvider } from '../../core/config/config.core';
+import { Database, DatabaseProvider } from '../../core/database/database.core';
+import { CannotFindEmailConfirm } from '../../core/database/database.model';
 import { isError } from '../../core/errors.core';
-import {
-    EmailConfirmsRepository,
-    EmailConfirmsRepositoryProvider,
-} from '../../repositories/emailConfirms/emailConfirms.repository';
-import {
-    RefreshTokensRepository,
-    RefreshTokensRepositoryProvider,
-} from '../../repositories/refreshTokens/refreshTokens.repository';
 import { uuid } from '../../utils';
-import { ConfigService, ConfigServiceProvider } from '../config/config.service';
 import { MailService, MailServiceProvider } from '../mail/mail.service';
+import { UserType } from '../token/token.model';
+import { TokenService, TokenServiceProvider } from '../token/token.service';
 import { UserService, UserServiceProvider } from '../user/user.service';
 import {
     CannotSendEmailConfirmation,
@@ -20,21 +15,17 @@ import {
     EmailNotConfirmed,
     UserPayload,
 } from './auth.model';
+import { JwtRefreshTokenStrategy } from './strategies/jwt-refresh.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { CannotFindEmailConfirm } from '../../repositories/repositoryErrors.model';
-import { User } from '@prisma/client';
-import { DatabaseService } from '../database/database.service';
-import { UserType } from '../token/token.model';
 
 @Injectable()
 export class AuthServiceProvider {
     constructor(
+        private config: ConfigProvider,
         private userService: UserServiceProvider,
-        private emailConfirms: EmailConfirmsRepositoryProvider,
-        private configService: ConfigServiceProvider,
-        private refreshTokens: RefreshTokensRepositoryProvider,
         private mailService: MailServiceProvider,
         private tokenService: TokenServiceProvider,
+        private db: DatabaseProvider,
     ) {}
 
     async signUp(payload: UserPayload) {
@@ -67,12 +58,12 @@ export class AuthServiceProvider {
     async signOut(email: string) {
         const user = await this.userService.findUser({ email });
         if (!isError(user)) {
-            await this.refreshTokens.Dao.delete({ where: { userId: user.id } });
+            await this.db.refreshToken.delete({ where: { userId: user.id } });
         }
     }
 
     async confirmEmail(confirmUuid: string) {
-        const confirmEntityResult = await this.emailConfirms.Dao.findFirst({
+        const confirmEntityResult = await this.db.emailConfirm.findFirst({
             where: { confirmUuid },
         });
         if (confirmEntityResult === null) {
@@ -106,13 +97,13 @@ export class AuthServiceProvider {
             return new EmailAlreadyConfirmed();
         }
 
-        const confirm = await this.emailConfirms.Dao.create({
+        const confirm = await this.db.emailConfirm.create({
             data: {
                 userId: userResult.id,
                 confirmUuid: uuid(),
             },
         });
-        const link = `${this.configService.DOMAIN}/auth/confirm-email?uuid=${confirm.confirmUuid}`;
+        const link = `${this.config.DOMAIN}/auth/confirm-email?uuid=${confirm.confirmUuid}`;
         // await this.mailService.sendEmail(
         //     'Please confirm email',
         //     `<a href="${link}">${link}</a>`,
@@ -122,15 +113,7 @@ export class AuthServiceProvider {
 }
 
 @Module({
-    imports: [
-        ConfigService,
-        DatabaseService,
-        UserService,
-        EmailConfirmsRepository,
-        MailService,
-        RefreshTokensRepository,
-        TokenService,
-    ],
+    imports: [Config, Database, UserService, MailService, TokenService],
     providers: [AuthServiceProvider, JwtStrategy, JwtRefreshTokenStrategy],
     exports: [AuthServiceProvider],
 })

@@ -1,12 +1,11 @@
-import { TokenService, TokenServiceProvider } from './../../services/token/token.service';
-import { ControllerResponse, mapResponse, RequestUser } from '../../core/controller.core';
 import { Body, Controller, Get, Module, Post, UseGuards } from '@nestjs/common';
-import { User } from '../../core/controller.core';
+import { ControllerResponse, mapResponse, RequestUser, User } from '../../core/controller.core';
 import { AuthService, AuthServiceProvider } from '../../services/auth/auth.service';
-import { UseValidationPipe } from '../../utils/validation.utils';
-import { ConfirmEmailInput, SignInInput, SignUpInput } from './auth.model';
 import { JwtUserRefreshGuard } from '../../services/auth/guards/jwt-user-refresh.guard';
 import { UserType } from '../../services/token/token.model';
+import { UseValidationPipe } from '../../utils/validation.utils';
+import { TokenService, TokenServiceProvider } from './../../services/token/token.service';
+import { ConfirmEmailInput, SignInInput, SignUpInput } from './auth.model';
 
 @Controller('api/auth')
 export class AuthControllerProvider {

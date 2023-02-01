@@ -1,8 +1,8 @@
 import { plainToClass, Type } from 'class-transformer';
 import { IsNotEmptyObject, validate, ValidateNested } from 'class-validator';
-import { IsTrue } from '../../../utils/validation.utils';
 import { UserJson } from '../../../models/user.model';
 import { getSpec } from '../../../pactum';
+import { IsTrue } from '../../../utils/validation.utils';
 
 export const me = getSpec.api<string, UserJson>('user/me', (spec) => async (token) => {
     const response = await spec.withHeaders('Authorization', `Bearer ${token}`).toss();

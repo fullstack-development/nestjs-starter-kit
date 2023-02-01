@@ -1,7 +1,7 @@
-import Spec from 'pactum/src/models/Spec';
 import { plainToClass } from 'class-transformer';
 import { IsJWT, isJWT, validate } from 'class-validator';
 import * as cookieParser from 'cookie';
+import Spec from 'pactum/src/models/Spec';
 import { getSpec, postSpec } from '../../../pactum';
 import { IsTrue } from '../../../utils/validation.utils';
 
@@ -35,10 +35,10 @@ const signUp = postSpec.api<SignInput, true>(
             })
             .expectStatus(200)
             .toss();
-    
+
         const body = plainToClass(SignUpResponse, response.json);
 
-        const errors =  await validate(body);
+        const errors = await validate(body);
         expect(errors.length).toEqual(0);
 
         return body.success;

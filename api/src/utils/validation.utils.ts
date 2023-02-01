@@ -3,10 +3,11 @@ import { plainToClass, Transform, Type } from 'class-transformer';
 import {
     IsBase64,
     isBase64,
-    IsString,
     IsDate,
     IsNumber,
+    isNumber,
     IsOptional,
+    IsString,
     registerDecorator,
     validate as classValidate,
     validateSync as classValidateSync,
@@ -15,7 +16,6 @@ import {
     ValidationOptions,
     ValidatorConstraint,
     ValidatorConstraintInterface,
-    isNumber,
 } from 'class-validator';
 import { ValidatorOptions } from 'class-validator/types/validation/ValidatorOptions';
 

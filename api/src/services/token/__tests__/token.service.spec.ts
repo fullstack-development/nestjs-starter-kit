@@ -1,14 +1,14 @@
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
+import { ConfigProvider } from '../../../core/config/config.core';
+import { DatabaseProvider } from '../../../core/database/database.core';
+import { CannotFindUser } from '../../../core/database/database.model';
 import { isError } from '../../../core/errors.core';
-import { RefreshTokensRepositoryProvider } from '../../../repositories/refreshTokens/refreshTokens.repository';
-import { CannotFindUser } from '../../../repositories/repositoryErrors.model';
 import { sha256 } from '../../../utils/crypt.utils';
-import { MockRepository, mockRepository } from '../../../utils/tests.utils';
+import { DatabaseRepositoriesMock, mockDatabaseRepositories } from '../../../utils/tests.utils';
 import { ConfigServiceFake } from '../../../__mocks__/ConfigServiceFake';
 import { getUserStub } from '../../../__mocks__/user.stub';
-import { ConfigServiceProvider } from '../../config/config.service';
 import { UserServiceProvider } from '../../user/user.service';
 import { UserType } from '../token.model';
 import { TokenServiceProvider } from '../token.service';
@@ -19,7 +19,7 @@ describe('TokenService', () => {
     let jwtService: DeepMocked<JwtService>;
     let userService: DeepMocked<UserServiceProvider>;
 
-    let refreshTokensRepository: MockRepository<RefreshTokensRepositoryProvider>;
+    let db: DatabaseRepositoriesMock;
 
     let user: ReturnType<typeof getUserStub>;
 
@@ -27,7 +27,11 @@ describe('TokenService', () => {
         const module = await Test.createTestingModule({
             providers: [
                 TokenServiceProvider,
-                { provide: ConfigServiceProvider, useClass: ConfigServiceFake },
+                { provide: ConfigProvider, useClass: ConfigServiceFake },
+                {
+                    provide: DatabaseProvider,
+                    useValue: mockDatabaseRepositories(),
+                },
                 {
                     provide: JwtService,
                     useValue: createMock<JwtService>(),
@@ -36,28 +40,24 @@ describe('TokenService', () => {
                     provide: UserServiceProvider,
                     useValue: createMock<UserServiceProvider>(),
                 },
-                {
-                    provide: RefreshTokensRepositoryProvider,
-                    useValue: mockRepository<RefreshTokensRepositoryProvider>(),
-                },
             ],
         }).compile();
 
+        configService = module.get(ConfigProvider);
+        db = module.get(DatabaseProvider);
         tokenService = module.get(TokenServiceProvider);
-        configService = module.get(ConfigServiceProvider);
         jwtService = module.get(JwtService);
         userService = module.get(UserServiceProvider);
-        refreshTokensRepository = module.get(RefreshTokensRepositoryProvider);
 
         user = getUserStub();
     });
 
     it('should be defined service and all deps', () => {
+        expect(db).toBeDefined();
         expect(tokenService).toBeDefined();
         expect(configService).toBeDefined();
         expect(userService).toBeDefined();
         expect(jwtService).toBeDefined();
-        expect(refreshTokensRepository).toBeDefined();
     });
 
     describe('User', () => {
@@ -67,7 +67,7 @@ describe('TokenService', () => {
                     .mockReturnValueOnce('refreshToken')
                     .mockReturnValueOnce('accessToken');
                 userService.findUser.mockResolvedValueOnce(user);
-                refreshTokensRepository.Dao.create.mockResolvedValue({
+                db.refreshToken.create.mockResolvedValue({
                     userId: 0,
                     id: 0,
                     hash: '',
@@ -86,8 +86,8 @@ describe('TokenService', () => {
                         refreshToken: 'refreshToken',
                     }),
                 );
-                expect(refreshTokensRepository.Dao.create).toBeCalledTimes(1);
-                expect(refreshTokensRepository.Dao.create).toBeCalledWith({
+                expect(db.refreshToken.create).toBeCalledTimes(1);
+                expect(db.refreshToken.create).toBeCalledWith({
                     data: {
                         hash: sha256('refreshToken'),
                         userId: 0,
@@ -110,7 +110,7 @@ describe('TokenService', () => {
                     .mockReturnValueOnce('refreshToken')
                     .mockReturnValueOnce('accessToken');
                 userService.findUser.mockResolvedValueOnce(userWithRefreshToken);
-                refreshTokensRepository.Dao.update.mockResolvedValue(refreshToken);
+                db.refreshToken.update.mockResolvedValue(refreshToken);
 
                 const generatedResult = await tokenService.generate(
                     user.id,
@@ -125,8 +125,8 @@ describe('TokenService', () => {
                         refreshToken: 'refreshToken',
                     }),
                 );
-                expect(refreshTokensRepository.Dao.update).toBeCalledTimes(1);
-                expect(refreshTokensRepository.Dao.update).toBeCalledWith({
+                expect(db.refreshToken.update).toBeCalledTimes(1);
+                expect(db.refreshToken.update).toBeCalledWith({
                     where: {
                         id: 0,
                     },
@@ -165,7 +165,7 @@ describe('TokenService', () => {
                     .mockReturnValueOnce('refreshToken')
                     .mockReturnValueOnce('accessToken');
                 userService.findUser.mockResolvedValueOnce(user);
-                refreshTokensRepository.Dao.create.mockResolvedValue(refreshToken);
+                db.refreshToken.create.mockResolvedValue(refreshToken);
 
                 const generatedResult = await tokenService.generate(
                     user.id,

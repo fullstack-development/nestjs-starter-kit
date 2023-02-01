@@ -2,46 +2,61 @@ version: '3.5'
 
 services:
   postgres:
-    container_name: stk_db
+    container_name: "${CONTAINER_NAME_DB:-stk_db}"
     image: postgres
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: 1234
-      POSTGRES_DB: stkdb
-      LC_ALL: C.UTF-8
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-1234}
+      POSTGRES_DB: ${POSTGRES_DB:-stkdb}
+      LC_ALL: ${LC_ALL:-C.UTF-8}
     ports:
-      - "5432:5432"
+      - "${DB_PORT:-5439}:${DB_PORT:-5439}"
+    command: -p "${DB_PORT:-5439}"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER} -p $${DB_PORT:-5439}"
+        ]
       interval: 1s
       timeout: 2s
       retries: 20
     extra_hosts:
       - "host.docker.internal:host-gateway"
   api:
-    container_name: stk_api
+    container_name: "${CONTAINER_NAME_API:-stk_api}"
     build:
       context: .
       dockerfile: Dockerfile.api
     environment:
-      PORT_API: 3000
-      DB_PORT: 5432
-      DB_ADDRESS: host.docker.internal
-      DB_PASSWORD: 1234
-      DB_USER: admin
-      DB_NAME: stkdb
-      JWT_SECRET: secret
-      JWT_EXPIRES_IN: 10m
-      JWT_REFRESH_TOKEN_SECRET: secret_refresh
-      JWT_REFRESH_TOKEN_EXPIRATION_TIME: 2 days
-      ENVIRONMENT: local
+      PORT_API: ${PORT_API:-3000}
+      DB_PORT: ${DB_PORT:-5439}
+      DB_ADDRESS: ${DB_ADDRESS:-host.docker.internal}
+      DB_PASSWORD: ${DB_PASSWORD:-1234}
+      DB_USER: ${DB_USER:-admin}
+      DB_NAME: ${DB_NAME:-stkdb}
+      JWT_SECRET: ${JWT_SECRET:-secret}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-10m}
+      JWT_REFRESH_TOKEN_SECRET: ${JWT_REFRESH_TOKEN_SECRET:-secret_refresh}
+      JWT_REFRESH_TOKEN_EXPIRATION_TIME: ${JWT_REFRESH_TOKEN_EXPIRATION_TIME:-2days}
+      ENVIRONMENT: ${ENVIRONMENT:-local}
     ports:
       - "3000:3000"
     depends_on:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "node", "./local-launch/scripts/healthcheck.js", "http", "get", "host.docker.internal", "3000", "api/echo"]
+      test:
+        [
+          "CMD",
+          "node",
+          "./launch/scripts/utils/healthcheck.js",
+          "http",
+          "get",
+          "host.docker.internal",
+          "3000",
+          "api/echo"
+        ]
       interval: 1s
       timeout: 2s
       retries: 20

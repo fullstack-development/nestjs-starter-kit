@@ -1,24 +1,19 @@
-import { UserAlreadyExist, EmailOrPasswordIncorrect } from './../../user/user.model';
-import { EmailConfirmsRepositoryProvider } from './../../../repositories/emailConfirms/emailConfirms.repository';
-import { MockRepository, mockRepository } from './../../../utils/tests.utils';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import { ConfigServiceFake } from '../../../__mocks__/ConfigServiceFake';
+import { EmailConfirm } from '@lib/repository';
 import { Test } from '@nestjs/testing';
-import { AuthServiceProvider } from '../auth.service';
-import { getUserStub } from '../../../__mocks__/user.stub';
+import { ConfigProvider } from '../../../core/config/config.core';
+import { DatabaseProvider } from '../../../core/database/database.core';
+import { CannotFindEmailConfirm, CannotFindUser } from '../../../core/database/database.model';
 import { isError } from '../../../core/errors.core';
-import { ConfigServiceProvider } from '../../config/config.service';
-import { UsersRepositoryProvider } from '../../../repositories/users/users.repository';
-import { RefreshTokensRepositoryProvider } from '../../../repositories/refreshTokens/refreshTokens.repository';
-import { MailServiceProvider } from '../../mail/mail.service';
-import { UserServiceProvider } from '../../user/user.service';
-import {
-    CannotFindEmailConfirm,
-    CannotFindUser,
-} from '../../../repositories/repositoryErrors.model';
-import { TokenServiceProvider } from '../../token/token.service';
-import { EmailConfirm } from '@prisma/client';
+import { DatabaseRepositoriesMock, mockDatabaseRepositories } from '../../../utils/tests.utils';
+import { ConfigServiceFake } from '../../../__mocks__/ConfigServiceFake';
 import { getConfirmEmailStub } from '../../../__mocks__/confirmEmail.stub';
+import { getUserStub } from '../../../__mocks__/user.stub';
+import { MailServiceProvider } from '../../mail/mail.service';
+import { TokenServiceProvider } from '../../token/token.service';
+import { UserServiceProvider } from '../../user/user.service';
+import { AuthServiceProvider } from '../auth.service';
+import { EmailOrPasswordIncorrect, UserAlreadyExist } from './../../user/user.model';
 
 describe('AuthService', () => {
     let authService: AuthServiceProvider;
@@ -26,9 +21,7 @@ describe('AuthService', () => {
     let userService: DeepMocked<UserServiceProvider>;
     let tokenService: DeepMocked<TokenServiceProvider>;
 
-    let usersRepository: MockRepository<UsersRepositoryProvider>;
-    let refreshTokensRepository: MockRepository<RefreshTokensRepositoryProvider>;
-    let emailConfirmsRepository: MockRepository<EmailConfirmsRepositoryProvider>;
+    let db: DatabaseRepositoriesMock;
 
     let user: ReturnType<typeof getUserStub>;
 
@@ -36,7 +29,11 @@ describe('AuthService', () => {
         const module = await Test.createTestingModule({
             providers: [
                 AuthServiceProvider,
-                { provide: ConfigServiceProvider, useClass: ConfigServiceFake },
+                { provide: ConfigProvider, useClass: ConfigServiceFake },
+                {
+                    provide: DatabaseProvider,
+                    useValue: mockDatabaseRepositories(),
+                },
                 {
                     provide: UserServiceProvider,
                     useValue: createMock<UserServiceProvider>(),
@@ -46,32 +43,18 @@ describe('AuthService', () => {
                     useValue: createMock<MailServiceProvider>(),
                 },
                 {
-                    provide: RefreshTokensRepositoryProvider,
-                    useValue: mockRepository<RefreshTokensRepositoryProvider>(),
-                },
-                {
-                    provide: UsersRepositoryProvider,
-                    useValue: mockRepository<UsersRepositoryProvider>(),
-                },
-                {
                     provide: TokenServiceProvider,
                     useValue: createMock<TokenServiceProvider>(),
-                },
-                {
-                    provide: EmailConfirmsRepositoryProvider,
-                    useValue: mockRepository<EmailConfirmsRepositoryProvider>(),
                 },
             ],
         }).compile();
 
         authService = module.get(AuthServiceProvider);
-        configService = module.get(ConfigServiceProvider);
-        tokenService = module.get(TokenServiceProvider);
-        userService = module.get(UserServiceProvider);
 
-        usersRepository = module.get(UsersRepositoryProvider);
-        refreshTokensRepository = module.get(RefreshTokensRepositoryProvider);
-        emailConfirmsRepository = module.get(EmailConfirmsRepositoryProvider);
+        configService = module.get(ConfigProvider);
+        db = module.get(DatabaseProvider);
+        userService = module.get(UserServiceProvider);
+        tokenService = module.get(TokenServiceProvider);
 
         user = getUserStub();
     });
@@ -79,8 +62,7 @@ describe('AuthService', () => {
     it('should be defined service and all deps', () => {
         expect(authService).toBeDefined();
         expect(configService).toBeDefined();
-        expect(usersRepository).toBeDefined();
-        expect(refreshTokensRepository).toBeDefined();
+        expect(db).toBeDefined();
         expect(userService).toBeDefined();
     });
 
@@ -94,8 +76,8 @@ describe('AuthService', () => {
         it('should correct sign-up', async () => {
             userService.createUser.mockResolvedValue(user);
             userService.findUser.mockResolvedValue(user);
-            emailConfirmsRepository.Dao.create.mockResolvedValue(confirmMail);
-            emailConfirmsRepository.Dao.findFirst.mockResolvedValue(confirmMail);
+            db.emailConfirm.create.mockResolvedValue(confirmMail);
+            db.emailConfirm.findFirst.mockResolvedValue(confirmMail);
 
             const createdResult = await authService.signUp({
                 email: 'test@example.com',
@@ -143,7 +125,7 @@ describe('AuthService', () => {
             };
             userService.findVerifiedUser.mockResolvedValue({ ...user, emailConfirmed: true });
             userService.findUser.mockResolvedValueOnce(user);
-            refreshTokensRepository.Dao.create.mockResolvedValue(refreshToken);
+            db.refreshToken.create.mockResolvedValue(refreshToken);
             tokenService.generate.mockResolvedValueOnce({
                 accessToken: '1',
                 refreshCookie: '2',
@@ -211,11 +193,11 @@ describe('AuthService', () => {
                 userId: 0,
                 user,
             };
-            emailConfirmsRepository.Dao.findFirst.mockResolvedValue(confirmMail);
+            db.emailConfirm.findFirst.mockResolvedValue(confirmMail);
             userService.findUser.mockResolvedValue(user);
             userService.confirmEmail.mockResolvedValue(undefined);
             userService.findUser.mockResolvedValueOnce(user);
-            refreshTokensRepository.Dao.create.mockResolvedValue(refreshToken);
+            db.refreshToken.create.mockResolvedValue(refreshToken);
             tokenService.generate.mockResolvedValueOnce({
                 accessToken: '1',
                 refreshCookie: '2',
@@ -234,7 +216,7 @@ describe('AuthService', () => {
         });
 
         it('should return error if email already confirmed', async () => {
-            emailConfirmsRepository.Dao.findFirst.mockResolvedValue(confirmMail);
+            db.emailConfirm.findFirst.mockResolvedValue(confirmMail);
             userService.findUser.mockResolvedValue({ ...user, emailConfirmed: true });
 
             const confirmResult = await authService.confirmEmail('1');
@@ -248,7 +230,7 @@ describe('AuthService', () => {
         });
 
         it('should return error if confirmation not found', async () => {
-            emailConfirmsRepository.Dao.findFirst.mockResolvedValue(null);
+            db.emailConfirm.findFirst.mockResolvedValue(null);
 
             const confirmResult = await authService.confirmEmail('1');
 
@@ -265,8 +247,8 @@ describe('AuthService', () => {
 
             expect(userService.findUser).toBeCalledTimes(1);
             expect(userService.findUser).toBeCalledWith({ email: user.email });
-            expect(refreshTokensRepository.Dao.delete).toBeCalledTimes(1);
-            expect(refreshTokensRepository.Dao.delete).toBeCalledWith({
+            expect(db.refreshToken.delete).toBeCalledTimes(1);
+            expect(db.refreshToken.delete).toBeCalledWith({
                 where: { userId: user.id },
             });
         });
@@ -278,7 +260,7 @@ describe('AuthService', () => {
 
             expect(userService.findUser).toBeCalledTimes(1);
             expect(userService.findUser).toBeCalledWith({ email: user.email });
-            expect(refreshTokensRepository.Dao.delete).toBeCalledTimes(0);
+            expect(db.refreshToken.delete).toBeCalledTimes(0);
         });
     });
 });

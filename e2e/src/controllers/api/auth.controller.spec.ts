@@ -1,18 +1,18 @@
-import { PrismaClient } from '@prisma/client';
+import { EmailConfirm, User } from '@lib/repository';
 import { isJWT } from 'class-validator';
 import { v4 } from 'uuid';
+import { createDbClient } from '../../db';
 import { confirmEmail, refresh, signIn, signUp } from './endpoints/auth.controller.endpoints';
 
 describe('Auth Controller', () => {
-    let prisma: PrismaClient;
+    const db = createDbClient();
 
     beforeAll(async () => {
-        prisma = new PrismaClient();
-        await prisma.$connect();
+        await db.connect();
     });
 
     afterAll(async () => {
-        await prisma.$disconnect();
+        await db.end();
     });
 
     describe('POST /api/auth/sign-up', () => {
@@ -32,8 +32,11 @@ describe('Auth Controller', () => {
             await signUp.send({ email: 'test@example.com', password: '12345678' });
 
             expect(
-                (await prisma.user.findFirst({ where: { email: 'test@example.com' } }))
-                    ?.emailConfirmed,
+                (
+                    await db.query(
+                        `SELECT "emailConfirmed" FROM "User" WHERE "email"='test@example.com'`,
+                    )
+                ).rows[0].emailConfirmed,
             ).toBeFalsy();
         });
 
@@ -64,33 +67,37 @@ describe('Auth Controller', () => {
         });
 
         it('should success confirm email', async () => {
-            const user = await prisma.user.findFirst({
-                where: { email: 'test@example.com' },
-                include: { emailConfirm: true },
-            });
+            const user: User | undefined = (
+                await db.query(`SELECT * FROM "User" WHERE "email"='test@example.com'`)
+            ).rows[0];
+            const emailConfirm: EmailConfirm | undefined = (
+                await db.query(`SELECT * FROM "EmailConfirm" WHERE "userId"=${user?.id}`)
+            ).rows[0];
 
             expect(
-                (await prisma.user.findFirst({ where: { email: 'test@example.com' } }))
-                    ?.emailConfirmed,
+                (await db.query(`SELECT * FROM "User" WHERE "email"='test@example.com'`)).rows[0]
+                    .emailConfirmed,
             ).toBeFalsy();
 
-            await confirmEmail.send(user?.emailConfirm?.confirmUuid as string);
+            await confirmEmail.send(emailConfirm?.confirmUuid as string);
 
             expect(
-                (await prisma.user.findFirst({ where: { email: 'test@example.com' } }))
-                    ?.emailConfirmed,
+                (await db.query(`SELECT * FROM "User" WHERE "email"='test@example.com'`)).rows[0]
+                    .emailConfirmed,
             ).toBeTruthy();
         });
 
         it('should return error if user already confirmed email', async () => {
-            const user = await prisma.user.findFirst({
-                where: { email: 'test@example.com' },
-                include: { emailConfirm: true },
-            });
+            const user: (User & { emailConfirm: EmailConfirm }) | undefined = (
+                await db.query(`SELECT * FROM "User" WHERE "email"='test@example.com'`)
+            ).rows[0];
+            const emailConfirm: EmailConfirm | undefined = (
+                await db.query(`SELECT * FROM "EmailConfirm" WHERE "userId"=${user?.id}`)
+            ).rows[0];
 
             await confirmEmail
                 .spec()
-                .withBody({ confirmUuid: user?.emailConfirm?.confirmUuid })
+                .withBody({ confirmUuid: emailConfirm?.confirmUuid })
                 .expectStatus(200)
                 .expectJsonLike({ data: { error: 'emailAlreadyConfirmed' } });
         });

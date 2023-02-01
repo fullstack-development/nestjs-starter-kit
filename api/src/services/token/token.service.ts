@@ -1,23 +1,20 @@
+import { RefreshToken, User } from '@lib/repository';
 import { Injectable, Module } from '@nestjs/common';
 import { JwtModule, JwtService } from '@nestjs/jwt';
-import { RefreshToken, User } from '@prisma/client';
+import { Config, ConfigProvider } from '../../core/config/config.core';
+import { Database, DatabaseProvider } from '../../core/database/database.core';
 import { isError } from '../../core/errors.core';
-import {
-    RefreshTokensRepository,
-    RefreshTokensRepositoryProvider,
-} from '../../repositories/refreshTokens/refreshTokens.repository';
 import { sha256 } from '../../utils/crypt.utils';
-import { ConfigService, ConfigServiceProvider } from '../config/config.service';
 import { UserService, UserServiceProvider } from '../user/user.service';
 import { UserType } from './token.model';
 
 @Injectable()
 export class TokenServiceProvider {
     constructor(
-        private readonly cfg: ConfigServiceProvider,
+        private readonly config: ConfigProvider,
         private readonly jwt: JwtService,
         private readonly users: UserServiceProvider,
-        private readonly usersRefresh: RefreshTokensRepositoryProvider,
+        private readonly db: DatabaseProvider,
     ) {}
 
     async generate(userId: number, userType: UserType, email: string) {
@@ -58,12 +55,12 @@ export class TokenServiceProvider {
             case UserType.USER:
                 return {
                     refresh: {
-                        expiresIn: this.cfg.JWT_REFRESH_TOKEN_EXPIRATION_TIME,
-                        secret: this.cfg.JWT_REFRESH_TOKEN_SECRET,
+                        expiresIn: this.config.JWT_REFRESH_TOKEN_EXPIRATION_TIME,
+                        secret: this.config.JWT_REFRESH_TOKEN_SECRET,
                     },
                     token: {
-                        expiresIn: this.cfg.JWT_EXPIRES_IN,
-                        secret: this.cfg.JWT_SECRET,
+                        expiresIn: this.config.JWT_EXPIRES_IN,
+                        secret: this.config.JWT_SECRET,
                     },
                 };
         }
@@ -76,14 +73,14 @@ export class TokenServiceProvider {
         hashedRefreshToken: string,
     ) {
         if (user.refreshToken) {
-            await this.usersRefresh.Dao.update({
+            await this.db.refreshToken.update({
                 where: {
                     id: user.refreshToken.id,
                 },
                 data: { hash: hashedRefreshToken },
             });
         } else {
-            await this.usersRefresh.Dao.create({
+            await this.db.refreshToken.create({
                 data: {
                     hash: hashedRefreshToken,
                     userId: user.id,
@@ -95,17 +92,17 @@ export class TokenServiceProvider {
 
 @Module({
     imports: [
-        ConfigService,
+        Config,
+        Database,
         JwtModule.registerAsync({
-            imports: [ConfigService],
-            inject: [ConfigServiceProvider],
-            useFactory: (configService: ConfigServiceProvider) => ({
+            imports: [Config],
+            inject: [ConfigProvider],
+            useFactory: (configService: ConfigProvider) => ({
                 secret: configService.JWT_SECRET,
                 signOptions: { expiresIn: configService.JWT_EXPIRES_IN },
             }),
         }),
         UserService,
-        RefreshTokensRepository,
     ],
     providers: [TokenServiceProvider],
     exports: [TokenServiceProvider],

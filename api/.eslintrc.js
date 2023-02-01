@@ -14,7 +14,7 @@ module.exports = {
     rules: {
         'max-len': [
             'error',
-            110,
+            100,
             {
                 ignorePattern: '^import\\s.+\\sfrom\\s.+;$',
                 ignoreUrls: true,

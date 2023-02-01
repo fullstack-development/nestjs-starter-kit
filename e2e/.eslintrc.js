@@ -5,11 +5,7 @@ module.exports = {
         project: './tsconfig.eslint.json',
         sourceType: 'module',
     },
-    extends: [
-        'plugin:@typescript-eslint/recommended',
-        'prettier/@typescript-eslint',
-        'plugin:prettier/recommended',
-    ],
+    extends: ['plugin:@typescript-eslint/recommended', 'plugin:prettier/recommended'],
     root: true,
     env: {
         node: true,
@@ -18,7 +14,7 @@ module.exports = {
     rules: {
         'max-len': [
             'error',
-            110,
+            100,
             {
                 ignorePattern: '^import\\s.+\\sfrom\\s.+;$',
                 ignoreUrls: true,
