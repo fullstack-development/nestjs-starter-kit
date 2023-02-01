@@ -82,8 +82,18 @@ export class HttpInterceptor implements NestInterceptor, OnModuleInit {
             }),
             catchError(async (error: BaseError<string> | Error | unknown) => {
                 if (process.env['TEST'] !== 'true') {
-                    if ((isHttpError(error) && error.status >= 500) || !isHttpError(error)) {
-                        this.logger.error(`${error}`);
+                    if (
+                        (isHttpError(error) && error.status >= 500) ||
+                        (isError(error) && error.kind >= 500)
+                    ) {
+                        const errorText = (() => {
+                            try {
+                                return JSON.stringify(error);
+                            } catch {
+                                return `${error}`;
+                            }
+                        })();
+                        this.logger.error(errorText);
                     }
                 }
 
@@ -130,15 +140,7 @@ export class HttpInterceptor implements NestInterceptor, OnModuleInit {
                     ).errorUniqId;
                 }
 
-                if (process.env['TEST'] !== 'true') {
-                    response.send(
-                        `${R.omit(['stack'], body)}\nStack: ${
-                            process.env['ENVIRONMENT'] !== 'prod' ? body?.stack : ''
-                        }`,
-                    );
-                } else {
-                    response.send(R.omit(['stack'], body));
-                }
+                response.send(makeResponse(body));
             }),
         );
     }
@@ -164,4 +166,17 @@ function isHttpError(error: unknown): error is {
         !Array.isArray(error) &&
         typeof error['status'] === 'number'
     );
+}
+
+function makeResponse(body: {
+    error: string;
+    errorUniqId?: string | undefined;
+    message?: string | undefined;
+    stack?: string | undefined;
+}) {
+    if (process.env['TEST'] === 'true' || process.env['ENVIRONMENT'] === 'prod') {
+        return R.omit(['stack'], body);
+    }
+
+    return body;
 }

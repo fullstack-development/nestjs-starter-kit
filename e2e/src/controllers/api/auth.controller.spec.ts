@@ -44,8 +44,8 @@ describe('Auth Controller', () => {
             await signUp
                 .spec()
                 .withBody({ email: 'test@example.com', password: '12345678' })
-                .expectStatus(200)
-                .expectJsonLike({ data: { error: 'userAlreadyExist' } });
+                .expectStatus(409)
+                .expectBody({ error: 'userAlreadyExist' });
         });
     });
 
@@ -62,8 +62,8 @@ describe('Auth Controller', () => {
             await confirmEmail
                 .spec()
                 .withBody({ confirmUuid: v4() })
-                .expectStatus(200)
-                .expectJsonLike({ data: { error: 'cannotFindEmailConfirm' } });
+                .expectStatus(422)
+                .expectJsonLike({ error: 'cannotFindEmailConfirm' });
         });
 
         it('should success confirm email', async () => {
@@ -98,8 +98,8 @@ describe('Auth Controller', () => {
             await confirmEmail
                 .spec()
                 .withBody({ confirmUuid: emailConfirm?.confirmUuid })
-                .expectStatus(200)
-                .expectJsonLike({ data: { error: 'emailAlreadyConfirmed' } });
+                .expectStatus(409)
+                .expectJsonLike({ error: 'emailAlreadyConfirmed' });
         });
     });
 
@@ -120,21 +120,21 @@ describe('Auth Controller', () => {
             await signIn
                 .spec()
                 .withBody({ email: 'test1@example.com', password: '12345678' })
-                .expectStatus(200)
-                .expectJsonLike({ data: { error: 'emailNotConfirmed' } });
+                .expectStatus(422)
+                .expectJsonLike({ error: 'emailNotConfirmed' });
         });
 
         it('should return error if email or password incorrect', async () => {
             await signIn
                 .spec()
                 .withBody({ email: 'test@example.com', password: '123456789' })
-                .expectStatus(200)
-                .expectJsonLike({ data: { error: 'emailOrPasswordIncorrect' } });
+                .expectStatus(422)
+                .expectJsonLike({ error: 'emailOrPasswordIncorrect' });
             await signIn
                 .spec()
                 .withBody({ email: 'test2@example.com', password: '12345678' })
-                .expectStatus(200)
-                .expectJsonLike({ data: { error: 'emailOrPasswordIncorrect' } });
+                .expectStatus(422)
+                .expectJsonLike({ error: 'emailOrPasswordIncorrect' });
         });
 
         it('should success return tokens', async () => {
@@ -149,8 +149,8 @@ describe('Auth Controller', () => {
 
         it('should return new access token and refresh token in cookie', async () => {
             const tokens = await signIn.send({ email: 'test@example.com', password: '12345678' });
-
             const result = await refresh.send(tokens.refreshToken);
+
             expect(isJWT(result.accessToken)).toEqual(true);
             expect(isJWT(result.refreshToken)).toEqual(true);
         });
