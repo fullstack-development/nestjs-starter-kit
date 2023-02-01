@@ -1,1 +1,0 @@
-#### Guard description 2

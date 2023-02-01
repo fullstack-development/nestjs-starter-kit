@@ -17,6 +17,6 @@
         "composite": true,
         "allowJs": true
     },
-    "include": ["src/**/*", "src/index.ts", "generator1.ts"],
+    "include": ["src/**/*", "src/index.ts"],
     "exclude": ["node_modules", "dist", "**/*spec.ts"]
 }

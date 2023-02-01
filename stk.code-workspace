@@ -16,9 +16,6 @@
     },
     {
       "path": "launch"
-    },
-    {
-      "path": "doc"
     }
   ],
   "settings": {
@@ -28,8 +25,7 @@
       "api": true,
       "e2e": true,
       "launch": true,
-      "libs": true,
-      "doc": true
+      "libs": true
     }
   }
 }
