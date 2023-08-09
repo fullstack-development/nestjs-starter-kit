@@ -18,7 +18,6 @@
         "test:coverage": "cross-env TEST=true jest --coverage"
     },
     "dependencies": {
-        "@medibloc/nestjs-request-context": "^1.0.0",
         "@nestjs/common": "^9.2.1",
         "@nestjs/core": "^9.2.1",
         "@nestjs/jwt": "^10.0.1",
@@ -40,6 +39,7 @@
         "reflect-metadata": "^0.1.13",
         "rimraf": "^3.0.2",
         "rxjs": "^7.2.0",
+        "ethers": "^5.7.1",
         "swagger-ui-express": "^4.5.0",
         "ts-morph": "^17.0.1",
         "uuid": "^8.3.2",

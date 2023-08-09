@@ -1,8 +1,7 @@
-import { RefreshToken, User } from '@lib/repository';
+import { DatabaseProvider, RefreshToken, User } from '@lib/repository';
 import { Injectable, Module } from '@nestjs/common';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { Config, ConfigProvider } from '../../core/config/config.core';
-import { Database, DatabaseProvider } from '../../core/database/database.core';
 import { isError } from '../../core/errors.core';
 import { sha256 } from '../../utils/crypt.utils';
 import { UserService, UserServiceProvider } from '../user/user.service';
@@ -93,7 +92,6 @@ export class TokenServiceProvider {
 @Module({
     imports: [
         Config,
-        Database,
         JwtModule.registerAsync({
             imports: [Config],
             inject: [ConfigProvider],

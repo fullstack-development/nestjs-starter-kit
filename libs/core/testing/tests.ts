@@ -1,8 +1,6 @@
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { INestApplication } from '@nestjs/common';
-import { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { ethers } from 'ethers';
-import { of, throwError } from 'rxjs';
 import { DatabaseProvider, Repositories } from '../../repository';
 
 export type DatabaseRepositoriesMock = {
@@ -108,17 +106,4 @@ export const describeIf = (condition: boolean) => (condition ? describe : descri
 
 export const itIf = (condition: boolean) => (condition ? it : it.skip);
 
-export const httpResponse = <T>(data: T) => {
-    return of({ data } as AxiosResponse);
-};
-
-export const httpError = (status: number, error: string) => {
-    return throwError(
-        () =>
-            new AxiosError('', '', {} as InternalAxiosRequestConfig<unknown>, '', {
-                status,
-                data: { error },
-            } as AxiosResponse<unknown, unknown>),
-    );
-};
 export const isTestEnvironment = () => process.env['TEST'] === 'true';

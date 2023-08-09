@@ -1,9 +1,9 @@
+import { DatabaseProvider } from '@lib/repository';
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import * as R from 'ramda';
 import { ConfigProvider } from '../../../core/config/config.core';
-import { DatabaseProvider } from '../../../core/database/database.core';
 import { TokenPayload } from '../auth.model';
 
 @Injectable()

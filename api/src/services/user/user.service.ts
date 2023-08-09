@@ -1,7 +1,6 @@
-import { User } from '@lib/repository';
+import { DatabaseProvider, User } from '@lib/repository';
 import { Injectable, Module } from '@nestjs/common';
-import { Database, DatabaseProvider } from '../../core/database/database.core';
-import { CannotFindUser } from '../../core/database/database.model';
+import { CannotFindUser } from '../../core/errors.core';
 import { date } from '../../utils';
 import { sha256 } from '../../utils/crypt.utils';
 import { EmailOrPasswordIncorrect, UserAlreadyExist, UserPayload } from './user.model';
@@ -59,7 +58,6 @@ export class UserServiceProvider {
 }
 
 @Module({
-    imports: [Database],
     providers: [UserServiceProvider],
     exports: [UserServiceProvider],
 })

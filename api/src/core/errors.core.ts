@@ -67,3 +67,21 @@ export function isError<T, E, BE extends BaseError<E>>(value: T | BE): value is 
 export function isBaseErrorString(be: BaseError<unknown>): be is BaseError<string> {
     return typeof be.error === 'string';
 }
+
+export class CannotFindEmailConfirm extends UnprocessableEntityError<'cannotFindEmailConfirm'> {
+    constructor(payload?: Record<string, unknown>) {
+        super('cannotFindEmailConfirm', { payload });
+    }
+}
+
+export class CannotFindUser extends UnprocessableEntityError<'cannotFindUser'> {
+    constructor(payload?: Record<string, unknown>) {
+        super('cannotFindUser', { payload });
+    }
+}
+
+export class CannotFindRefreshToken extends UnprocessableEntityError<'cannotFindRefreshToken'> {
+    constructor(payload?: Record<string, unknown>) {
+        super('cannotFindRefreshToken', { payload });
+    }
+}

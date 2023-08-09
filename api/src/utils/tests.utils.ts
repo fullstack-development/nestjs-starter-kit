@@ -1,9 +1,8 @@
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import { Repositories } from '@lib/repository';
+import { DatabaseProvider, Repositories } from '@lib/repository';
 import { INestApplication, Type } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as request from 'supertest';
-import { DatabaseProvider } from '../core/database/database.core';
 import { JwtUserGuard } from '../services/auth/guards/jwt-user.guard';
 import { getUserStub } from '../__mocks__/user.stub';
 

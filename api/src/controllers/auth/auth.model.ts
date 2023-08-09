@@ -1,6 +1,6 @@
 import { IsEmail, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 import { ControllerResponse } from '../../core/controller.core';
-import { CannotFindEmailConfirm, CannotFindUser } from '../../core/database/database.model';
+import { CannotFindEmailConfirm, CannotFindUser } from '../../core/errors.core';
 import {
     CannotSendEmailConfirmation,
     EmailAlreadyConfirmed,
