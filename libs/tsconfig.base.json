@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "declaration": true,
+        "module": "commonjs",
+        "rootDir": ".",
+        "declarationMap": true,
+        "removeComments": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "allowSyntheticDefaultImports": true,
+        "target": "ES2022",
+        "sourceMap": true,
+        "incremental": true,
+        "strictNullChecks": true,
+        "skipLibCheck": true,
+        "composite": true,
+        "allowJs": true,
+        "typeRoots": ["./core/node_modules/@types", "./repository/node_modules/@types"]
+    },
+    "include": ["**/*.ts"],
+    "exclude": ["**/migrations/**", "**/dist/**", "**/node_modules/**"],
+}

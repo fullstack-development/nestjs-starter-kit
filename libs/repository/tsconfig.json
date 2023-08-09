@@ -1,22 +1,7 @@
 {
+    "extends": "../tsconfig.base.json",
     "compilerOptions": {
-        "declaration": true,
-        "outDir": "../../api/dist/libs/repository",
-        "module": "commonjs",
-        "declarationMap": true,
-        "removeComments": true,
-        "emitDecoratorMetadata": true,
-        "experimentalDecorators": true,
-        "allowSyntheticDefaultImports": true,
-        "target": "ES2022",
-        "sourceMap": true,
         "baseUrl": "./",
-        "incremental": true,
-        "strictNullChecks": true,
-        "skipLibCheck": true,
-        "composite": true,
-        "allowJs": true
-    },
-    "include": ["src/**/*", "src/index.ts"],
-    "exclude": ["node_modules", "dist", "**/*spec.ts"]
+        "outDir": "./dist"
+    }
 }
