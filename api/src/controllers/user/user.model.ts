@@ -1,9 +1,9 @@
+import { ControllerResponse } from '@lib/core';
 import { EmailConfirm, RefreshToken, User } from '@lib/repository';
 import { plainToClass, Transform, Type } from 'class-transformer';
 import { IsOptional, ValidateNested } from 'class-validator';
-import { ControllerResponse } from '../../core/controller.core';
-import { CannotFindUser as CFU } from '../../core/errors.core';
 import { CompareDateQuery, CompareNumberQuery, IsSafeInteger } from '../../utils/validation.utils';
+import { CannotFindUser as CFU } from './../../services/user/user.model';
 
 export class QueryParams {
     @IsOptional()

@@ -1,4 +1,4 @@
-import { ConflictError, UnprocessableEntityError } from '../../core/errors.core';
+import { ConflictError, UnprocessableEntityError } from '@lib/core';
 
 export type UserPayload = {
     email: string;
@@ -14,5 +14,17 @@ export class UserAlreadyExist extends ConflictError<'userAlreadyExist'> {
 export class EmailOrPasswordIncorrect extends UnprocessableEntityError<'emailOrPasswordIncorrect'> {
     constructor() {
         super('emailOrPasswordIncorrect');
+    }
+}
+
+export class CannotFindUser extends UnprocessableEntityError<'cannotFindUser'> {
+    constructor(payload?: Record<string, unknown>) {
+        super('cannotFindUser', { payload });
+    }
+}
+
+export class CannotFindEmailConfirm extends UnprocessableEntityError<'cannotFindEmailConfirm'> {
+    constructor(payload?: Record<string, unknown>) {
+        super('cannotFindEmailConfirm', { payload });
     }
 }

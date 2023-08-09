@@ -1,5 +1,5 @@
 import { createParamDecorator, ExecutionContext, Type } from '@nestjs/common';
-import { IsNumber } from 'class-validator';
+import { IsEmail, IsNumber } from 'class-validator';
 import { validateSync } from '../utils/validation.utils';
 import { BaseError, isError } from './errors.core';
 
@@ -18,6 +18,9 @@ export class ControllerResponse<T, H extends string> {
 export class ContextUser {
     @IsNumber()
     id: number;
+
+    @IsEmail()
+    email: string;
 }
 
 export const getRequestUser =

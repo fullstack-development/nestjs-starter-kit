@@ -1,5 +1,5 @@
+import { ContextUser, ControllerResponse, mapResponse, User } from '@lib/core';
 import { Body, Controller, Get, Module, Post, UseGuards } from '@nestjs/common';
-import { ControllerResponse, mapResponse, RequestUser, User } from '../../core/controller.core';
 import { AuthService, AuthServiceProvider } from '../../services/auth/auth.service';
 import { JwtUserRefreshGuard } from '../../services/auth/guards/jwt-user-refresh.guard';
 import { UserType } from '../../services/token/token.model';
@@ -53,7 +53,7 @@ export class AuthControllerProvider {
 
     @Get('refresh')
     @UseGuards(JwtUserRefreshGuard)
-    async handleRefreshToken(@User() user: RequestUser): Promise<HandleRefreshTokenResponse> {
+    async handleRefreshToken(@User() user: ContextUser): Promise<HandleRefreshTokenResponse> {
         return mapResponse(
             await this.tokenService.generate(user.id, UserType.USER, user.email),
             ({ accessToken, refreshCookie }) =>

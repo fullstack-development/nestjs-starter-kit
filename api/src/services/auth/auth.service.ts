@@ -1,11 +1,12 @@
+import { isError } from '@lib/core';
 import { DatabaseProvider, User } from '@lib/repository';
 import { Injectable, Module } from '@nestjs/common';
 import { Config, ConfigProvider } from '../../core/config/config.core';
-import { CannotFindEmailConfirm, isError } from '../../core/errors.core';
 import { uuid } from '../../utils';
 import { MailService, MailServiceProvider } from '../mail/mail.service';
 import { UserType } from '../token/token.model';
 import { TokenService, TokenServiceProvider } from '../token/token.service';
+import { CannotFindEmailConfirm } from '../user/user.model';
 import { UserService, UserServiceProvider } from '../user/user.service';
 import {
     CannotSendEmailConfirmation,

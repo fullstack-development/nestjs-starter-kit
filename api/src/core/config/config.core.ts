@@ -1,9 +1,9 @@
+import { ValidationError } from '@lib/core';
 import { Injectable, Module } from '@nestjs/common';
 import * as dotenv from 'dotenv';
 import * as fs from 'fs';
 import * as path from 'path';
 import { validateSync } from '../../utils/validation.utils';
-import { ValidationError } from '../errors.core';
 import { ConfigDto, ENVIRONMENT } from './config.model';
 
 @Injectable()

@@ -1,8 +1,8 @@
+import { isError } from '@lib/core';
 import { DatabaseProvider, RefreshToken, User } from '@lib/repository';
 import { Injectable, Module } from '@nestjs/common';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { Config, ConfigProvider } from '../../core/config/config.core';
-import { isError } from '../../core/errors.core';
 import { sha256 } from '../../utils/crypt.utils';
 import { UserService, UserServiceProvider } from '../user/user.service';
 import { UserType } from './token.model';

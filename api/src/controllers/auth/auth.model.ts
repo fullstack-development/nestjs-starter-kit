@@ -1,12 +1,16 @@
+import { ControllerResponse } from '@lib/core';
 import { IsEmail, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
-import { ControllerResponse } from '../../core/controller.core';
-import { CannotFindEmailConfirm, CannotFindUser } from '../../core/errors.core';
 import {
     CannotSendEmailConfirmation,
     EmailAlreadyConfirmed,
     EmailNotConfirmed,
 } from '../../services/auth/auth.model';
-import { EmailOrPasswordIncorrect, UserAlreadyExist } from '../../services/user/user.model';
+import {
+    CannotFindEmailConfirm,
+    CannotFindUser,
+    EmailOrPasswordIncorrect,
+    UserAlreadyExist,
+} from '../../services/user/user.model';
 
 export class SignUpInput {
     @IsEmail()

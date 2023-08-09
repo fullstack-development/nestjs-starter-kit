@@ -16,7 +16,7 @@ export class ValidationError {
     }
 }
 
-type ErrorKind = 208 | 400 | 404 | 409 | 422 | 500;
+type ErrorKind = 400 | 404 | 409 | 422 | 500;
 
 type ErrorOptions = {
     payload?: Record<string, unknown>;
