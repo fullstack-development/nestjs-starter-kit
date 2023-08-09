@@ -1,12 +1,31 @@
 import { INestApplication } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
-import { serve, setup } from 'swagger-ui-express';
-import * as Yaml from 'yamljs';
 import { AppModule } from './app/app.module';
 import { ConfigProvider } from './core/config/config.core';
 import { ENVIRONMENT } from './core/config/config.model';
 import './patchBigInt';
+
+const setupDocumentation = async (app: INestApplication, config: ConfigProvider) => {
+    const ENV = config.ENVIRONMENT;
+    if (ENV === ENVIRONMENT.STAGE || ENV === ENVIRONMENT.LOCAL) {
+        const documentConfig = new DocumentBuilder()
+            .setTitle('RRC Api')
+            .setDescription('RRC api description')
+            .setVersion('1.0')
+            .build();
+
+        const document = SwaggerModule.createDocument(app, documentConfig);
+        SwaggerModule.setup('api/docs/swagger', app, document, {
+            swaggerOptions: {
+                defaultModelRendering: 'model',
+                defaultModelsExpandDepth: 0,
+                defaultModelExpandDepth: 10,
+            },
+        });
+    }
+};
 
 const enableCorsByEnv = (app: INestApplication, config: ConfigProvider) => {
     const baseCorsOptions = {
@@ -72,22 +91,7 @@ async function bootstrap() {
     const configService = app.get(ConfigProvider);
 
     enableCorsByEnv(app, configService);
-
-    const ENV = configService.ENVIRONMENT;
-    if (ENV === ENVIRONMENT.STAGE || ENV === ENVIRONMENT.LOCAL) {
-        const swaggerDoc = Yaml.load('src/swagger.yaml');
-        app.use(
-            '/swagger',
-            serve,
-            setup(swaggerDoc, {
-                swaggerOptions: {
-                    defaultModelRendering: 'model',
-                    defaultModelsExpandDepth: 0,
-                    defaultModelExpandDepth: 10,
-                },
-            }),
-        );
-    }
+    await setupDocumentation(app, configService);
 
     await app.listen(3000);
 }

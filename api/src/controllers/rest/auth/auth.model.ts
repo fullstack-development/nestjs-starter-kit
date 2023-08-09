@@ -4,13 +4,13 @@ import {
     CannotSendEmailConfirmation,
     EmailAlreadyConfirmed,
     EmailNotConfirmed,
-} from '../../services/auth/auth.model';
+} from '../../../services/auth/auth.model';
 import {
     CannotFindEmailConfirm,
     CannotFindUser,
     EmailOrPasswordIncorrect,
     UserAlreadyExist,
-} from '../../services/user/user.model';
+} from '../../../services/user/user.model';
 
 export class SignUpInput {
     @IsEmail()

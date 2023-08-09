@@ -1,10 +1,14 @@
-import { ContextUser, ControllerResponse, mapResponse, User } from '@lib/core';
+import { ApiDescribe, ContextUser, ControllerResponse, mapResponse, User } from '@lib/core';
 import { UseValidationPipe } from '@lib/utils';
 import { Body, Controller, Get, Module, Post, UseGuards } from '@nestjs/common';
-import { AuthService, AuthServiceProvider } from '../../services/auth/auth.service';
-import { JwtUserRefreshGuard } from '../../services/auth/guards/jwt-user-refresh.guard';
-import { UserType } from '../../services/token/token.model';
-import { TokenService, TokenServiceProvider } from './../../services/token/token.service';
+import { ApiTags } from '@nestjs/swagger';
+import { CannotSendEmailConfirmation } from '../../../services/auth/auth.model';
+import { AuthService, AuthServiceProvider } from '../../../services/auth/auth.service';
+import { JwtUserRefreshGuard } from '../../../services/auth/guards/jwt-user-refresh.guard';
+import { UserType } from '../../../services/token/token.model';
+import { UserAlreadyExist } from '../../../services/user/user.model';
+import { PREFIX_URI } from '../../prefix';
+import { TokenService, TokenServiceProvider } from './../../../services/token/token.service';
 import {
     ConfirmEmailInput,
     ConfirmEmailResponse,
@@ -15,7 +19,8 @@ import {
     SignUpResponse,
 } from './auth.model';
 
-@Controller('api/auth')
+@ApiTags(`${PREFIX_URI}/auth`)
+@Controller(`${PREFIX_URI}/auth`)
 export class AuthControllerProvider {
     constructor(
         private authService: AuthServiceProvider,
@@ -24,6 +29,10 @@ export class AuthControllerProvider {
 
     @Post('sign-up')
     @UseValidationPipe()
+    @ApiDescribe({
+        hasValidationErrors: true,
+        errors: [UserAlreadyExist, CannotSendEmailConfirmation],
+    })
     async signUp(@Body() body: SignUpInput): Promise<SignUpResponse> {
         return mapResponse(
             await this.authService.signUp(body),

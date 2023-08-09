@@ -1,7 +1,8 @@
 import { ControllerResponse } from '@lib/core';
 import { Body, Controller, Get, Module, Query } from '@nestjs/common';
+import { PREFIX_URI } from '../prefix';
 
-@Controller('api')
+@Controller(PREFIX_URI)
 export class AppControllerProvider {
     @Get('echo')
     async echo(

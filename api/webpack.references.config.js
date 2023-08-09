@@ -13,6 +13,16 @@ module.exports = function (options, webpack) {
                         loader: 'ts-loader',
                         options: {
                             projectReferences: true,
+                            getCustomTransformers: (program) => ({
+                                before: [require('@nestjs/swagger/plugin').before(
+                                    {
+                                        classValidatorShim: true,
+                                        introspectComments: true,
+                                        dtoFileNameSuffix: ['.dto.ts', '.model.ts', '.contract.ts']
+                                    },
+                                    program
+                                )]
+                            })
                         },
                     },
                 },

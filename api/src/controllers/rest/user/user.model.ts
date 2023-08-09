@@ -3,7 +3,7 @@ import { EmailConfirm, RefreshToken, User } from '@lib/repository';
 import { CompareDateQuery, CompareNumberQuery, IsSafeInteger } from '@lib/utils';
 import { plainToClass, Transform, Type } from 'class-transformer';
 import { IsOptional, ValidateNested } from 'class-validator';
-import { CannotFindUser as CFU } from './../../services/user/user.model';
+import { CannotFindUser as CFU } from './../../../services/user/user.model';
 
 export class QueryParams {
     @IsOptional()

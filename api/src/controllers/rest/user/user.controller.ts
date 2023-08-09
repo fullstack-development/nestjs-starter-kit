@@ -1,11 +1,12 @@
 import { ContextUser, ControllerResponse, mapResponse, User } from '@lib/core';
 import { Controller, Get, Module, UseGuards } from '@nestjs/common';
 import * as R from 'ramda';
-import { JwtUserGuard } from '../../services/auth/guards/jwt-user.guard';
-import { UserService, UserServiceProvider } from '../../services/user/user.service';
+import { JwtUserGuard } from '../../../services/auth/guards/jwt-user.guard';
+import { UserService, UserServiceProvider } from '../../../services/user/user.service';
+import { PREFIX_URI } from '../../prefix';
 import { MeResponse as MRS } from './user.model';
 
-@Controller('api/user')
+@Controller(`${PREFIX_URI}/user`)
 export class UserControllerProvider {
     constructor(private users: UserServiceProvider) {}
 

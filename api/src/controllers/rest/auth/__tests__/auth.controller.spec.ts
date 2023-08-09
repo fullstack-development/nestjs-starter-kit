@@ -1,5 +1,6 @@
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import { RequestContextModule } from '@medibloc/nestjs-request-context';
+import { HttpInterceptor } from '@lib/core';
+import { AsyncContext, DatabaseProvider, Transactions } from '@lib/repository';
 import { ModuleRef } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
@@ -7,8 +8,6 @@ import * as cookieParser from 'cookie-parser';
 import * as request from 'supertest';
 import { v4 } from 'uuid';
 import { ConfigProvider } from '../../../core/config/config.core';
-import { DatabaseProvider } from '../../../core/database/database.core';
-import { HttpInterceptor } from '../../../core/interceptor.core';
 import { AuthServiceProvider } from '../../../services/auth/auth.service';
 import { JwtRefreshTokenStrategy } from '../../../services/auth/strategies/jwt-refresh.strategy';
 import { JwtStrategy } from '../../../services/auth/strategies/jwt.strategy';
@@ -17,7 +16,6 @@ import { TokenServiceProvider } from '../../../services/token/token.service';
 import { UserServiceProvider } from '../../../services/user/user.service';
 import { AppWrap } from '../../../utils/tests.utils';
 import { ConfigServiceFake } from '../../../__mocks__/ConfigServiceFake';
-import { TransactionsContextFake } from '../../../__mocks__/TransactionsContextFake';
 import { getUserStub } from '../../../__mocks__/user.stub';
 import { AuthControllerProvider } from '../auth.controller';
 
@@ -36,10 +34,6 @@ describe('AuthController', () => {
                 JwtModule.register({
                     secret: configService.JWT_SECRET,
                     signOptions: { expiresIn: configService.JWT_EXPIRES_IN },
-                }),
-                RequestContextModule.forRoot({
-                    contextClass: TransactionsContextFake,
-                    isGlobal: true,
                 }),
             ],
             providers: [
@@ -81,7 +75,11 @@ describe('AuthController', () => {
 
         appWrap.app = module.createNestApplication();
         appWrap.app.useGlobalInterceptors(
-            new HttpInterceptor(createMock<ModuleRef>(), db as unknown as DatabaseProvider),
+            new HttpInterceptor(
+                createMock<ModuleRef>(),
+                createMock<AsyncContext<string, Transactions>>(),
+                db as unknown as DatabaseProvider,
+            ),
         );
         appWrap.app.use(cookieParser());
         await appWrap.app.init();
