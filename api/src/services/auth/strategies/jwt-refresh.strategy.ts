@@ -1,11 +1,11 @@
 import { DatabaseProvider } from '@lib/repository';
+import { sha256 } from '@lib/utils';
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import * as R from 'ramda';
 import { ConfigProvider } from '../../../core/config/config.core';
-import { sha256 } from '../../../utils/crypt.utils';
 import { TokenPayload } from '../auth.model';
 
 @Injectable()

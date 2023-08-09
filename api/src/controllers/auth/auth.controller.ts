@@ -1,9 +1,9 @@
 import { ContextUser, ControllerResponse, mapResponse, User } from '@lib/core';
+import { UseValidationPipe } from '@lib/utils';
 import { Body, Controller, Get, Module, Post, UseGuards } from '@nestjs/common';
 import { AuthService, AuthServiceProvider } from '../../services/auth/auth.service';
 import { JwtUserRefreshGuard } from '../../services/auth/guards/jwt-user-refresh.guard';
 import { UserType } from '../../services/token/token.model';
-import { UseValidationPipe } from '../../utils/validation.utils';
 import { TokenService, TokenServiceProvider } from './../../services/token/token.service';
 import {
     ConfirmEmailInput,

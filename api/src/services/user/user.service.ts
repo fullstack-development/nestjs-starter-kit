@@ -1,7 +1,6 @@
 import { DatabaseProvider, User } from '@lib/repository';
+import { date, sha256 } from '@lib/utils';
 import { Injectable, Module } from '@nestjs/common';
-import { date } from '../../utils';
-import { sha256 } from '../../utils/crypt.utils';
 import {
     CannotFindUser,
     EmailOrPasswordIncorrect,

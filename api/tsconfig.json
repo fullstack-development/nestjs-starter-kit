@@ -16,7 +16,8 @@
         "allowJs": true,
         "paths": {
             "@lib/repository": ["../libs/repository/src/index.ts"],
-            "@lib/core": ["../libs/core/src/index.ts"]
+            "@lib/core": ["../libs/core/src/index.ts"],
+            "@lib/utils": ["../libs/core/utils/index.ts"]
         }
     },
     "include": ["*.ts", "./src/**/*.ts"],
