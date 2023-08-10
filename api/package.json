@@ -87,7 +87,9 @@
             "<rootDir>/node_modules",
             "<rootDir>/src",
             "<rootDir>/../libs/repository",
-            "<rootDir>/../libs/repository/node_modules"
+            "<rootDir>/../libs/repository/node_modules",
+            "<rootDir>/../libs/core",
+            "<rootDir>/../libs/core/node_modules"
         ],
         "modulePathIgnorePatterns": [
             "<rootDir>/dist/",
@@ -108,7 +110,10 @@
             "./jest-setup-file.ts"
         ],
         "moduleNameMapper": {
-            "@lib/repository": "<rootDir>/../libs/repository"
+            "@lib/repository": "<rootDir>/../libs/repository",
+            "@lib/core": "<rootDir>/../libs/core/src/index.ts",
+            "@lib/utils": "<rootDir>/../libs/core/utils/index.ts",
+            "@lib/testing": "<rootDir>/../libs/core/testing/index.ts"
         }
     }
 }

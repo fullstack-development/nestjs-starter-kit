@@ -1,23 +1,19 @@
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { HttpInterceptor } from '@lib/core';
 import { AsyncContext, DatabaseProvider, Repositories, Transactions } from '@lib/repository';
+import { AppWrap, DatabaseUnsafeRepositoryMock, mockDatabaseUnsafeRepository } from '@lib/testing';
 import { ModuleRef } from '@nestjs/core';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
 import * as cookieParser from 'cookie-parser';
 import { omit } from 'ramda';
 import * as request from 'supertest';
-import { ConfigProvider } from '../../../core/config/config.core';
-import { JwtRefreshTokenStrategy } from '../../../services/auth/strategies/jwt-refresh.strategy';
-import { JwtStrategy } from '../../../services/auth/strategies/jwt.strategy';
-import { UserServiceProvider } from '../../../services/user/user.service';
-import {
-    AppWrap,
-    DatabaseUnsafeRepositoryMock,
-    mockDatabaseUnsafeRepository,
-} from '../../../utils/tests.utils';
-import { ConfigServiceFake } from '../../../__mocks__/ConfigServiceFake';
-import { getUserStub } from '../../../__mocks__/user.stub';
+import { ConfigProvider } from '../../../../core/config/config.core';
+import { JwtRefreshTokenStrategy } from '../../../../services/auth/strategies/jwt-refresh.strategy';
+import { JwtStrategy } from '../../../../services/auth/strategies/jwt.strategy';
+import { UserServiceProvider } from '../../../../services/user/user.service';
+import { ConfigServiceFake } from '../../../../__mocks__/ConfigServiceFake';
+import { getUserStub } from '../../../../__mocks__/user.stub';
 import { UserControllerProvider } from './../user.controller';
 
 describe('UserController', () => {
