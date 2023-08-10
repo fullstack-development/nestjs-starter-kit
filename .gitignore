@@ -4,3 +4,6 @@ node_modules/
 yarn-error.log
 .env
 .e2e.env
+
+*/**/node_modules_docker_dev
+*/**/.ignore
