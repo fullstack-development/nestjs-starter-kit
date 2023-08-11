@@ -1,7 +1,6 @@
 import { AsyncContext, AsyncContextModule } from '@nestjs-steroids/async-context';
 import { DynamicModule, Injectable, Module } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { DMMFClass } from '@prisma/client/runtime';
 import { RepositoryLibrary, RepositoryLibraryProvider } from './repository.lib';
 import { Repositories } from './repository.model';
 
@@ -62,11 +61,6 @@ export class DatabaseProvider implements RepositoryGetters {
 
     get emailConfirm() {
         return repository(Repositories.EmailConfirm, this.ctx);
-    }
-
-    get dmmf() {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return (this.repository.Prisma as any)._baseDmmf as DMMFClass;
     }
 
     /**

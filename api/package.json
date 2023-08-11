@@ -95,7 +95,8 @@
             "<rootDir>/dist/",
             "<rootDir>/eslint-plugin/",
             "<rootDir>/migrations/",
-            "<rootDir>/coverage/"
+            "<rootDir>/coverage/",
+            "<rootDir>/node_modules_docker_dev"
         ],
         "testRegex": ".*\\.spec\\.ts$",
         "transform": {

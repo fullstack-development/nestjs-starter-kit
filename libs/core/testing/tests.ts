@@ -14,19 +14,11 @@ export type DatabaseRepositoriesMock = {
         [key in Repositories]: DeepMocked<DatabaseProvider[key]>;
     };
 };
-export function mockDatabase(
-    models: Array<{ name: string; fields: Array<{ name: string }> }> = [],
-): DatabaseRepositoriesMock {
+export function mockDatabase(): DatabaseRepositoriesMock {
     return {
         UnsafeRepository: {
             $transaction: jest.fn(),
             ...mockDatabaseRepositories(),
-        },
-        dmmf: {
-            modelMap: models.reduce(
-                (acc, item) => ({ ...acc, [item.name]: { fields: item.fields } }),
-                {},
-            ),
         },
         ...mockDatabaseRepositories(),
     } as unknown as DatabaseRepositoriesMock;
