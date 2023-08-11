@@ -12,6 +12,10 @@
       "name": "libs/repository"
     },
     {
+      "path": "libs/core",
+      "name": "libs/core"
+    },
+    {
       "path": "e2e"
     },
     {

@@ -1,4 +1,4 @@
-import { BaseError, ConflictError, UnprocessableEntityError } from '../../core/errors.core';
+import { BaseError, ConflictError, UnprocessableEntityError } from '@lib/core';
 
 export type TokenPayload = {
     email: string;

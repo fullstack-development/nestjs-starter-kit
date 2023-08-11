@@ -1,11 +1,9 @@
-import { User } from '@lib/repository';
+import { isError } from '@lib/core';
+import { DatabaseProvider, User } from '@lib/repository';
+import { DatabaseRepositoriesMock, mockDatabaseRepositories } from '@lib/testing';
 import { Test } from '@nestjs/testing';
-import { DatabaseProvider } from '../../../core/database/database.core';
-import { CannotFindUser } from '../../../core/database/database.model';
-import { isError } from '../../../core/errors.core';
-import { DatabaseRepositoriesMock, mockDatabaseRepositories } from '../../../utils/tests.utils';
 import { getUserStub } from '../../../__mocks__/user.stub';
-import { EmailOrPasswordIncorrect, UserAlreadyExist } from '../user.model';
+import { CannotFindUser, EmailOrPasswordIncorrect, UserAlreadyExist } from '../user.model';
 import { UserPayload } from './../../auth/auth.model';
 import { UserServiceProvider } from './../user.service';
 

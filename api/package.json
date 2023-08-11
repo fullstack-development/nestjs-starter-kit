@@ -18,13 +18,13 @@
         "test:coverage": "cross-env TEST=true jest --coverage"
     },
     "dependencies": {
-        "@medibloc/nestjs-request-context": "^1.0.0",
         "@nestjs/common": "^9.2.1",
         "@nestjs/core": "^9.2.1",
         "@nestjs/jwt": "^10.0.1",
         "@nestjs/passport": "^9.0.0",
         "@nestjs/platform-express": "^9.2.1",
         "@nestjs/schedule": "^2.1.0",
+        "@nestjs/swagger": "^6.1.4",
         "body-parser": "^1.19.0",
         "class-transformer": "^0.3.1",
         "class-validator": "^0.12.2",
@@ -32,6 +32,7 @@
         "cross-env": "^7.0.3",
         "date-fns": "^2.29.3",
         "dotenv": "^8.2.0",
+        "ethers": "^5.7.1",
         "express": "^4.17.2",
         "node-fetch": "^2.6.7",
         "passport": "^0.4.1",
@@ -40,10 +41,8 @@
         "reflect-metadata": "^0.1.13",
         "rimraf": "^3.0.2",
         "rxjs": "^7.2.0",
-        "swagger-ui-express": "^4.5.0",
         "ts-morph": "^17.0.1",
-        "uuid": "^8.3.2",
-        "yamljs": "^0.3.0"
+        "uuid": "^8.3.2"
     },
     "devDependencies": {
         "@golevelup/ts-jest": "^0.3.2",
@@ -88,13 +87,16 @@
             "<rootDir>/node_modules",
             "<rootDir>/src",
             "<rootDir>/../libs/repository",
-            "<rootDir>/../libs/repository/node_modules"
+            "<rootDir>/../libs/repository/node_modules",
+            "<rootDir>/../libs/core",
+            "<rootDir>/../libs/core/node_modules"
         ],
         "modulePathIgnorePatterns": [
             "<rootDir>/dist/",
             "<rootDir>/eslint-plugin/",
             "<rootDir>/migrations/",
-            "<rootDir>/coverage/"
+            "<rootDir>/coverage/",
+            "<rootDir>/node_modules_docker_dev"
         ],
         "testRegex": ".*\\.spec\\.ts$",
         "transform": {
@@ -109,7 +111,10 @@
             "./jest-setup-file.ts"
         ],
         "moduleNameMapper": {
-            "@lib/repository": "<rootDir>/../libs/repository"
+            "@lib/repository": "<rootDir>/../libs/repository",
+            "@lib/core": "<rootDir>/../libs/core/src/index.ts",
+            "@lib/utils": "<rootDir>/../libs/core/utils/index.ts",
+            "@lib/testing": "<rootDir>/../libs/core/testing/index.ts"
         }
     }
 }

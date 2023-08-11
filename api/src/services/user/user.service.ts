@@ -1,10 +1,12 @@
-import { User } from '@lib/repository';
+import { DatabaseProvider, User } from '@lib/repository';
+import { date, sha256 } from '@lib/utils';
 import { Injectable, Module } from '@nestjs/common';
-import { Database, DatabaseProvider } from '../../core/database/database.core';
-import { CannotFindUser } from '../../core/database/database.model';
-import { date } from '../../utils';
-import { sha256 } from '../../utils/crypt.utils';
-import { EmailOrPasswordIncorrect, UserAlreadyExist, UserPayload } from './user.model';
+import {
+    CannotFindUser,
+    EmailOrPasswordIncorrect,
+    UserAlreadyExist,
+    UserPayload,
+} from './user.model';
 
 @Injectable()
 export class UserServiceProvider {
@@ -59,7 +61,6 @@ export class UserServiceProvider {
 }
 
 @Module({
-    imports: [Database],
     providers: [UserServiceProvider],
     exports: [UserServiceProvider],
 })

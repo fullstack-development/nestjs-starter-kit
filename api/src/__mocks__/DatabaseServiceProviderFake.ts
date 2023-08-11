@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import { DatabaseProvider } from '../core/database/database.core';
+import { DatabaseProvider } from '@lib/repository';
 
 export type DeepMockedDatabaseServiceProvider = ReturnType<typeof getMockedDatabase>;
 

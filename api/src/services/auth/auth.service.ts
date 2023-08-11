@@ -1,13 +1,12 @@
-import { User } from '@lib/repository';
+import { isError } from '@lib/core';
+import { DatabaseProvider, User } from '@lib/repository';
+import { uuid } from '@lib/utils';
 import { Injectable, Module } from '@nestjs/common';
 import { Config, ConfigProvider } from '../../core/config/config.core';
-import { Database, DatabaseProvider } from '../../core/database/database.core';
-import { CannotFindEmailConfirm } from '../../core/database/database.model';
-import { isError } from '../../core/errors.core';
-import { uuid } from '../../utils';
 import { MailService, MailServiceProvider } from '../mail/mail.service';
 import { UserType } from '../token/token.model';
 import { TokenService, TokenServiceProvider } from '../token/token.service';
+import { CannotFindEmailConfirm } from '../user/user.model';
 import { UserService, UserServiceProvider } from '../user/user.service';
 import {
     CannotSendEmailConfirmation,
@@ -113,7 +112,7 @@ export class AuthServiceProvider {
 }
 
 @Module({
-    imports: [Config, Database, UserService, MailService, TokenService],
+    imports: [Config, UserService, MailService, TokenService],
     providers: [AuthServiceProvider, JwtStrategy, JwtRefreshTokenStrategy],
     exports: [AuthServiceProvider],
 })

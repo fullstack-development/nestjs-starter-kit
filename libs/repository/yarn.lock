@@ -136,6 +136,11 @@
     "@jridgewell/resolve-uri" "3.1.0"
     "@jridgewell/sourcemap-codec" "1.4.14"
 
+"@nestjs-steroids/async-context@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@nestjs-steroids/async-context/-/async-context-2.0.0.tgz#e4b78eb1b79f1bd18cec81fb1f471215dc505a15"
+  integrity sha512-0r8C7nnNfTr4dhU9VzvYpJBDmjk1JEwZC3mwmmQ+ltIGEnhUAvyFtfp3jpnX76U5qPPUuBlKGqhmNqmulrQetA==
+
 "@nestjs/cli@^9.1.9":
   version "9.1.9"
   resolved "https://registry.yarnpkg.com/@nestjs/cli/-/cli-9.1.9.tgz#f696b79e1e6478e9fff3bc90c70253720d19f03f"

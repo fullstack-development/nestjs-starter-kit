@@ -1,11 +1,9 @@
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import { EmailConfirm } from '@lib/repository';
+import { isError } from '@lib/core';
+import { DatabaseProvider, EmailConfirm } from '@lib/repository';
+import { DatabaseRepositoriesMock, mockDatabaseRepositories } from '@lib/testing';
 import { Test } from '@nestjs/testing';
 import { ConfigProvider } from '../../../core/config/config.core';
-import { DatabaseProvider } from '../../../core/database/database.core';
-import { CannotFindEmailConfirm, CannotFindUser } from '../../../core/database/database.model';
-import { isError } from '../../../core/errors.core';
-import { DatabaseRepositoriesMock, mockDatabaseRepositories } from '../../../utils/tests.utils';
 import { ConfigServiceFake } from '../../../__mocks__/ConfigServiceFake';
 import { getConfirmEmailStub } from '../../../__mocks__/confirmEmail.stub';
 import { getUserStub } from '../../../__mocks__/user.stub';
@@ -13,7 +11,12 @@ import { MailServiceProvider } from '../../mail/mail.service';
 import { TokenServiceProvider } from '../../token/token.service';
 import { UserServiceProvider } from '../../user/user.service';
 import { AuthServiceProvider } from '../auth.service';
-import { EmailOrPasswordIncorrect, UserAlreadyExist } from './../../user/user.model';
+import {
+    CannotFindEmailConfirm,
+    CannotFindUser,
+    EmailOrPasswordIncorrect,
+    UserAlreadyExist,
+} from './../../user/user.model';
 
 describe('AuthService', () => {
     let authService: AuthServiceProvider;
