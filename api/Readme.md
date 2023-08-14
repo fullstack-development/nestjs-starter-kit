@@ -1,4 +1,4 @@
-# FantasyPad api
+# Starter Kit api
 
 ## 1. Install deps
 ```bash
