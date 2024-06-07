@@ -1,0 +1,30 @@
+{
+    "folders": [
+        {
+            "path": ".",
+            "name": ".",
+        },
+        {
+            "path": "apps/api",
+            "name": "api",
+        },
+        {
+            "path": "libs/core",
+            "name": "lib/core",
+        },
+        {
+            "path": "libs/repository",
+            "name": "lib/repository",
+        },
+    ],
+    "settings": {
+        "files.exclude": {
+            "apps": true,
+            "libs": true,
+        },
+        "typescript.tsdk": "node_modules/typescript/lib",
+        "typescript.preferences.importModuleSpecifier": "shortest",
+        "eslint.enable": true,
+        "editor.formatOnSave": true,
+    },
+}

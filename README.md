@@ -5,6 +5,7 @@
 1. [API doc](./api/Readme.md)
 
 ## Preparations
+
 ### Installation
 
 Do installations step by step:
@@ -37,19 +38,19 @@ Do installations step by step:
 
 1. Run docker containers via docker-compose from the root folder of the repository
 
-   ```bash
-   docker compose -f stk.docker-compose.yaml up -d --build
-   ```
+    ```bash
+    docker compose -f stk.docker-compose.yaml up -d --build
+    ```
 
 2. Go to `api/env` folder and create copy of `dev.example.env` to `dev.env`
-   ```bash
-   cd ./api/env
-   cp ./dev.example.env ./dev.env
-   ```
+    ```bash
+    cd ./api/env
+    cp ./dev.example.env ./dev.env
+    ```
 3. Copy `schema.prisma` from root dir in `api/src/schema.prisma`
 4. Go up to `api` and launch migrations
-   ```bash
-   cd ../
-   source ./env/dev.env && DATABASE_URL=$DATABASE_URL yarn prisma:migrate:deploy
-   ```
-   - Press `Yes (y)` if it asks you to install missed dependencies
+    ```bash
+    cd ../
+    source ./env/dev.env && DATABASE_URL=$DATABASE_URL yarn prisma:migrate:deploy
+    ```
+    - Press `Yes (y)` if it asks you to install missed dependencies
