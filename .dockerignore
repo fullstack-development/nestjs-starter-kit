@@ -1,4 +1,6 @@
-**/node_modules
-**/dist
-**/build
-api/.prisma-lib
+.git
+node_modules
+dist
+typeorm.env
+api.env
+

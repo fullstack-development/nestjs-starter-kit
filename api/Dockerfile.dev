@@ -1,9 +1,0 @@
-FROM public.ecr.aws/docker/library/node:18.15
-
-WORKDIR /app
-
-ENV PATH=/app/api/node_modules/.bin:$PATH
-
-EXPOSE 3000
-
-CMD ["sh", "-c", "yarn --cwd libs/repository && yarn --cwd libs/repository prisma:generate && yarn --cwd libs/core && yarn --cwd api && yarn cache clean && yarn --cwd api start:dev"]
