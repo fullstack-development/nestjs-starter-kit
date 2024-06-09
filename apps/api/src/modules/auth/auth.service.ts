@@ -8,7 +8,7 @@ import { v4 } from 'uuid';
 import { ConfigModel } from '../../config/config.model';
 import { UserService } from '../user/user.service';
 import { SignInBody, SignUpBody } from './common/auth.dto';
-import { CannotFindEmailConfirm, EmailAlreadyConfirmed } from './common/auth.errors';
+import { CannotFindEmailConfirm, EmailAlreadyConfirmed, EmailNotConfirmed } from './common/auth.errors';
 import { GetTokenResult } from './common/auth.model';
 
 @Injectable()
@@ -32,12 +32,16 @@ export class AuthService {
         }
     }
 
-    async signIn(body: SignInBody): Promise<GetTokenResult | UserNotFound> {
+    async signIn(body: SignInBody): Promise<GetTokenResult | UserNotFound | EmailNotConfirmed> {
         const hash = SHA256(body.password).toString();
         const user = await this.rep.user.findOne({ where: { email: body.email, hash } });
 
         if (!user) {
             return new UserNotFound({ email: body.email });
+        }
+
+        if (!user.emailConfirmed) {
+            return new EmailNotConfirmed(body.email);
         }
 
         const { accessToken, refreshToken, refreshTokenHash } = this.generateToken(user.id);

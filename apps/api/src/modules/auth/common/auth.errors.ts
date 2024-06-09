@@ -6,6 +6,12 @@ export class EmailAlreadyConfirmed extends BaseError<'emailAlreadyConfirmed'> {
     }
 }
 
+export class EmailNotConfirmed extends BaseError<'emailNotConfirmed'> {
+    constructor(email: string) {
+        super('emailNotConfirmed', { message: objToString({ email }) });
+    }
+}
+
 export class CannotFindEmailConfirm extends BaseError<'cannotFindEmailConfirm'> {
     constructor() {
         super('cannotFindEmailConfirm');
