@@ -59,10 +59,10 @@ export class AuthService {
         };
     }
 
-    async signOut(email: string) {
-        const user = await this.rep.user.findOne({ where: { email } });
+    async signOut(id: number) {
+        const user = await this.rep.user.findOne({ where: { id } });
         if (user) {
-            user.refreshTokenHash = undefined;
+            user.refreshTokenHash = null;
             await this.rep.user.save(user);
         }
     }

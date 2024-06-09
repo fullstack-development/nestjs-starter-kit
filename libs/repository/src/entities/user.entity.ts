@@ -17,9 +17,9 @@ export class UserEntity {
     @Column({ default: false })
     emailConfirmed: boolean;
 
-    @Column({ nullable: true })
-    refreshTokenHash?: string;
+    @Column({ type: 'text', nullable: true })
+    refreshTokenHash?: string | null;
 
-    @Column({ nullable: true })
-    emailConfirmToken?: string;
+    @Column({ type: 'text', nullable: true })
+    emailConfirmToken?: string | null;
 }

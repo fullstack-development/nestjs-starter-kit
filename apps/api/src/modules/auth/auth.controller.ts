@@ -13,6 +13,7 @@ import {
     signInToCookie,
 } from './common/auth.model';
 import { JwtUserRefreshGuard } from './guards/jwt-user-refresh.guard';
+import { JwtUserGuard } from './guards/jwt-user.guard';
 
 @Controller('/api/auth')
 export class AuthController {
@@ -30,6 +31,14 @@ export class AuthController {
     @Transactional()
     async signIn(@Body() body: SignInBody) {
         return makeResponse(await this.authService.signIn(body), signInToBody, signInToCookie);
+    }
+
+    @Post('/sign-out')
+    @UseValidationPipe()
+    @UseGuards(JwtUserGuard)
+    @Transactional()
+    async signOut(@User() user: ContextUser) {
+        return makeResponse(await this.authService.signOut(user.id), identity);
     }
 
     @Post('/confirm-email')
