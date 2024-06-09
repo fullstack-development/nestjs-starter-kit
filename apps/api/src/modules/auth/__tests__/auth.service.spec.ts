@@ -1,5 +1,5 @@
 import { DeepMocked, createMock } from '@golevelup/ts-jest';
-import { CoreConfigService, UserNotFound, isError } from '@lib/core';
+import { CoreConfigService, isError } from '@lib/core';
 import { RepositoryService } from '@lib/repository';
 import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
@@ -10,7 +10,12 @@ import { ConfigModel } from '../../../config/config.model';
 import { UserAlreadyExists } from '../../user/common/user.errors';
 import { UserService } from '../../user/user.service';
 import { AuthService } from '../auth.service';
-import { CannotFindEmailConfirm, EmailAlreadyConfirmed, EmailNotConfirmed } from '../common/auth.errors';
+import {
+    CannotFindEmailConfirm,
+    EmailAlreadyConfirmed,
+    EmailNotConfirmed,
+    EmailOrPasswordIncorrect,
+} from '../common/auth.errors';
 import { GetTokenResult } from '../common/auth.model';
 
 describe('AuthService', () => {
@@ -121,7 +126,7 @@ describe('AuthService', () => {
             });
 
             expect(isError(signInResult)).toBeTruthy();
-            expect(signInResult).toBeInstanceOf(UserNotFound);
+            expect(signInResult).toBeInstanceOf(EmailOrPasswordIncorrect);
         });
 
         it('should return error if email not confirmed', async () => {

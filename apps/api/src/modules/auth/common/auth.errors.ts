@@ -17,3 +17,9 @@ export class CannotFindEmailConfirm extends BaseError<'cannotFindEmailConfirm'> 
         super('cannotFindEmailConfirm');
     }
 }
+
+export class EmailOrPasswordIncorrect extends BaseError<'emailOrPasswordIncorrect'> {
+    constructor(email: string) {
+        super('emailOrPasswordIncorrect', { message: objToString(email) });
+    }
+}
