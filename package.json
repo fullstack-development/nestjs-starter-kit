@@ -13,9 +13,11 @@
         "typeorm:run": "node ./scripts/typeorm/migrationRun.js",
         "api:build": "nest build api",
         "api:dev": "NODE_ENV=development APP=api nest start api --watch",
-        "api:prod": "NODE_ENV=production APP=api node dist/apps/api/apps/api/src/main.js"
+        "api:prod": "NODE_ENV=production APP=api node dist/apps/api/apps/api/src/main.js",
+        "test": "jest"
     },
     "dependencies": {
+        "@golevelup/ts-jest": "^0.5.0",
         "@nestjs-cls/transactional": "^2.3.1",
         "@nestjs-cls/transactional-adapter-typeorm": "^1.2.1",
         "@nestjs/common": "^10.0.0",
@@ -42,7 +44,7 @@
     "devDependencies": {
         "@nestjs/cli": "^10.0.0",
         "@nestjs/schematics": "^10.0.0",
-        "@nestjs/testing": "^10.0.0",
+        "@nestjs/testing": "^10.3.8",
         "@types/cookie-parser": "^1.4.7",
         "@types/express": "^4.17.17",
         "@types/jest": "^29.5.2",
@@ -89,8 +91,8 @@
             "<rootDir>/apps/"
         ],
         "moduleNameMapper": {
-            "^@starter-kit/repository(|/.*)$": "<rootDir>/libs/repository/src/$1",
-            "^@starter-kit/core(|/.*)$": "<rootDir>/libs/core/src/$1"
+            "^@lib/repository(|/.*)$": "<rootDir>/libs/repository/src/$1",
+            "^@lib/core(|/.*)$": "<rootDir>/libs/core/src/$1"
         }
     }
 }
