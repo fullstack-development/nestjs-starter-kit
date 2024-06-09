@@ -34,14 +34,14 @@ export class AuthService {
 
     async signIn(body: SignInBody): Promise<GetTokenResult | UserNotFound> {
         const hash = SHA256(body.password).toString();
-        const admin = await this.rep.user.findOne({ where: { email: body.email, hash } });
+        const user = await this.rep.user.findOne({ where: { email: body.email, hash } });
 
-        if (!admin) {
+        if (!user) {
             return new UserNotFound({ email: body.email });
         }
 
-        const { accessToken, refreshToken, refreshTokenHash } = this.generateToken(admin.id);
-        await this.rep.user.save({ id: admin.id, refreshTokenHash });
+        const { accessToken, refreshToken, refreshTokenHash } = this.generateToken(user.id);
+        await this.rep.user.save({ id: user.id, refreshTokenHash });
 
         return {
             token: accessToken,
