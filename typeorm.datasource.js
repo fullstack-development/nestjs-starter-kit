@@ -13,7 +13,7 @@ function getConfig() {
         password: env?.parsed['DB_PASSWORD'],
         database: env?.parsed['DB_NAME'],
         migrations: [resolve(__dirname, 'libs/repository/src/migrations/*.js')],
-        entities: [resolve(__dirname, 'dist/libs/repository/entities/*.js')],
+        entities: [resolve(__dirname, 'dist/apps/api/libs/repository/src/entities/*.js')],
     });
 }
 
