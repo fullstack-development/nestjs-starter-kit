@@ -176,4 +176,15 @@ describe('AuthService', () => {
             expect(confirmResult).toBeInstanceOf(CannotFindEmailConfirm);
         });
     });
+
+    describe('sign-out', () => {
+        it('should delete refresh token from user on signOut', async () => {
+            rep.user.findOne.mockResolvedValue(user);
+
+            await authService.signOut(user.id);
+
+            expect(rep.user.save).toHaveBeenCalledTimes(1);
+            expect(rep.user.save).toHaveBeenCalledWith({ ...user, refreshTokenHash: null });
+        });
+    });
 });
