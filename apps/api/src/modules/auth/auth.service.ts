@@ -8,7 +8,12 @@ import { v4 } from 'uuid';
 import { ConfigModel } from '../../config/config.model';
 import { UserService } from '../user/user.service';
 import { SignInBody, SignUpBody } from './common/auth.dto';
-import { CannotFindEmailConfirm, EmailAlreadyConfirmed, EmailNotConfirmed } from './common/auth.errors';
+import {
+    CannotFindEmailConfirm,
+    EmailAlreadyConfirmed,
+    EmailNotConfirmed,
+    EmailOrPasswordIncorrect,
+} from './common/auth.errors';
 import { GetTokenResult } from './common/auth.model';
 
 @Injectable()
@@ -32,12 +37,12 @@ export class AuthService {
         }
     }
 
-    async signIn(body: SignInBody): Promise<GetTokenResult | UserNotFound | EmailNotConfirmed> {
+    async signIn(body: SignInBody): Promise<GetTokenResult | EmailOrPasswordIncorrect | EmailNotConfirmed> {
         const hash = SHA256(body.password).toString();
         const user = await this.rep.user.findOne({ where: { email: body.email, hash } });
 
         if (!user) {
-            return new UserNotFound({ email: body.email });
+            return new EmailOrPasswordIncorrect(body.email);
         }
 
         if (!user.emailConfirmed) {
@@ -52,6 +57,14 @@ export class AuthService {
             refreshCookie:
                 `Refresh=${refreshToken}; HttpOnly; ` + `Path=/; Max-Age=${this.config.env.JWT_REFRESH_EXPIRES_IN}`,
         };
+    }
+
+    async signOut(email: string) {
+        const user = await this.rep.user.findOne({ where: { email } });
+        if (user) {
+            user.refreshTokenHash = undefined;
+            await this.rep.user.save(user);
+        }
     }
 
     async refresh(id: number): Promise<GetTokenResult | UserNotFound> {
