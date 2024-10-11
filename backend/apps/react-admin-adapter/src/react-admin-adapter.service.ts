@@ -1,8 +1,8 @@
-import { entities } from '@lib/repository';
+import { BaseEntity, entities } from '@lib/repository';
 import { TransactionHost } from '@nestjs-cls/transactional';
 import { TransactionalAdapterTypeOrm } from '@nestjs-cls/transactional-adapter-typeorm';
 import { Injectable } from '@nestjs/common';
-import { BaseEntity, EntityMetadata } from 'typeorm';
+import { EntityMetadata } from 'typeorm';
 
 type Ent = {
     [k: string]: {

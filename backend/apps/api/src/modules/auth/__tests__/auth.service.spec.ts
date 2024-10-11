@@ -6,7 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
 import { ConfigServiceMock } from '../../../__mocks__/ConfigServiceMock';
 import { getRepositoryServiceMock } from '../../../__mocks__/RepositoryServiceMock';
-import { getUserStub } from '../../../__mocks__/stubs/user.stub';
+import { getPartialUserStub } from '../../../__mocks__/stubs/user.stub';
 import { ConfigModel } from '../../../config/config.model';
 import { UserAlreadyExists } from '../../user/common/user.errors';
 import { UserService } from '../../user/user.service';
@@ -21,7 +21,6 @@ import { GetTokenResult } from '../common/auth.model';
 
 describe('AuthService', () => {
     let rep: ReturnType<typeof getRepositoryServiceMock>;
-    let user: ReturnType<typeof getUserStub>;
     let authService: AuthService;
     let configService: CoreConfigService<ConfigModel>;
     let userService: DeepMocked<UserService>;
@@ -49,8 +48,6 @@ describe('AuthService', () => {
         rep = module.get(RepositoryService);
         userService = module.get(UserService);
         jwt = module.get(JwtService);
-
-        user = getUserStub();
     });
 
     it('should be defined service and all deps', () => {
@@ -58,11 +55,12 @@ describe('AuthService', () => {
         expect(configService).toBeDefined();
         expect(rep).toBeDefined();
         expect(userService).toBeDefined();
-        expect(user).toBeDefined();
     });
 
     describe('signUp', () => {
         it('should correct sign-up', async () => {
+            const user = getPartialUserStub() as UserEntity;
+
             userService.createUser.mockResolvedValue(user);
 
             // TODO test sendConfirmEmail
@@ -77,6 +75,8 @@ describe('AuthService', () => {
         });
 
         it('should return error if user already exist', async () => {
+            const user = getPartialUserStub() as UserEntity;
+
             userService.createUser.mockResolvedValue(new UserAlreadyExists(user.email));
 
             const createResult = await authService.signUp({
@@ -91,6 +91,8 @@ describe('AuthService', () => {
 
     describe('sendConfirmEmail', () => {
         it('should return error if user email is already confirmed', async () => {
+            const user = getPartialUserStub() as UserEntity;
+
             const mockedUser = {
                 ...user,
                 emailConfirmed: true,
@@ -104,6 +106,8 @@ describe('AuthService', () => {
 
     describe('signIn', () => {
         it('should success sign-in with correct login and password', async () => {
+            const user = getPartialUserStub() as UserEntity;
+
             const mockedUser = {
                 ...user,
                 id: 99,
@@ -140,6 +144,7 @@ describe('AuthService', () => {
         });
 
         it('should return error if email not confirmed', async () => {
+            const user = getPartialUserStub() as UserEntity;
             const mockedUser = {
                 ...user,
                 emailConfirmed: false,
@@ -158,6 +163,7 @@ describe('AuthService', () => {
 
     describe('confirmEmail', () => {
         it('should confirm email', async () => {
+            const user = getPartialUserStub() as UserEntity;
             const mockedUser = {
                 ...user,
                 id: 77,
@@ -198,6 +204,7 @@ describe('AuthService', () => {
 
     describe('sign-out', () => {
         it('should delete refresh token from user on signOut', async () => {
+            const user = getPartialUserStub() as UserEntity;
             rep.user.findOne.mockResolvedValue(user);
 
             await authService.signOut(user.id);

@@ -1,16 +1,20 @@
-import {
-  Admin,
-  Resource,
-  ListGuesser,
-  EditGuesser,
-  ShowGuesser,
-} from "react-admin";
+import { Admin, Resource } from "react-admin";
 import { Layout } from "./Layout";
 import { dataProvider } from "./dataProvider";
 import { UsersList } from "./resources/users/UsersList.tsx";
+import { BalancesList } from "./resources/balance/BalancesList.tsx";
 
 export const App = () => (
   <Admin layout={Layout} dataProvider={dataProvider}>
-    <Resource name={"UserEntity"} list={UsersList} />
+    <Resource
+      options={{ label: "Users" }}
+      name={"UserEntity"}
+      list={UsersList}
+    />
+    <Resource
+      options={{ label: "Balances" }}
+      name={"BalanceEntity"}
+      list={BalancesList}
+    />
   </Admin>
 );

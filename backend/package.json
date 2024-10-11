@@ -92,8 +92,7 @@
         ],
         "moduleNameMapper": {
             "^@lib/repository(|/.*)$": "<rootDir>/libs/repository/src/$1",
-            "^@lib/core(|/.*)$": "<rootDir>/libs/core/src/$1",
-            "^@lib/react-admin-adapter(|/.*)$": "<rootDir>/libs/react-admin-adapter/src/$1"
+            "^@lib/core(|/.*)$": "<rootDir>/libs/core/src/$1"
         }
     }
 }

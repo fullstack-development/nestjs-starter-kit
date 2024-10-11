@@ -22,9 +22,7 @@
             "@lib/repository": ["./libs/repository/src"],
             "@lib/repository/*": ["./libs/repository/src/*"],
             "@lib/core": ["./libs/core/src"],
-            "@lib/core/*": ["./libs/core/src/*"],
-            "@lib/react-admin-adapter": ["libs/react-admin-adapter/src"],
-            "@lib/react-admin-adapter/*": ["libs/react-admin-adapter/src/*"]
+            "@lib/core/*": ["./libs/core/src/*"]
         }
     }
 }

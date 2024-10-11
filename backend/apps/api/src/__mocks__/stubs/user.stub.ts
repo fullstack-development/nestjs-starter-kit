@@ -1,6 +1,6 @@
 import { UserEntity } from '@lib/repository/entities/user.entity';
 
-export const getUserStub = (): UserEntity => ({
+export const getPartialUserStub = (): Omit<UserEntity, 'balance'> => ({
     id: 0,
     email: 'email@example.com',
     createdAt: new Date(),
@@ -8,11 +8,4 @@ export const getUserStub = (): UserEntity => ({
     emailConfirmed: false,
     refreshTokenHash: undefined,
     emailConfirmToken: undefined,
-    hasId: () => true,
-    save: async () => getUserStub(),
-    remove: async () => getUserStub(),
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    reload: async () => {},
-    recover: async () => getUserStub(),
-    softRemove: async () => getUserStub(),
 });

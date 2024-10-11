@@ -7,16 +7,12 @@ import { ReactAdminAdapterModule } from './react-admin-adapter.module';
 
 const enableCorsByEnv = (app: INestApplication<unknown>) => {
     if (process.env['NODE_ENV'] === 'development') {
-        app.enableCors({
-            origin: 'http://localhost:5173',
-            methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-            allowedHeaders: ['Accept', 'Authorization'],
-        });
+        app.enableCors({ origin: '*' });
     }
 };
 
 async function bootstrap() {
-    const app = await NestFactory.create(ReactAdminAdapterModule, { cors: true });
+    const app = await NestFactory.create(ReactAdminAdapterModule);
     app.use(cookieParser());
 
     enableCorsByEnv(app);

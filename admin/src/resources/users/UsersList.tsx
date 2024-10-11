@@ -8,6 +8,7 @@ export const UsersList = () => {
         <TextField source="email" />
         <TextField source="hash" />
         <DateField source={"createdAt"} />
+        <TextField source="balance.id" />
       </Datagrid>
     </List>
   );
