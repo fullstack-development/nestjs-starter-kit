@@ -1,4 +1,5 @@
-import { Column, Entity, JoinColumn, OneToOne, Relation } from 'typeorm';
+import { ItemEntity } from '@lib/repository/entities/item.entity';
+import { Column, Entity, JoinColumn, OneToMany, OneToOne, Relation } from 'typeorm';
 import type { BalanceEntity } from './balance.entity';
 import { BaseEntity } from './model';
 
@@ -25,4 +26,7 @@ export class UserEntity extends BaseEntity {
     @OneToOne('BalanceEntity', 'user', { onDelete: 'CASCADE' })
     @JoinColumn()
     balance: Relation<BalanceEntity>;
+
+    @OneToMany(() => ItemEntity, (i) => i.user)
+    items: Array<ItemEntity>;
 }

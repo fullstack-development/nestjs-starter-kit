@@ -8,4 +8,5 @@ export const getPartialUserStub = (): Omit<UserEntity, 'balance'> => ({
     emailConfirmed: false,
     refreshTokenHash: undefined,
     emailConfirmToken: undefined,
+    items: [],
 });

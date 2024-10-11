@@ -13,9 +13,9 @@ const transformQueryObject = ({ value }: TransformFnParams) => {
 };
 
 export class GetQuery {
-    @IsDefined()
+    @IsOptional()
     @Transform(transformQueryObject)
-    range: [number, number];
+    range?: [number, number];
 
     @IsOptional()
     @Transform(transformQueryObject)

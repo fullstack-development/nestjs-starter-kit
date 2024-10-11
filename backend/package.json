@@ -10,7 +10,7 @@
         "format": "prettier --write \"apps/**/*.{ts,json}\" \"libs/**/*.{ts,json}\"",
         "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
         "typeorm:generate": "node ./scripts/typeorm/migrationGenerate.js",
-        "typeorm:run": "node ./scripts/typeorm/migrationRun.js",
+        "typeorm:up": "node ./scripts/typeorm/migrationUp.js",
         "api:dev": "NODE_ENV=development APP=api nest start api --watch",
         "api:prod": "NODE_ENV=production APP=api node dist/apps/api/apps/api/src/main.js",
         "react-admin-adapter:dev": "NODE_ENV=development APP=react-admin-adapter nest start react-admin-adapter --watch",

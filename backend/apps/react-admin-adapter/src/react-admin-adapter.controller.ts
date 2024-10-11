@@ -30,14 +30,18 @@ export class ReactAdminAdapterController {
             filter.order = { [query.sort[0]]: query.sort[1] };
         }
 
-        filter.skip = query.range[0];
-        filter.take = query.range[1] - query.range[0];
+        if (query.range) {
+            filter.skip = query.range[0];
+            filter.take = query.range[1] - query.range[0];
+        }
 
         const relations = entity.meta.relations.map((r) => r.propertyName);
         const data = await this.service.getEntityManager().find(entity.entityClass, { ...filter, relations });
 
-        res.header('Access-Control-Expose-Headers', 'Content-Range');
-        res.header('Content-Range', `${query.range[0]}-${query.range[1]}/${count}`);
+        if (query.range) {
+            res.header('Access-Control-Expose-Headers', 'Content-Range');
+            res.header('Content-Range', `${query.range[0]}-${query.range[1]}/${count}`);
+        }
         res.json(data);
     }
 }

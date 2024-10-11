@@ -1,4 +1,16 @@
-import { Datagrid, DateField, List, TextField } from "react-admin";
+import {
+  ArrayField,
+  Datagrid,
+  DateField,
+  List,
+  TextField,
+  useRecordContext,
+} from "react-admin";
+
+const Items = () => {
+  const record = useRecordContext();
+  return <div>{record?.items.map((i: any) => i.type).join(", ")}</div>;
+};
 
 export const UsersList = () => {
   return (
@@ -9,6 +21,9 @@ export const UsersList = () => {
         <TextField source="hash" />
         <DateField source={"createdAt"} />
         <TextField source="balance.id" />
+        <ArrayField source="items">
+          <Items />
+        </ArrayField>
       </Datagrid>
     </List>
   );
