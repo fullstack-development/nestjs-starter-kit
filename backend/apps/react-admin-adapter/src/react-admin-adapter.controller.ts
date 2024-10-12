@@ -42,7 +42,7 @@ export class ReactAdminAdapterController {
             res.header('Access-Control-Expose-Headers', 'Content-Range');
             res.header('Content-Range', `${query.range[0]}-${query.range[1]}/${count}`);
         }
-        res.json(data);
+        res.status(200).json(data);
     }
 
     @Get(':entity/:id')
