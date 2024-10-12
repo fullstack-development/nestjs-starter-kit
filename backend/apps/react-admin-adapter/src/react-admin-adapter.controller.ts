@@ -15,8 +15,7 @@ export class ReactAdminAdapterController {
     public async get(@Param('entity') entityName: string, @Query() query: GetQuery, @Res() res: Response) {
         const entity = this.service.getEntity(entityName);
         if (!entity) {
-            res.status(404);
-            res.send();
+            res.status(404).send();
             return;
         }
 
@@ -54,8 +53,7 @@ export class ReactAdminAdapterController {
     ) {
         const entity = this.service.getEntity(entityName);
         if (!entity) {
-            res.status(404);
-            res.send();
+            res.status(404).send();
             return;
         }
 
