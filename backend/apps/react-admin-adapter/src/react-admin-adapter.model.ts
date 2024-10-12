@@ -30,11 +30,12 @@ export class GetQuery {
 const isRecord = (o: unknown): o is Record<string, unknown> =>
     o !== null && o !== undefined && typeof o === 'object' && o && typeof o !== 'string' && !Array.isArray(o);
 
-export const parseQueryFilter = (queryFilter: Object) => {
+export const parseQueryFilter = (queryFilter: unknown) => {
     if (!isRecord(queryFilter)) {
         return undefined;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: Record<string, any> = {};
     for (const key of Object.keys(queryFilter)) {
         const filter = queryFilter[key];
