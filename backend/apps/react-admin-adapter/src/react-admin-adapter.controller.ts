@@ -3,7 +3,7 @@ import { BaseEntity } from '@lib/repository';
 import { Controller, Get, Param, Query, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { FindManyOptions } from 'typeorm';
-import { GetQuery } from './react-admin-adapter.model';
+import { GetQuery, parseQueryFilter } from './react-admin-adapter.model';
 import { ReactAdminAdapterService } from './react-admin-adapter.service';
 
 @Controller('/api/admin/db')
@@ -21,7 +21,7 @@ export class ReactAdminAdapterController {
         }
 
         const filter: FindManyOptions<BaseEntity> = {
-            where: query.filter,
+            where: query.filter && parseQueryFilter(query.filter),
         };
 
         const count = await this.service.getEntityManager().count(entity.entityClass, filter);

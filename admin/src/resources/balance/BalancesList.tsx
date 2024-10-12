@@ -1,4 +1,4 @@
-import { Datagrid, List, TextField } from "react-admin";
+import { Datagrid, List, ReferenceField, TextField } from "react-admin";
 
 export const BalancesList = () => {
   return (
@@ -6,7 +6,14 @@ export const BalancesList = () => {
       <Datagrid>
         <TextField source="id" />
         <TextField source="cash" />
-        <TextField source={"user.id"} />
+        <TextField label={"User Id"} source={"user.id"} />
+        <ReferenceField
+          reference={"UserEntity"}
+          source={"user.id"}
+          label={"User Email"}
+        >
+          <TextField source={"email"} />
+        </ReferenceField>
       </Datagrid>
     </List>
   );
