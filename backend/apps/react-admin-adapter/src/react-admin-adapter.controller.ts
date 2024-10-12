@@ -1,4 +1,4 @@
-import { UseValidationPipe } from '@lib/core';
+import { ParseParamIntPipe, UseValidationPipe } from '@lib/core';
 import { BaseEntity } from '@lib/repository';
 import { Controller, Get, Param, Query, Res } from '@nestjs/common';
 import { Response } from 'express';
@@ -43,5 +43,25 @@ export class ReactAdminAdapterController {
             res.header('Content-Range', `${query.range[0]}-${query.range[1]}/${count}`);
         }
         res.json(data);
+    }
+
+    @Get(':entity/:id')
+    @UseValidationPipe()
+    public async getOne(
+        @Param('entity') entityName: string,
+        @Param('id', new ParseParamIntPipe()) id: number,
+        @Res() res: Response,
+    ) {
+        const entity = this.service.getEntity(entityName);
+        if (!entity) {
+            res.status(404);
+            res.send();
+            return;
+        }
+
+        const relations = entity.meta.relations.map((r) => r.propertyName);
+        const data = await this.service.getEntityManager().findOne(entity.entityClass, { where: { id }, relations });
+
+        res.status(200).json(data);
     }
 }

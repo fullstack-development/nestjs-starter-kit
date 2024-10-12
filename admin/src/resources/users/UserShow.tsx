@@ -1,10 +1,16 @@
-import { ArrayField, Datagrid, DateField, List, TextField } from "react-admin";
+import {
+  ArrayField,
+  DateField,
+  Show,
+  SimpleShowLayout,
+  TextField,
+} from "react-admin";
 import { Items } from "./model.tsx";
 
-export const UsersList = () => {
+export const UserShow = () => {
   return (
-    <List resource="UserEntity" title={"Users"}>
-      <Datagrid>
+    <Show>
+      <SimpleShowLayout>
         <TextField source="id" />
         <TextField source="email" />
         <TextField source="hash" />
@@ -13,7 +19,7 @@ export const UsersList = () => {
         <ArrayField source="items">
           <Items />
         </ArrayField>
-      </Datagrid>
-    </List>
+      </SimpleShowLayout>
+    </Show>
   );
 };
