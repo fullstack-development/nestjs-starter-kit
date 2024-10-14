@@ -1,6 +1,6 @@
 import {
   Create,
-  DateInput,
+  DateTimeInput,
   NumberInput,
   required,
   SimpleForm,
@@ -13,7 +13,7 @@ export const UserCreate = () => {
       <SimpleForm>
         <TextInput name={"email"} source="email" validate={required()} />
         <TextInput name={"hash"} source="hash" validate={required()} />
-        <DateInput name={"createdAt"} source={"createdAt"} />
+        <DateTimeInput name={"createdAt"} source={"createdAt"} />
         <NumberInput
           name={"balance.id"}
           source="balance.id"

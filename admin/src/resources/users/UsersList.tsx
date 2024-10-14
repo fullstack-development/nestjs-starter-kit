@@ -8,7 +8,7 @@ export const UsersList = () => {
         <TextField source="id" />
         <TextField source="email" />
         <TextField source="hash" />
-        <DateField source={"createdAt"} />
+        <DateField showTime={true} source={"createdAt"} />
         <TextField source="balance.id" />
         <ArrayField source="items">
           <Items />
