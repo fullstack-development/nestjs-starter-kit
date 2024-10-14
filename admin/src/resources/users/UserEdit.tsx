@@ -1,24 +1,24 @@
 import {
-  DateTimeInput,
-  Edit,
-  required,
-  SimpleForm,
-  TextInput,
+    DateTimeInput,
+    Edit,
+    required,
+    SimpleForm,
+    TextInput,
 } from "react-admin";
 
 export const UserEdit = () => {
-  return (
-    <Edit>
-      <SimpleForm>
-        <TextInput readOnly name={"id"} label="id" source="id" />
-        <TextInput name={"email"} source="email" validate={required()} />
-        <TextInput name={"hash"} source="hash" validate={required()} />
-        <DateTimeInput
-          name={"createdAt"}
-          source={"createdAt"}
-          validate={required()}
-        />
-      </SimpleForm>
-    </Edit>
-  );
+    return (
+        <Edit>
+            <SimpleForm>
+                <TextInput readOnly name={"id"} label="id" source="id"/>
+                <TextInput name={"email"} source="email" validate={required()}/>
+                <TextInput name={"hash"} source="hash" validate={required()}/>
+                <DateTimeInput
+                    name={"createdAt"}
+                    source={"createdAt"}
+                    validate={required()}
+                />
+            </SimpleForm>
+        </Edit>
+    );
 };
