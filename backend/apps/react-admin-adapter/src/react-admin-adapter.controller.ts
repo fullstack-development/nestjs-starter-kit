@@ -1,7 +1,7 @@
 import { ParseParamIntPipe, UseValidationPipe } from '@lib/core';
 import { BaseEntity } from '@lib/repository';
 import { Transactional } from '@nestjs-cls/transactional';
-import { Body, Controller, Get, Param, Put, Query, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { omit } from 'ramda';
 import { FindManyOptions } from 'typeorm';
@@ -86,6 +86,54 @@ export class ReactAdminAdapterController {
 
         await manager.update(entity.entityClass, id, payload);
         const data = await manager.findOne(entity.entityClass, { where: { id }, relations });
+
+        res.status(200).json(data);
+    }
+
+    @Post(':entity')
+    @UseValidationPipe()
+    @Transactional()
+    public async createOne(
+        @Param('entity') entityName: string,
+        @Body() body: Record<string, unknown>,
+        @Res() res: Response,
+    ) {
+        const entity = this.service.getEntity(entityName);
+        if (!entity) {
+            res.status(404).send();
+            return;
+        }
+
+        const manager = this.service.getEntityManager();
+        const relations = entity.meta.relations.map((r) => r.propertyName);
+
+        const instance = manager.create(entity.entityClass, body);
+        await manager.save(entity.entityClass, instance);
+        const data = await manager.findOne(entity.entityClass, { where: { id: instance.id }, relations });
+
+        res.status(200).json(data);
+    }
+
+    @Delete(':entity/:id')
+    @UseValidationPipe()
+    @Transactional()
+    public async deleteOne(
+        @Param('entity') entityName: string,
+        @Param('id', new ParseParamIntPipe()) id: number,
+        @Res() res: Response,
+    ) {
+        const entity = this.service.getEntity(entityName);
+        if (!entity) {
+            res.status(404).send();
+            return;
+        }
+
+        const manager = this.service.getEntityManager();
+        const relations = entity.meta.relations.map((r) => r.propertyName);
+
+        const data = await manager.findOne(entity.entityClass, { where: { id }, relations });
+
+        await manager.delete(entity.entityClass, id);
 
         res.status(200).json(data);
     }

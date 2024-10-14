@@ -10,6 +10,9 @@ import { ItemShow } from "./resources/item/ItemShow.tsx";
 import { BalanceEdit } from "./resources/balance/BalanceEdit.tsx";
 import { ItemEdit } from "./resources/item/ItemEdit.tsx";
 import { UserEdit } from "./resources/users/UserEdit.tsx";
+import { ItemCreate } from "./resources/item/ItemCreate.tsx";
+import { BalanceCreate } from "./resources/balance/BalanceCreate.tsx";
+import { UserCreate } from "./resources/users/UserCreate.tsx";
 
 export const App = () => (
   <Admin layout={Layout} dataProvider={dataProvider}>
@@ -19,6 +22,7 @@ export const App = () => (
       list={UsersList}
       show={UserShow}
       edit={UserEdit}
+      create={UserCreate}
     />
     <Resource
       options={{ label: "Balances" }}
@@ -26,6 +30,7 @@ export const App = () => (
       list={BalancesList}
       show={BalanceShow}
       edit={BalanceEdit}
+      create={BalanceCreate}
     />
     <Resource
       options={{ label: "Items" }}
@@ -33,6 +38,7 @@ export const App = () => (
       list={ItemsList}
       show={ItemShow}
       edit={ItemEdit}
+      create={ItemCreate}
     />
   </Admin>
 );
