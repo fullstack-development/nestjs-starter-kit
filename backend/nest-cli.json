@@ -35,13 +35,13 @@
                 "tsConfigPath": "libs/core/tsconfig.lib.json"
             }
         },
-        "react-admin-adapter": {
+        "admin": {
             "type": "application",
-            "root": "apps/react-admin-adapter",
+            "root": "apps/admin",
             "entryFile": "main",
-            "sourceRoot": "apps/react-admin-adapter/src",
+            "sourceRoot": "apps/admin/src",
             "compilerOptions": {
-                "tsConfigPath": "apps/react-admin-adapter/tsconfig.app.json"
+                "tsConfigPath": "apps/admin/tsconfig.app.json"
             }
         }
     },

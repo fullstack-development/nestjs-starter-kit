@@ -12,7 +12,7 @@ type Ent = {
 };
 
 @Injectable()
-export class ReactAdminAdapterService {
+export class AdminService {
     private readonly entities: Ent;
 
     constructor(private readonly txHost: TransactionHost<TransactionalAdapterTypeOrm>) {

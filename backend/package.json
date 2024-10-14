@@ -13,7 +13,8 @@
         "typeorm:up": "node ./scripts/typeorm/migrationUp.js",
         "api:dev": "NODE_ENV=development APP=api nest start api --watch",
         "api:prod": "NODE_ENV=production APP=api node dist/apps/api/apps/api/src/main.js",
-        "react-admin-adapter:dev": "NODE_ENV=development APP=react-admin-adapter nest start react-admin-adapter --watch",
+        "admin:dev": "NODE_ENV=development APP=admin nest start admin --watch",
+        "admin:prod": "NODE_ENV=production APP=admin node dist/apps/admin/apps/admin/src/main.js",
         "test": "jest"
     },
     "dependencies": {

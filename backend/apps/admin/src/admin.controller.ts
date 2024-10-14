@@ -5,12 +5,12 @@ import { Body, Controller, Delete, Get, Param, Post, Put, Query, Res } from '@ne
 import { Response } from 'express';
 import { omit } from 'ramda';
 import { FindManyOptions } from 'typeorm';
-import { GetQuery, parseQueryFilter } from './react-admin-adapter.model';
-import { ReactAdminAdapterService } from './react-admin-adapter.service';
+import { GetQuery, parseQueryFilter } from './admin.model';
+import { AdminService } from './admin.service';
 
 @Controller('/api/admin/db')
-export class ReactAdminAdapterController {
-    constructor(private readonly service: ReactAdminAdapterService) {}
+export class AdminController {
+    constructor(private readonly service: AdminService) {}
 
     @Get(':entity')
     @UseValidationPipe()

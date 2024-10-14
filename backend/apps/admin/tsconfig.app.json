@@ -2,7 +2,7 @@
     "extends": "../../tsconfig.json",
     "compilerOptions": {
         "declaration": false,
-        "outDir": "../../dist/apps/react-admin-adapter"
+        "outDir": "../../dist/apps/admin"
     },
     "include": ["src/**/*"],
     "exclude": ["node_modules", "dist", "**/*spec.ts"]

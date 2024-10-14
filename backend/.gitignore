@@ -39,4 +39,4 @@ lerna-debug.log*
 .env
 typeorm.env
 api.env
-react-admin-adapter.env
+admin.env

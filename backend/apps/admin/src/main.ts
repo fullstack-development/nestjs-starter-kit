@@ -2,8 +2,8 @@ import { CoreConfigService } from '@lib/core';
 import { INestApplication } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import cookieParser from 'cookie-parser';
+import { AdminModule } from './admin.module';
 import { ConfigModel } from './config/config.model';
-import { ReactAdminAdapterModule } from './react-admin-adapter.module';
 
 const enableCorsByEnv = (app: INestApplication<unknown>) => {
     if (process.env['NODE_ENV'] === 'development') {
@@ -12,7 +12,7 @@ const enableCorsByEnv = (app: INestApplication<unknown>) => {
 };
 
 async function bootstrap() {
-    const app = await NestFactory.create(ReactAdminAdapterModule);
+    const app = await NestFactory.create(AdminModule);
     app.use(cookieParser());
 
     enableCorsByEnv(app);
@@ -20,4 +20,5 @@ async function bootstrap() {
 
     await app.listen(config.env.PORT);
 }
+
 bootstrap();
