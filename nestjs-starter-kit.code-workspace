@@ -13,7 +13,7 @@
             "name": "admin"
         },
         {
-            "path": "admin",
+            "path": "admin-ui",
             "name": "admin-ui"
         },
         {
@@ -28,7 +28,7 @@
     "settings": {
         "files.exclude": {
             ".idea": true,
-            "admin": true,
+            "admin-ui": true,
             "backend": true
         },
         "typescript.tsdk": "node_modules/typescript/lib",
