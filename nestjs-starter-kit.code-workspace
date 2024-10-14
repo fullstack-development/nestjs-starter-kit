@@ -1,0 +1,39 @@
+{
+    "folders": [
+        {
+            "path": ".",
+            "name": "."
+        },
+        {
+            "path": "backend/apps/api",
+            "name": "api"
+        },
+        {
+            "path": "backend/apps/admin",
+            "name": "admin"
+        },
+        {
+            "path": "admin",
+            "name": "admin-ui"
+        },
+        {
+            "path": "backend/libs/core",
+            "name": "lib/core"
+        },
+        {
+            "path": "backend/libs/repository",
+            "name": "lib/repository"
+        }
+    ],
+    "settings": {
+        "files.exclude": {
+            ".idea": true,
+            "admin": true,
+            "backend": true
+        },
+        "typescript.tsdk": "node_modules/typescript/lib",
+        "typescript.preferences.importModuleSpecifier": "shortest",
+        "eslint.enable": true,
+        "editor.formatOnSave": true
+    }
+}
