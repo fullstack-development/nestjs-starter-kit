@@ -1,7 +1,8 @@
 import { ParseParamIntPipe, UseValidationPipe } from '@lib/core';
 import { BaseEntity } from '@lib/repository';
-import { Controller, Get, Param, Query, Res } from '@nestjs/common';
+import { Body, Controller, Get, Param, Put, Query, Res } from '@nestjs/common';
 import { Response } from 'express';
+import { omit } from 'ramda';
 import { FindManyOptions } from 'typeorm';
 import { GetQuery, parseQueryFilter } from './react-admin-adapter.model';
 import { ReactAdminAdapterService } from './react-admin-adapter.service';
@@ -59,6 +60,30 @@ export class ReactAdminAdapterController {
 
         const relations = entity.meta.relations.map((r) => r.propertyName);
         const data = await this.service.getEntityManager().findOne(entity.entityClass, { where: { id }, relations });
+
+        res.status(200).json(data);
+    }
+
+    @Put(':entity/:id')
+    @UseValidationPipe()
+    public async updateOne(
+        @Param('entity') entityName: string,
+        @Param('id', new ParseParamIntPipe()) id: number,
+        @Body() body: Record<string, unknown>,
+        @Res() res: Response,
+    ) {
+        const entity = this.service.getEntity(entityName);
+        if (!entity) {
+            res.status(404).send();
+            return;
+        }
+
+        const manager = this.service.getEntityManager();
+        const relations = entity.meta.relations.map((r) => r.propertyName);
+        const payload = omit(relations, body);
+
+        await manager.update(entity.entityClass, id, payload);
+        const data = await manager.findOne(entity.entityClass, { where: { id }, relations });
 
         res.status(200).json(data);
     }
