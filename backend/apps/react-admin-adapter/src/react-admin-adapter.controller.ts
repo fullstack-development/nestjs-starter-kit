@@ -1,5 +1,6 @@
 import { ParseParamIntPipe, UseValidationPipe } from '@lib/core';
 import { BaseEntity } from '@lib/repository';
+import { Transactional } from '@nestjs-cls/transactional';
 import { Body, Controller, Get, Param, Put, Query, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { omit } from 'ramda';
@@ -66,6 +67,7 @@ export class ReactAdminAdapterController {
 
     @Put(':entity/:id')
     @UseValidationPipe()
+    @Transactional()
     public async updateOne(
         @Param('entity') entityName: string,
         @Param('id', new ParseParamIntPipe()) id: number,
