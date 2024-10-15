@@ -12,7 +12,7 @@ type Ent = {
 };
 
 @Injectable()
-export class AdminService {
+export class DbService {
     private readonly entities: Ent;
 
     constructor(private readonly txHost: TransactionHost<TransactionalAdapterTypeOrm>) {

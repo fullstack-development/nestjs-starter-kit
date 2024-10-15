@@ -21,4 +21,10 @@ export class ConfigModel {
     @IsNumber()
     @Transform((p) => Number(p.value))
     PORT: number;
+
+    @IsString()
+    JWT_SECRET: string;
+
+    @IsString()
+    JWT_EXPIRES_IN: string;
 }

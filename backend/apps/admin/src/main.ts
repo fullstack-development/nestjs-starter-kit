@@ -2,7 +2,7 @@ import { CoreConfigService } from '@lib/core';
 import { INestApplication } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import cookieParser from 'cookie-parser';
-import { AdminModule } from './admin.module';
+import { AppModule } from './app.module';
 import { ConfigModel } from './config/config.model';
 
 const enableCorsByEnv = (app: INestApplication<unknown>) => {
@@ -12,7 +12,7 @@ const enableCorsByEnv = (app: INestApplication<unknown>) => {
 };
 
 async function bootstrap() {
-    const app = await NestFactory.create(AdminModule);
+    const app = await NestFactory.create(AppModule);
     app.use(cookieParser());
 
     enableCorsByEnv(app);

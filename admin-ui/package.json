@@ -10,6 +10,12 @@
         "format": "prettier --write ./src"
     },
     "dependencies": {
+        "@nestjs/jwt": "^10.2.0",
+        "@nestjs/passport": "^10.0.3",
+        "axios": "^1.7.7",
+        "jwt-decode": "^4.0.0",
+        "passport": "^0.7.0",
+        "passport-jwt": "^4.0.1",
         "ra-data-simple-rest": "^5.2.0",
         "react": "^18.3.0",
         "react-admin": "^5.2.3",

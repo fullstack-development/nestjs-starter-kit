@@ -1,19 +1,21 @@
 import { ParseParamIntPipe, UseValidationPipe } from '@lib/core';
 import { BaseEntity } from '@lib/repository';
 import { Transactional } from '@nestjs-cls/transactional';
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Res, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
 import { omit } from 'ramda';
 import { FindManyOptions } from 'typeorm';
-import { GetQuery, parseQueryFilter } from './admin.model';
-import { AdminService } from './admin.service';
+import { JwtAdminGuard } from '../auth/guards/jwt-admin.guard';
+import { GetQuery, parseQueryFilter } from './db.model';
+import { DbService } from './db.service';
 
 @Controller('/api/admin/db')
-export class AdminController {
-    constructor(private readonly service: AdminService) {}
+export class DbController {
+    constructor(private readonly service: DbService) {}
 
     @Get(':entity')
     @UseValidationPipe()
+    @UseGuards(JwtAdminGuard)
     public async get(@Param('entity') entityName: string, @Query() query: GetQuery, @Res() res: Response) {
         const entity = this.service.getEntity(entityName);
         if (!entity) {
@@ -48,6 +50,7 @@ export class AdminController {
 
     @Get(':entity/:id')
     @UseValidationPipe()
+    @UseGuards(JwtAdminGuard)
     public async getOne(
         @Param('entity') entityName: string,
         @Param('id', new ParseParamIntPipe()) id: number,
@@ -68,6 +71,7 @@ export class AdminController {
     @Put(':entity/:id')
     @UseValidationPipe()
     @Transactional()
+    @UseGuards(JwtAdminGuard)
     public async updateOne(
         @Param('entity') entityName: string,
         @Param('id', new ParseParamIntPipe()) id: number,
@@ -93,6 +97,7 @@ export class AdminController {
     @Post(':entity')
     @UseValidationPipe()
     @Transactional()
+    @UseGuards(JwtAdminGuard)
     public async createOne(
         @Param('entity') entityName: string,
         @Body() body: Record<string, unknown>,
@@ -117,6 +122,7 @@ export class AdminController {
     @Delete(':entity/:id')
     @UseValidationPipe()
     @Transactional()
+    @UseGuards(JwtAdminGuard)
     public async deleteOne(
         @Param('entity') entityName: string,
         @Param('id', new ParseParamIntPipe()) id: number,

@@ -1,5 +1,5 @@
 import { CoreConfigService } from '@lib/core';
-import { BalanceEntity, ItemEntity, UserEntity } from '@lib/repository/entities';
+import { AdminEntity, BalanceEntity, ItemEntity, UserEntity } from '@lib/repository/entities';
 import { ClsPluginTransactional } from '@nestjs-cls/transactional';
 import { TransactionalAdapterTypeOrm } from '@nestjs-cls/transactional-adapter-typeorm';
 import { Global, Module } from '@nestjs/common';
@@ -8,7 +8,7 @@ import { ClsModule } from 'nestjs-cls';
 import { DbSettings } from './repository.model';
 import { RepositoryService } from './repository.service';
 
-export const entities = [UserEntity, BalanceEntity, ItemEntity];
+export const entities = [UserEntity, BalanceEntity, ItemEntity, AdminEntity];
 
 @Global()
 @Module({

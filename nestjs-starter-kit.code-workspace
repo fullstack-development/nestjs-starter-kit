@@ -28,8 +28,13 @@
     "settings": {
         "files.exclude": {
             ".idea": true,
-            "admin-ui": true,
-            "backend": true
+            "backend/.idea": true,
+            "backend/apps": true,
+            "backend/libs": true,
+            "admin-ui/.idea": true,
+            "admin-ui/public": true,
+            "admin-ui/node_modules": true,
+            "admin-ui/src": true
         },
         "typescript.tsdk": "node_modules/typescript/lib",
         "typescript.preferences.importModuleSpecifier": "shortest",
