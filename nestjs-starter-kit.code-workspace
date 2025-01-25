@@ -2,29 +2,43 @@
     "folders": [
         {
             "path": ".",
-            "name": ".",
+            "name": "."
         },
         {
-            "path": "apps/api",
-            "name": "api",
+            "path": "backend/apps/api",
+            "name": "api"
         },
         {
-            "path": "libs/core",
-            "name": "lib/core",
+            "path": "backend/apps/admin",
+            "name": "admin"
         },
         {
-            "path": "libs/repository",
-            "name": "lib/repository",
+            "path": "admin-ui",
+            "name": "admin-ui"
         },
+        {
+            "path": "backend/libs/core",
+            "name": "lib/core"
+        },
+        {
+            "path": "backend/libs/repository",
+            "name": "lib/repository"
+        }
     ],
     "settings": {
         "files.exclude": {
-            "apps": true,
-            "libs": true,
+            ".idea": true,
+            "backend/.idea": true,
+            "backend/apps": true,
+            "backend/libs": true,
+            "admin-ui/.idea": true,
+            "admin-ui/public": true,
+            "admin-ui/node_modules": true,
+            "admin-ui/src": true
         },
         "typescript.tsdk": "node_modules/typescript/lib",
         "typescript.preferences.importModuleSpecifier": "shortest",
         "eslint.enable": true,
-        "editor.formatOnSave": true,
-    },
+        "editor.formatOnSave": true
+    }
 }
