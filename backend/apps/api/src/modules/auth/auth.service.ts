@@ -1,11 +1,11 @@
-import { CoreConfigService, UserNotFound, isError } from '@lib/core';
+import { UserNotFound, isError } from '@lib/core';
 import { RepositoryService } from '@lib/repository';
 import { UserEntity } from '@lib/repository/entities/user.entity';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { SHA256 } from 'crypto-js';
 import { v4 } from 'uuid';
-import { ConfigModel } from '../../config/config.model';
+import { EnvConfig } from '../../config/config.model';
 import { UserService } from '../user/user.service';
 import { SignInBody, SignUpBody } from './common/auth.dto';
 import {
@@ -21,7 +21,7 @@ export class AuthService {
     constructor(
         private readonly jwt: JwtService,
         private readonly rep: RepositoryService,
-        private readonly config: CoreConfigService<ConfigModel>,
+        private readonly config: EnvConfig,
         private readonly user: UserService,
     ) {}
 
@@ -55,7 +55,7 @@ export class AuthService {
         return {
             token: accessToken,
             refreshCookie:
-                `Refresh=${refreshToken}; HttpOnly; ` + `Path=/; Max-Age=${this.config.env.JWT_REFRESH_EXPIRES_IN}`,
+                `Refresh=${refreshToken}; HttpOnly; ` + `Path=/; Max-Age=${this.config.JWT_REFRESH_EXPIRES_IN}`,
         };
     }
 
@@ -80,7 +80,7 @@ export class AuthService {
         return {
             token: accessToken,
             refreshCookie:
-                `Refresh=${refreshToken}; HttpOnly; ` + `Path=/; Max-Age=${this.config.env.JWT_REFRESH_EXPIRES_IN}`,
+                `Refresh=${refreshToken}; HttpOnly; ` + `Path=/; Max-Age=${this.config.JWT_REFRESH_EXPIRES_IN}`,
         };
     }
 
@@ -99,7 +99,7 @@ export class AuthService {
         return {
             token: accessToken,
             refreshCookie:
-                `Refresh=${refreshToken}; HttpOnly; ` + `Path=/; Max-Age=${this.config.env.JWT_REFRESH_EXPIRES_IN}`,
+                `Refresh=${refreshToken}; HttpOnly; ` + `Path=/; Max-Age=${this.config.JWT_REFRESH_EXPIRES_IN}`,
         };
     }
 
@@ -113,7 +113,7 @@ export class AuthService {
         await this.rep.user.save(user);
 
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const link = `${this.config.env.DOMAIN}/auth/confirm-email?token=${token}`;
+        const link = `${this.config.DOMAIN}/auth/confirm-email?token=${token}`;
         // await this.mailService.sendEmail(
         //     'Please confirm email',
         //     `<a href="${link}">${link}</a>`,
@@ -125,8 +125,8 @@ export class AuthService {
         const refreshToken = this.jwt.sign(
             { id, date: Date.now() },
             {
-                secret: this.config.env.JWT_REFRESH_SECRET,
-                expiresIn: this.config.env.JWT_REFRESH_EXPIRES_IN,
+                secret: this.config.JWT_REFRESH_SECRET,
+                expiresIn: this.config.JWT_REFRESH_EXPIRES_IN,
             },
         );
 
@@ -138,8 +138,8 @@ export class AuthService {
             accessToken: this.jwt.sign(
                 { id, date: Date.now() },
                 {
-                    secret: this.config.env.JWT_SECRET,
-                    expiresIn: this.config.env.JWT_EXPIRES_IN,
+                    secret: this.config.JWT_SECRET,
+                    expiresIn: this.config.JWT_EXPIRES_IN,
                 },
             ),
         };

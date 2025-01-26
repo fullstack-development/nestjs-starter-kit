@@ -1,13 +1,13 @@
-import { Interceptor } from '@lib/core';
+import { ConfigModule, Interceptor } from '@lib/core';
 import { RepositoryModule } from '@lib/repository';
 import { Module } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
-import { ConfigModule } from './config/config.module';
+import { EnvConfig } from './config/config.model';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 
 @Module({
-    imports: [ConfigModule, RepositoryModule, UserModule, AuthModule],
+    imports: [ConfigModule.register(EnvConfig), RepositoryModule, UserModule, AuthModule],
     providers: [{ provide: APP_INTERCEPTOR, useClass: Interceptor }],
 })
 export class AppModule {}
