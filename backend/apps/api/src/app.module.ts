@@ -7,7 +7,15 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 
 @Module({
-    imports: [ConfigModule.register(EnvConfig), RepositoryModule, UserModule, AuthModule],
+    imports: [
+        ConfigModule.register(EnvConfig),
+        RepositoryModule.forRootAsync({
+            inject: [EnvConfig],
+            useFactory: (config: EnvConfig) => config,
+        }),
+        UserModule,
+        AuthModule,
+    ],
     providers: [{ provide: APP_INTERCEPTOR, useClass: Interceptor }],
 })
 export class AppModule {}
