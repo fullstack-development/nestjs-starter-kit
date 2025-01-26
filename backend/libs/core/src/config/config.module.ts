@@ -1,21 +1,18 @@
 import { DynamicModule, Global, Module } from '@nestjs/common';
-import { CONFIG_OPTIONS, ConfigOptions } from './config.model';
-import { CoreConfigService } from './config.service';
+import { TypedConfigModule, dotenvLoader } from 'nest-typed-config';
 
 @Global()
 @Module({})
-export class CoreConfigModule {
-    static register<T>(dto: new () => T): DynamicModule {
+export class ConfigModule {
+    public static register<T>(dto: new () => T): DynamicModule {
         return {
-            module: CoreConfigModule,
-            providers: [
-                {
-                    provide: CONFIG_OPTIONS,
-                    useValue: { dto } as ConfigOptions<T>,
-                },
-                CoreConfigService,
+            module: ConfigModule,
+            imports: [
+                TypedConfigModule.forRoot({
+                    schema: dto,
+                    load: process.env.NODE_ENV === 'production' ? () => process.env : dotenvLoader(),
+                }),
             ],
-            exports: [CoreConfigService],
         };
     }
 }
