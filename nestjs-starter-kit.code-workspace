@@ -28,7 +28,8 @@
     "settings": {
         "files.exclude": {
             ".idea": true,
-            "backend": true,
+            "backend/apps": true,
+            "backend/libs": true,
             "admin-ui": true
         },
         "typescript.tsdk": "node_modules/typescript/lib",
