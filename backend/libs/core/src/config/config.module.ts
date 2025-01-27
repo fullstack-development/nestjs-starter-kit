@@ -10,7 +10,12 @@ export class ConfigModule {
             imports: [
                 TypedConfigModule.forRoot({
                     schema: dto,
-                    load: process.env.NODE_ENV === 'production' ? () => process.env : dotenvLoader(),
+                    load:
+                        process.env.NODE_ENV === 'production'
+                            ? () => process.env
+                            : dotenvLoader({
+                                  envFilePath: `${process.env.APP ?? ''}.env`,
+                              }),
                 }),
             ],
         };
