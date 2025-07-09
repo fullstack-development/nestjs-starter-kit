@@ -36,4 +36,19 @@ export class EnvConfig {
 
     @IsString()
     DOMAIN: string;
+
+    @IsString()
+    OPENOBSERVE_ENDPOINT: string;
+
+    @IsString()
+    OPENOBSERVE_KEY: string;
+
+    @IsString()
+    OPENOBSERVE_ORGANIZATION_ID: string;
+
+    @IsString()
+    OPENOBSERVE_APP_ID: string;
+
+    @IsString()
+    OPENOBSERVE_USER: string;
 }

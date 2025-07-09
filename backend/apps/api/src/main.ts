@@ -1,3 +1,5 @@
+import { LoggerService } from '@lib/logger';
+import { OpenobserveService } from '@lib/logger/modules/openobserve/openobserve.service';
 import { INestApplication } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import cookieParser from 'cookie-parser';
@@ -11,8 +13,9 @@ const enableCorsByEnv = (app: INestApplication<unknown>) => {
 };
 
 async function bootstrap() {
-    const app = await NestFactory.create(AppModule);
+    const app = await NestFactory.create(AppModule, { bufferLogs: true });
     app.use(cookieParser());
+    app.useLogger(new LoggerService(app.get(OpenobserveService)));
 
     enableCorsByEnv(app);
     const config = app.get(EnvConfig);

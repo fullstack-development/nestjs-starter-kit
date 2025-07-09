@@ -23,6 +23,10 @@
         {
             "path": "backend/libs/repository",
             "name": "lib/repository"
+        },
+        {
+            "path": "backend/libs/logger",
+            "name": "lib/logger"
         }
     ],
     "settings": {
