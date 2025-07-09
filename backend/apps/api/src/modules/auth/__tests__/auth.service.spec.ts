@@ -1,13 +1,13 @@
 import { DeepMocked, createMock } from '@golevelup/ts-jest';
-import { CoreConfigService, isError } from '@lib/core';
+import { isError } from '@lib/core';
 import { RepositoryService } from '@lib/repository';
 import { UserEntity } from '@lib/repository/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
-import { ConfigServiceMock } from '../../../__mocks__/ConfigServiceMock';
+import { EnvConfigMock } from '../../../__mocks__/EnvConfigMock';
 import { getRepositoryServiceMock } from '../../../__mocks__/RepositoryServiceMock';
 import { getPartialUserStub } from '../../../__mocks__/stubs/user.stub';
-import { ConfigModel } from '../../../config/config.model';
+import { EnvConfig } from '../../../config/config.model';
 import { UserAlreadyExists } from '../../user/common/user.errors';
 import { UserService } from '../../user/user.service';
 import { AuthService } from '../auth.service';
@@ -22,7 +22,7 @@ import { GetTokenResult } from '../common/auth.model';
 describe('AuthService', () => {
     let rep: ReturnType<typeof getRepositoryServiceMock>;
     let authService: AuthService;
-    let configService: CoreConfigService<ConfigModel>;
+    let config: EnvConfig;
     let userService: DeepMocked<UserService>;
     let jwt: JwtService;
 
@@ -31,7 +31,7 @@ describe('AuthService', () => {
             providers: [
                 AuthService,
                 JwtService,
-                { provide: CoreConfigService, useClass: ConfigServiceMock },
+                { provide: EnvConfig, useValue: EnvConfigMock },
                 {
                     provide: RepositoryService,
                     useValue: getRepositoryServiceMock(),
@@ -44,7 +44,7 @@ describe('AuthService', () => {
         }).compile();
 
         authService = module.get(AuthService);
-        configService = module.get(CoreConfigService);
+        config = module.get(EnvConfig);
         rep = module.get(RepositoryService);
         userService = module.get(UserService);
         jwt = module.get(JwtService);
@@ -52,7 +52,7 @@ describe('AuthService', () => {
 
     it('should be defined service and all deps', () => {
         expect(authService).toBeDefined();
-        expect(configService).toBeDefined();
+        expect(config).toBeDefined();
         expect(rep).toBeDefined();
         expect(userService).toBeDefined();
     });

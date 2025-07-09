@@ -1,7 +1,7 @@
 import { Transform } from 'class-transformer';
 import { IsNumber, IsString } from 'class-validator';
 
-export class ConfigModel {
+export class EnvConfig {
     @IsString()
     DB_NAME: string;
 
