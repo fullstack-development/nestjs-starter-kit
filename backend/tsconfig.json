@@ -22,7 +22,9 @@
             "@lib/repository": ["./libs/repository/src"],
             "@lib/repository/*": ["./libs/repository/src/*"],
             "@lib/core": ["./libs/core/src"],
-            "@lib/core/*": ["./libs/core/src/*"]
+            "@lib/core/*": ["./libs/core/src/*"],
+            "@lib/logger": ["./libs/logger/src"],
+            "@lib/logger/*": ["./libs/logger/src/*"]
         }
     }
 }

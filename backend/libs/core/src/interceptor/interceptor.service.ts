@@ -22,6 +22,16 @@ export class Interceptor implements NestInterceptor {
 
     async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
         const res: Response = context.switchToHttp().getResponse();
+        const req = context.switchToHttp().getRequest();
+
+        this.logger.log({
+            message: 'Request',
+            payload: {
+                method: req.method,
+                url: req.url,
+                user: req.user,
+            },
+        });
 
         return next
             .handle()
@@ -39,6 +49,18 @@ export class Interceptor implements NestInterceptor {
 
                     if (data.body.success) {
                         res.status(200);
+
+                        this.logger.log({
+                            message: 'Response',
+                            payload: {
+                                status: data.status,
+                                method: req.method,
+                                url: req.url,
+                                body: data.body,
+                                user: req.user,
+                            },
+                        });
+
                         return data.body;
                     }
 
@@ -60,19 +82,44 @@ export class Interceptor implements NestInterceptor {
                             status = err.getStatus();
                         }
 
-                        this.logger.error(`INTERNAL_SERVER_ERROR Error(): ${message};\nStack: ${err.stack}`);
+                        this.logger.error({
+                            message: 'INTERNAL_SERVER_ERROR',
+                            payload: {
+                                message,
+                                stack: err.stack,
+                                method: req.method,
+                                url: req.url,
+                                user: req.user,
+                            },
+                        });
                         res.status(status);
                         return of(message);
                     }
 
                     if (err?.body && !err.body.success) {
-                        this.logger.error(`Error: ${JSON.stringify(err)}`);
+                        this.logger.error({
+                            message: 'Error',
+                            payload: {
+                                body: err.body,
+                                method: req.method,
+                                url: req.url,
+                                user: req.user,
+                            },
+                        });
                         res.status(err.status);
                         return of(objToString(err.body));
                     }
 
                     const unknownError = objToString(err);
-                    this.logger.error(`INTERNAL_SERVER_ERROR unknown: ${unknownError}`);
+                    this.logger.error({
+                        message: 'UNKNOWN INTERNAL_SERVER_ERROR',
+                        payload: {
+                            error: unknownError,
+                            method: req.method,
+                            url: req.url,
+                            user: req.user,
+                        },
+                    });
                     res.status(HttpStatus.INTERNAL_SERVER_ERROR);
                     return of(unknownError);
                 }),

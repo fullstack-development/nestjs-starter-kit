@@ -12,4 +12,9 @@ export const EnvConfigMock: EnvConfig = {
     JWT_REFRESH_SECRET: 'jwtRefreshSecret',
     JWT_REFRESH_EXPIRES_IN: '2days',
     DOMAIN: 'http://localhost:3000',
+    OPENOBSERVE_ENDPOINT: '',
+    OPENOBSERVE_KEY: '',
+    OPENOBSERVE_ORGANIZATION_ID: '',
+    OPENOBSERVE_APP_ID: '',
+    OPENOBSERVE_USER: '',
 };

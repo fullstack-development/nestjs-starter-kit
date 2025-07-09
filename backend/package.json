@@ -33,6 +33,7 @@
         "class-validator": "^0.14.1",
         "cookie-parser": "^1.4.6",
         "crypto-js": "^4.2.0",
+        "date-fns": "^4.1.0",
         "dotenv": "^16.4.5",
         "nest-typed-config": "^2.9.3",
         "nestjs-cls": "^4.3.0",
@@ -95,7 +96,8 @@
         ],
         "moduleNameMapper": {
             "^@lib/repository(|/.*)$": "<rootDir>/libs/repository/src/$1",
-            "^@lib/core(|/.*)$": "<rootDir>/libs/core/src/$1"
+            "^@lib/core(|/.*)$": "<rootDir>/libs/core/src/$1",
+            "^@lib/logger(|/.*)$": "<rootDir>/libs/logger/src/$1"
         }
     }
 }

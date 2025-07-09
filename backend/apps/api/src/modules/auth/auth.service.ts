@@ -1,7 +1,7 @@
 import { UserNotFound, isError } from '@lib/core';
 import { RepositoryService } from '@lib/repository';
 import { UserEntity } from '@lib/repository/entities/user.entity';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { SHA256 } from 'crypto-js';
 import { v4 } from 'uuid';
@@ -18,6 +18,8 @@ import { GetTokenResult } from './common/auth.model';
 
 @Injectable()
 export class AuthService {
+    private readonly logger = new Logger(AuthService.name);
+
     constructor(
         private readonly jwt: JwtService,
         private readonly rep: RepositoryService,
@@ -96,6 +98,11 @@ export class AuthService {
         user.refreshTokenHash = refreshTokenHash;
         await this.rep.user.save(user);
 
+        this.logger.log({
+            message: 'Confirm email',
+            payload: { email: user.email, user: user.id, token },
+        });
+
         return {
             token: accessToken,
             refreshCookie:
@@ -119,6 +126,11 @@ export class AuthService {
         //     `<a href="${link}">${link}</a>`,
         //     userResult.email,
         // );  FIXME: Need mail service implementation
+
+        this.logger.log({
+            message: 'Send confirm email',
+            payload: { email: user.email, token, user: user.id },
+        });
     }
 
     private generateToken(id: number) {

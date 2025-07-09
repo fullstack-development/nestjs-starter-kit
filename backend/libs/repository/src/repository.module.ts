@@ -6,6 +6,7 @@ import { TransactionalAdapterTypeOrm } from '@nestjs-cls/transactional-adapter-t
 import { DynamicModule, Global, Module } from '@nestjs/common';
 import { TypeOrmModule, getDataSourceToken } from '@nestjs/typeorm';
 import { ClsModule } from 'nestjs-cls';
+import { RepositoryService } from './repository.service';
 import { RepositoryModuleOptions } from './types/module.types';
 
 export const entities = [UserEntity, BalanceEntity, ItemEntity, AdminEntity];
@@ -49,6 +50,8 @@ export class RepositoryModule {
                     ],
                 }),
             ],
+            providers: [RepositoryService],
+            exports: [RepositoryService],
         };
     }
 }
